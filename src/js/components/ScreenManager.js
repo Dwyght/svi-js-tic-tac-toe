@@ -2,6 +2,8 @@ import { resolveTarget } from "../utils/dom.js";
 
 import { Button } from "./Button.js";
 
+import { Modal } from "./Modal.js";
+
 export class ScreenManager {
   constructor() {
     this.initializeElements();
@@ -20,13 +22,11 @@ export class ScreenManager {
 
     this.homeScreen = document.createElement("section");
 
-    this.waitingScreen = document.createElement("section");
-
     this.gameScreen = document.createElement("section");
 
     // Waiting elements
 
-    this.waitingTitle = document.createElement("h2");
+    this.waitingContent = document.createElement("div");
 
     this.waitingText = document.createElement("p");
 
@@ -43,6 +43,12 @@ export class ScreenManager {
     this.waitingPlayer = document.createElement("p");
 
     this.waitingHint = document.createElement("p");
+
+    this.waitingModal = new Modal({
+      title: "Waiting for another player...",
+      content: this.waitingContent,
+      closable: false,
+    });
   }
 
   // ========================================
@@ -54,17 +60,15 @@ export class ScreenManager {
 
     this.homeScreen.id = "home-screen";
 
-    this.waitingScreen.id = "waiting-screen";
-
     this.gameScreen.id = "game-screen";
-
-    this.waitingScreen.classList.add("hidden");
 
     this.gameScreen.classList.add("hidden");
 
-    this.waitingTitle.textContent = "Waiting for another player...";
-
     this.waitingText.textContent = "Share this game code:";
+
+    this.waitingContent.classList.add("waiting-modal-content");
+
+    this.waitingModal.dialog.classList.add("waiting-modal");
 
     this.gameCodeContainer.classList.add("game-code-container");
 
@@ -81,10 +85,9 @@ export class ScreenManager {
   // ========================================
 
   appendElements() {
-    this.container.append(this.homeScreen, this.waitingScreen, this.gameScreen);
+    this.container.append(this.homeScreen, this.gameScreen);
 
-    this.waitingScreen.append(
-      this.waitingTitle,
+    this.waitingContent.append(
       this.waitingText,
       this.gameCodeContainer,
       this.waitingPlayer,
@@ -125,9 +128,9 @@ export class ScreenManager {
   showHomeScreen() {
     this.homeScreen.classList.remove("hidden");
 
-    this.waitingScreen.classList.add("hidden");
-
     this.gameScreen.classList.add("hidden");
+
+    this.waitingModal.close();
   }
 
   // ========================================
@@ -139,11 +142,11 @@ export class ScreenManager {
 
     this.gameScreen.classList.add("hidden");
 
-    this.waitingScreen.classList.remove("hidden");
-
     this.waitingGameCode.textContent = gameCode;
 
     this.waitingPlayer.textContent = `${playerName}, you are Player X`;
+
+    this.waitingModal.open();
   }
 
   // ========================================
@@ -153,9 +156,9 @@ export class ScreenManager {
   showGameScreen() {
     this.homeScreen.classList.add("hidden");
 
-    this.waitingScreen.classList.add("hidden");
-
     this.gameScreen.classList.remove("hidden");
+
+    this.waitingModal.close();
   }
 
   // ========================================
@@ -187,6 +190,8 @@ export class ScreenManager {
 
     if (parent) {
       parent.append(this.container);
+
+      this.waitingModal.render(document.body);
     } else {
       console.error("ScreenManager target not found.");
     }

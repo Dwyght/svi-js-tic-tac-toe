@@ -42,11 +42,17 @@ export class HomePage {
   initializeElements() {
     this.container = document.createElement("div");
 
-    this.title = document.createElement("h1");
-
     this.actions = document.createElement("div");
 
     this.message = document.createElement("p");
+
+    // HOW TO PLAY
+
+    this.howToPlayContent = document.createElement("div");
+
+    this.howToPlayIntro = document.createElement("p");
+
+    this.howToPlaySteps = document.createElement("ol");
 
     // CREATE FORM
 
@@ -92,6 +98,14 @@ export class HomePage {
       onClick: () => this.openJoinModal(),
     });
 
+    this.howToPlayButton = new Button({
+      label: "How to Play",
+      className: "home-action-button",
+      onClick: () => this.openHowToPlayModal(),
+    });
+
+    this.howToPlayButton.element.classList.add("button-utility");
+
     this.createButton = new Button({
       label: "Create Game",
       type: "submit",
@@ -117,6 +131,11 @@ export class HomePage {
       title: "Join Game",
       content: this.joinForm,
     });
+
+    this.howToPlayModal = new Modal({
+      title: "How to Play",
+      content: this.howToPlayContent,
+    });
   }
 
   // ========================================
@@ -126,11 +145,31 @@ export class HomePage {
   setAttributes() {
     this.container.classList.add("home-page");
 
-    this.title.textContent = "Tic Tac Toe";
-
     this.actions.classList.add("home-actions");
 
     this.message.classList.add("message");
+
+    // HOW TO PLAY
+
+    this.howToPlayContent.classList.add("how-to-play-content");
+
+    this.howToPlayIntro.textContent =
+      "Play with a friend and be the first to make a row of three.";
+
+    const steps = [
+      "Choose Create Game, enter your name, and share the game code.",
+      "Your friend chooses Join Game and enters the shared code.",
+      "Player X goes first. Take turns choosing an empty square.",
+      "Make three matching pieces in a row, column, or diagonal to win.",
+    ];
+
+    for (const step of steps) {
+      const item = document.createElement("li");
+
+      item.textContent = step;
+
+      this.howToPlaySteps.append(item);
+    }
 
     // CREATE
 
@@ -190,11 +229,15 @@ export class HomePage {
   // ========================================
 
   appendElements() {
-    this.container.append(this.title, this.actions, this.message);
+    this.container.append(this.actions, this.message);
 
     this.openCreateButton.render(this.actions);
 
     this.openJoinButton.render(this.actions);
+
+    this.howToPlayButton.render(this.actions);
+
+    this.howToPlayContent.append(this.howToPlayIntro, this.howToPlaySteps);
 
     this.createForm.append(
       this.createNameLabel,
@@ -255,6 +298,10 @@ export class HomePage {
     this.joinModal.open();
 
     this.joinCodeInput.focus();
+  }
+
+  openHowToPlayModal() {
+    this.howToPlayModal.open();
   }
 
   // ========================================
@@ -460,6 +507,8 @@ export class HomePage {
     this.createModal.close();
 
     this.joinModal.close();
+
+    this.howToPlayModal.close();
   }
 
   // ========================================
@@ -475,6 +524,8 @@ export class HomePage {
       this.createModal.render(document.body);
 
       this.joinModal.render(document.body);
+
+      this.howToPlayModal.render(document.body);
     } else {
       console.error("HomePage target not found.");
     }

@@ -2,19 +2,22 @@ import { Button } from "./Button.js";
 import { resolveTarget } from "../utils/dom.js";
 
 export class Modal {
-  constructor({ title, content }) {
+  constructor({ title, content, closable = true }) {
     this.dialog = document.createElement("dialog");
     this.header = document.createElement("header");
     this.title = document.createElement("h2");
     this.body = document.createElement("div");
+    this.closable = closable;
 
-    this.closeButton = new Button({
-      label: "",
-      className: "modal-close-button",
-      onClick: () => this.close(),
-    });
+    if (this.closable) {
+      this.closeButton = new Button({
+        label: "",
+        className: "modal-close-button",
+        onClick: () => this.close(),
+      });
 
-    this.closeButton.element.setAttribute("aria-label", "Close");
+      this.closeButton.element.setAttribute("aria-label", "Close");
+    }
 
     this.dialog.classList.add("modal");
     this.header.classList.add("modal-header");
@@ -23,12 +26,22 @@ export class Modal {
 
     this.dialog.append(this.header, this.body);
     this.header.append(this.title);
-    this.closeButton.render(this.header);
+
+    if (this.closable) {
+      this.closeButton.render(this.header);
+    }
+
     this.body.append(content);
 
     this.dialog.addEventListener("click", (event) => {
-      if (event.target === this.dialog) {
+      if (this.closable && event.target === this.dialog) {
         this.close();
+      }
+    });
+
+    this.dialog.addEventListener("cancel", (event) => {
+      if (!this.closable) {
+        event.preventDefault();
       }
     });
   }

@@ -31,7 +31,7 @@ body {
 }
 
 .bg-video {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: -1;
 
@@ -39,6 +39,7 @@ body {
   height: 100%;
 
   object-fit: cover;
+  object-position: center;
 
   pointer-events: none;
 }

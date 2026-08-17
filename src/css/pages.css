@@ -16,56 +16,43 @@
    HOME PAGE
 ========================= */
 
-.home-page h1 {
-  margin-bottom: 30px;
+.home-page {
+  min-height: calc(100dvh - 60px);
+
+  padding-bottom: clamp(28px, 5dvh, 50px);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 
 .home-actions {
   display: flex;
 
-  justify-content: center;
+  flex-direction: column;
 
-  gap: 20px;
+  align-items: center;
+
+  gap: 14px;
 }
 
 .home-action-button {
-  min-width: 150px;
+  width: min(280px, 100%);
+  min-height: 52px;
+
+  padding: 13px 26px;
 }
 
-/* =========================
-   WAITING SCREEN
-========================= */
-
-#waiting-screen {
-  padding: 30px;
+.home-page > .message:empty {
+  display: none;
 }
 
 /* =========================
    GAME PAGE
 ========================= */
 
-.game-header {
-  display: flex;
-
-  justify-content: space-between;
-
-  gap: 20px;
-
-  margin-bottom: 20px;
-
-  padding: 15px;
-
-  background: white;
-
-  border: 1px solid #cccccc;
-}
-
-.players {
-  display: flex;
-
-  gap: 20px;
-
-  margin-bottom: 20px;
+.game-page {
+  padding-top: clamp(10px, 3dvh, 30px);
 }
 
 .reset-button {

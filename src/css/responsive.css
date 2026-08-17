@@ -3,6 +3,12 @@
     padding: 15px;
   }
 
+  .home-page {
+    min-height: calc(100dvh - 30px);
+
+    padding-bottom: clamp(22px, 4dvh, 36px);
+  }
+
   .home-actions {
     flex-direction: column;
 
@@ -15,11 +21,4 @@
     max-width: 350px;
   }
 
-  .game-header {
-    flex-direction: column;
-  }
-
-  .players {
-    flex-direction: column;
-  }
 }

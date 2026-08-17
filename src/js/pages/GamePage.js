@@ -17,6 +17,8 @@ import { Board } from "../components/Board.js";
 
 import { Button } from "../components/Button.js";
 
+import { Card } from "../components/Card.js";
+
 import { resolveTarget } from "../utils/dom.js";
 
 export class GamePage {
@@ -47,33 +49,14 @@ export class GamePage {
   initializeElements() {
     this.container = document.createElement("div");
 
-    this.title = document.createElement("h1");
-
-    this.gameHeader = document.createElement("div");
-
-    this.gameCodeText = document.createElement("p");
-
-    this.myPlayerText = document.createElement("p");
-
-    // Players
-
-    this.playersContainer = document.createElement("div");
-
-    this.playerXBox = document.createElement("div");
-
-    this.playerXTitle = document.createElement("strong");
-
-    this.playerXName = document.createElement("p");
-
-    this.playerOBox = document.createElement("div");
-
-    this.playerOTitle = document.createElement("strong");
-
-    this.playerOName = document.createElement("p");
-
     // Game information
 
     this.turnDisplay = document.createElement("h2");
+
+    this.turnCard = new Card({
+      content: this.turnDisplay,
+      className: "turn-card",
+    });
 
     this.message = document.createElement("p");
 
@@ -95,22 +78,7 @@ export class GamePage {
   setAttributes() {
     this.container.classList.add("game-page");
 
-    this.title.textContent = "Tic Tac Toe";
-
-    this.gameHeader.classList.add("game-header");
-
-    this.playersContainer.classList.add("players");
-
-    this.playerXBox.classList.add("player-box");
-
-    this.playerOBox.classList.add("player-box");
-
-    this.playerXTitle.textContent = "Player X";
-
-    this.playerOTitle.textContent = "Player O";
-
     this.message.classList.add("message");
-
   }
 
   // ========================================
@@ -118,24 +86,11 @@ export class GamePage {
   // ========================================
 
   appendElements() {
-    this.container.append(
-      this.title,
-      this.gameHeader,
-      this.playersContainer,
-      this.turnDisplay,
-      this.message,
-      this.boardContainer,
-    );
+    this.turnCard.render(this.container);
+
+    this.container.append(this.message, this.boardContainer);
 
     this.resetButton.render(this.container);
-
-    this.gameHeader.append(this.gameCodeText, this.myPlayerText);
-
-    this.playersContainer.append(this.playerXBox, this.playerOBox);
-
-    this.playerXBox.append(this.playerXTitle, this.playerXName);
-
-    this.playerOBox.append(this.playerOTitle, this.playerOName);
   }
 
   // ========================================
@@ -151,37 +106,11 @@ export class GamePage {
 
     this.screenManager.showGameScreen();
 
-    this.updateHeader();
-
-    this.updatePlayerNames();
-
     await this.loadBoard();
 
     this.pollingService.startRefresh(async () => {
       await this.refreshGame();
     });
-  }
-
-  // ========================================
-  // HEADER
-  // ========================================
-
-  updateHeader() {
-    this.gameCodeText.textContent = `Game Code: ${gameState.gameCode}`;
-
-    this.myPlayerText.textContent = `You: ${gameState.myName} (${gameState.myTile})`;
-  }
-
-  // ========================================
-  // NAMES
-  // ========================================
-
-  updatePlayerNames() {
-    const players = getPlayerNames(gameState.gameCode);
-
-    this.playerXName.textContent = players.X;
-
-    this.playerOName.textContent = players.O;
   }
 
   // ========================================
@@ -207,8 +136,6 @@ export class GamePage {
 
       return;
     }
-
-    this.updatePlayerNames();
 
     if (!gameState.gameOver) {
       await this.loadBoard();
