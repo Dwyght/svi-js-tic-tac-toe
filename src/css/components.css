@@ -1,0 +1,181 @@
+/* =========================
+   MODAL
+========================= */
+
+.modal {
+  width: min(420px, calc(100% - 30px));
+
+  padding: 0;
+
+  border: 1px solid #cccccc;
+}
+
+.modal::backdrop {
+  background: rgb(0 0 0 / 40%);
+}
+
+.modal-header {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  gap: 20px;
+
+  padding: 20px;
+
+  border-bottom: 1px solid #cccccc;
+}
+
+.modal-header h2 {
+  margin: 0;
+}
+
+.modal-close-button {
+  padding: 6px 10px;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.modal-form {
+  display: grid;
+
+  gap: 12px;
+
+  text-align: left;
+}
+
+.modal-form input {
+  width: 100%;
+}
+
+.modal-form > .button {
+  width: 100%;
+}
+
+.join-code-field {
+  display: flex;
+
+  gap: 10px;
+}
+
+.join-code-field input {
+  min-width: 0;
+}
+
+/* =========================
+   GAME CODE
+========================= */
+
+.game-code-container {
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  gap: 10px;
+
+  margin: 20px 0;
+}
+
+#waiting-game-code {
+  padding: 15px 25px;
+
+  border: 1px solid black;
+
+  background: white;
+
+  font-size: 24px;
+
+  font-weight: bold;
+
+  letter-spacing: 4px;
+}
+
+/* =========================
+   BOARD
+========================= */
+
+.board {
+  width: 304px;
+
+  display: grid;
+
+  grid-template-columns: repeat(3, 100px);
+
+  grid-template-rows: repeat(3, 100px);
+
+  gap: 2px;
+
+  margin: 30px auto;
+}
+
+.cell {
+  width: 100px;
+
+  height: 100px;
+
+  padding: 0;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  background: white;
+
+  border: 1px solid black;
+
+  font-size: 50px;
+
+  font-weight: bold;
+
+  cursor: pointer;
+}
+
+.cell:hover:not(:disabled) {
+  background: #eeeeee;
+}
+
+.cell.disabled {
+  cursor: not-allowed;
+}
+
+/* =========================
+   PLAYER BOX
+========================= */
+
+.player-box {
+  flex: 1;
+
+  padding: 15px;
+
+  background: white;
+
+  border: 1px solid #cccccc;
+}
+
+/* =========================
+   MESSAGES
+========================= */
+
+.message {
+  min-height: 24px;
+
+  margin-top: 20px;
+
+  font-weight: bold;
+}
+
+.modal-form .message {
+  margin: 0;
+}
+
+.hint {
+  color: #555555;
+}

@@ -1,0 +1,25 @@
+@media (max-width: 650px) {
+  body {
+    padding: 15px;
+  }
+
+  .home-actions {
+    flex-direction: column;
+
+    align-items: center;
+  }
+
+  .home-action-button {
+    width: 100%;
+
+    max-width: 350px;
+  }
+
+  .game-header {
+    flex-direction: column;
+  }
+
+  .players {
+    flex-direction: column;
+  }
+}
