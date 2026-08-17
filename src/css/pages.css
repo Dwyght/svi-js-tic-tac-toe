@@ -52,6 +52,8 @@
 ========================= */
 
 .game-page {
+  width: 100%;
+
   padding-top: clamp(10px, 3dvh, 30px);
 }
 

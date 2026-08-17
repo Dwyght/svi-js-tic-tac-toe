@@ -79,6 +79,8 @@ export class GamePage {
     this.container.classList.add("game-page");
 
     this.message.classList.add("message");
+
+    this.boardContainer.classList.add("board-stage");
   }
 
   // ========================================
@@ -106,11 +108,22 @@ export class GamePage {
 
     this.screenManager.showGameScreen();
 
+    this.playBoardEntrance();
+
     await this.loadBoard();
 
     this.pollingService.startRefresh(async () => {
       await this.refreshGame();
     });
+  }
+
+  playBoardEntrance() {
+    this.boardContainer.classList.remove("board-stage-enter");
+
+    // Restart the entrance animation for every newly started match.
+    void this.boardContainer.offsetWidth;
+
+    this.boardContainer.classList.add("board-stage-enter");
   }
 
   // ========================================

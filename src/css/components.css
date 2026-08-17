@@ -338,32 +338,70 @@
    BOARD
 ========================= */
 
-.board {
-  --cell-size: min(108px, calc((100vw - 90px) / 3));
+.board-stage {
+  --plate-size: min(520px, calc(100vw - 30px), calc(100dvh - 210px));
 
-  width: max-content;
+  width: var(--plate-size);
+  aspect-ratio: 1;
+
+  margin: 8px auto 12px;
+
+  display: grid;
+  place-items: center;
+
+  background-image: url("../assets/images/plate.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+
+  filter: drop-shadow(0 16px 14px rgb(58 32 18 / 28%));
+}
+
+.board-stage-enter {
+  animation: serve-board 900ms cubic-bezier(0.2, 0.8, 0.25, 1.08) both;
+}
+
+@keyframes serve-board {
+  from {
+    opacity: 0;
+    transform: translateY(calc(100dvh + 40px)) rotate(2deg) scale(0.94);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(0) scale(1);
+  }
+}
+
+.board {
+  --grid-line: clamp(3px, 0.5vw, 5px);
+
+  width: 76%;
+  aspect-ratio: 1;
 
   display: grid;
 
-  grid-template-columns: repeat(3, var(--cell-size));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 
-  grid-template-rows: repeat(3, var(--cell-size));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
 
-  gap: 2px;
+  gap: 0;
 
-  margin: 30px auto;
+  margin: 0;
 
   padding: 0;
 
-  background: rgb(210 228 238 / 55%);
+  background: transparent;
 }
 
 .cell {
   position: relative;
 
-  width: var(--cell-size);
+  width: auto;
 
-  height: var(--cell-size);
+  height: auto;
+  min-width: 0;
+  min-height: 0;
 
   padding: 0;
 
@@ -375,15 +413,20 @@
 
   overflow: hidden;
 
-  background: rgb(23 38 50 / 76%);
+  background: transparent;
 
   border: 0;
 
   cursor: pointer;
 }
 
-.cell[data-value=""]:hover:not(:disabled) {
-  background: rgb(38 58 73 / 82%);
+.cell:nth-child(3n + 1),
+.cell:nth-child(3n + 2) {
+  border-right: var(--grid-line) solid #70472f;
+}
+
+.cell:nth-child(-n + 6) {
+  border-bottom: var(--grid-line) solid #70472f;
 }
 
 .cell::before {
@@ -440,6 +483,19 @@
 
 .cell.disabled {
   cursor: not-allowed;
+}
+
+.cell:focus-visible {
+  z-index: 1;
+
+  outline: 3px solid #38506b;
+  outline-offset: -5px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .board-stage-enter {
+    animation: none;
+  }
 }
 
 /* =========================
