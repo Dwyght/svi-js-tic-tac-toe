@@ -52,6 +52,8 @@ export class Board {
       cell.element.dataset.x = cell.x;
 
       cell.element.dataset.y = cell.y;
+
+      this.clearCell(cell.element, cell.x, cell.y);
     }
   }
 
@@ -83,8 +85,27 @@ export class Board {
 
   displayBoard(values) {
     for (let i = 0; i < this.cells.length; i++) {
-      this.cells[i].element.textContent = values[i] || "";
+      const cell = this.cells[i];
+
+      const value = values[i] || "";
+
+      cell.element.dataset.value = value;
+
+      cell.element.setAttribute(
+        "aria-label",
+        this.getCellLabel(value, cell.x, cell.y),
+      );
     }
+  }
+
+  // ========================================
+  // PLAYER PREVIEW
+  // ========================================
+
+  setPlayerTile(tile) {
+    this.container.classList.toggle("player-x", tile === "X");
+
+    this.container.classList.toggle("player-o", tile === "O");
   }
 
   // ========================================
@@ -117,10 +138,30 @@ export class Board {
 
   clearBoard() {
     for (const cell of this.cells) {
-      cell.element.textContent = "";
+      this.clearCell(cell.element, cell.x, cell.y);
     }
 
     this.enableBoard();
+  }
+
+  clearCell(element, x, y) {
+    element.dataset.value = "";
+
+    element.setAttribute("aria-label", this.getCellLabel("", x, y));
+  }
+
+  getCellLabel(value, x, y) {
+    const position = `Row ${y + 1}, column ${x + 1}`;
+
+    if (value === "X") {
+      return `${position}: Super Mushroom`;
+    }
+
+    if (value === "O") {
+      return `${position}: Gold Coin`;
+    }
+
+    return `${position}: Empty`;
   }
 
   // ========================================

@@ -145,6 +145,8 @@ export class GamePage {
 
     this.board.clearBoard();
 
+    this.board.setPlayerTile(gameState.myTile);
+
     this.screenManager.showGameScreen();
 
     this.updateHeader();
