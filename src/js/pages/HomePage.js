@@ -99,6 +99,7 @@ export class HomePage {
 
     this.pasteButton = new Button({
       label: "Paste",
+      className: "button-utility",
       onClick: () => this.pasteGameCode(),
     });
 

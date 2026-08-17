@@ -81,9 +81,11 @@ export class GamePage {
 
     this.resetButton = new Button({
       label: "Reset Game",
-      className: "reset-button",
+      className: "button-secondary",
       onClick: () => this.handleReset(),
     });
+
+    this.resetButton.element.classList.add("reset-button");
   }
 
   // ========================================

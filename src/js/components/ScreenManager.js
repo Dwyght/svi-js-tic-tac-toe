@@ -36,6 +36,7 @@ export class ScreenManager {
 
     this.copyCodeButton = new Button({
       label: "Copy",
+      className: "button-utility",
       onClick: () => this.copyGameCode(),
     });
 

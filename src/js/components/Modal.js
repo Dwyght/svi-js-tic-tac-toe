@@ -9,10 +9,12 @@ export class Modal {
     this.body = document.createElement("div");
 
     this.closeButton = new Button({
-      label: "Close",
+      label: "",
       className: "modal-close-button",
       onClick: () => this.close(),
     });
+
+    this.closeButton.element.setAttribute("aria-label", "Close");
 
     this.dialog.classList.add("modal");
     this.header.classList.add("modal-header");
