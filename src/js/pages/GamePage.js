@@ -6,6 +6,7 @@ import {
   submitMove,
   checkGameStillActive,
   restartGameSession,
+  notifyGameSessionLeaving,
   resetGameSession,
 } from "../services/gameFlowService.js";
 import { Board } from "../components/Board.js";
@@ -26,6 +27,7 @@ export class GamePage {
     this.initializeElements();
     this.setAttributes();
     this.appendElements();
+    this.bindEvents();
 
     this.board = new Board((x, y) => {
       this.makeMove(x, y);
@@ -130,6 +132,26 @@ export class GamePage {
   }
 
   // ========================================
+  // EVENTS
+  // ========================================
+
+  bindEvents() {
+    window.addEventListener("beforeunload", () => {
+      this.notifyPlayerLeaving();
+    });
+  }
+
+  notifyPlayerLeaving() {
+    if (gameState.gameCode === null) {
+      return;
+    }
+
+    // Unload handlers cannot safely wait for asynchronous work. The
+    // keepalive request is allowed to continue after the page is discarded.
+    notifyGameSessionLeaving(gameState.gameCode).catch(() => {});
+  }
+
+  // ========================================
   // START GAME PAGE
   // ========================================
 
@@ -184,7 +206,7 @@ export class GamePage {
       this.board.clearBoard();
       this.resultModal.close();
       this.quitModal.close();
-      this.onReturnHome("The game room was removed.");
+      this.onReturnHome("The other player has left the game.");
       return;
     }
 

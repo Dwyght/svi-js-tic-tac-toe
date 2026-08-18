@@ -343,6 +343,16 @@ export async function restartGameSession(gameCode) {
 }
 
 // ========================================
+// NOTIFY GAME SESSION LEAVING
+// ========================================
+
+export function notifyGameSessionLeaving(gameCode) {
+  return resetGame(gameCode, {
+    keepalive: true,
+  });
+}
+
+// ========================================
 // RESET GAME SESSION
 // ========================================
 

@@ -4,12 +4,12 @@ import { BASE_URL } from "../config/constants.js";
 // GENERIC GET REQUEST
 // ========================================
 
-async function requestText(endpoint, parameters = {}) {
+async function requestText(endpoint, parameters = {}, options = {}) {
   const query = new URLSearchParams(parameters);
 
   const url = `${BASE_URL}/${endpoint}?${query}`;
 
-  const response = await fetch(url);
+  const response = await fetch(url, options);
 
   if (!response.ok) {
     throw new Error(`API Error: ${response.status}`);
@@ -67,8 +67,12 @@ export async function move(key, tile, y, x) {
 // RESET GAME
 // ========================================
 
-export async function resetGame(key) {
-  return requestText("reset", {
-    key: key,
-  });
+export async function resetGame(key, options = {}) {
+  return requestText(
+    "reset",
+    {
+      key: key,
+    },
+    options,
+  );
 }
