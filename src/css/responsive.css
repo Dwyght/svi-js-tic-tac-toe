@@ -39,29 +39,22 @@
     padding: 8px 20px;
   }
 
-  .game-page {
-    padding-top: 0;
-  }
-
   .turn-card {
     margin-bottom: 4px;
     padding: 8px 16px;
   }
 
-  .game-page > .message {
+  .game-status > .message {
     min-height: 20px;
     margin: 4px 0;
   }
 
   .board-stage {
     --plate-size: min(520px, calc(100vw - 30px), calc(100dvh - 180px));
-
-    margin: 2px auto 4px;
   }
 
   .reset-button {
     min-height: 42px;
-    margin-top: 4px;
     padding: 8px 18px;
   }
 

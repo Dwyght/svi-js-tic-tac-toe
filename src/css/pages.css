@@ -152,13 +152,36 @@
   width: 100%;
   height: 100%;
 
-  padding-top: clamp(10px, 3dvh, 30px);
+  display: grid;
+  place-items: center;
+
+  grid-template: 1fr / 1fr;
 }
 
-.game-page > .message {
+.game-status,
+.game-page > .board-stage,
+.game-page > .reset-button {
+  grid-area: 1 / 1;
+}
+
+.game-status {
+  width: 100%;
+
+  align-self: start;
+}
+
+.game-status > .message {
   margin: 8px 0 0;
 }
 
+.game-page > .board-stage {
+  margin: 0;
+
+  align-self: center;
+}
+
 .reset-button {
-  margin-top: 10px;
+  margin: 0;
+
+  align-self: end;
 }

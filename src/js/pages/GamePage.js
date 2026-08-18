@@ -51,6 +51,8 @@ export class GamePage {
 
     // Game information
 
+    this.statusContainer = document.createElement("div");
+
     this.turnDisplay = document.createElement("h2");
 
     this.turnCard = new Card({
@@ -63,7 +65,7 @@ export class GamePage {
     this.boardContainer = document.createElement("div");
 
     this.resetButton = new Button({
-      label: "Reset Game",
+      label: "QUIT GAME",
       className: "button-danger",
       onClick: () => this.handleReset(),
     });
@@ -78,6 +80,8 @@ export class GamePage {
   setAttributes() {
     this.container.classList.add("game-page");
 
+    this.statusContainer.classList.add("game-status");
+
     this.message.classList.add("message");
 
     this.boardContainer.classList.add("board-stage");
@@ -88,9 +92,11 @@ export class GamePage {
   // ========================================
 
   appendElements() {
-    this.turnCard.render(this.container);
+    this.turnCard.render(this.statusContainer);
 
-    this.container.append(this.message, this.boardContainer);
+    this.statusContainer.append(this.message);
+
+    this.container.append(this.statusContainer, this.boardContainer);
 
     this.resetButton.render(this.container);
   }
