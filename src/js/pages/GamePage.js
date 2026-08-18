@@ -1,7 +1,5 @@
 import { gameState } from "../state/gameState.js";
-
 import { getPlayerNames } from "../services/storageService.js";
-
 import {
   fetchAndParseBoard,
   evaluateBoard,
@@ -9,33 +7,25 @@ import {
   checkGameStillActive,
   resetGameSession,
 } from "../services/gameFlowService.js";
-
 import { Board } from "../components/Board.js";
-
 import { Button } from "../components/Button.js";
-
 import { Card } from "../components/Card.js";
-
+import { Modal } from "../components/Modal.js";
 import { resolveTarget } from "../utils/dom.js";
 
 export class GamePage {
   constructor({ screenManager, pollingService, onReturnHome }) {
     this.screenManager = screenManager;
-
     this.pollingService = pollingService;
-
     this.onReturnHome = onReturnHome;
 
     this.initializeElements();
-
     this.setAttributes();
-
     this.appendElements();
 
     this.board = new Board((x, y) => {
       this.makeMove(x, y);
     });
-
     this.board.render(this.boardContainer);
   }
 
@@ -47,27 +37,36 @@ export class GamePage {
     this.container = document.createElement("div");
 
     // Game information
-
     this.statusContainer = document.createElement("div");
-
     this.turnDisplay = document.createElement("h2");
-
     this.turnCard = new Card({
       content: this.turnDisplay,
       className: "turn-card",
     });
-
     this.message = document.createElement("p");
-
     this.boardContainer = document.createElement("div");
+
+    // Game result
+    this.resultContent = document.createElement("div");
+    this.resultMessage = document.createElement("p");
 
     this.resetButton = new Button({
       label: "QUIT GAME",
       className: "button-danger",
       onClick: () => this.handleReset(),
     });
-
     this.resetButton.element.classList.add("reset-button");
+
+    this.resultButton = new Button({
+      label: "RETURN HOME",
+      className: "button-confirm",
+      onClick: () => this.handleReset(),
+    });
+    this.resultModal = new Modal({
+      title: "Game Over",
+      content: this.resultContent,
+      closable: false,
+    });
   }
 
   // ========================================
@@ -76,12 +75,10 @@ export class GamePage {
 
   setAttributes() {
     this.container.classList.add("game-page");
-
     this.statusContainer.classList.add("game-status");
-
     this.message.classList.add("message");
-
     this.boardContainer.classList.add("board-stage");
+    this.resultContent.classList.add("modal-form");
   }
 
   // ========================================
@@ -90,12 +87,11 @@ export class GamePage {
 
   appendElements() {
     this.turnCard.render(this.statusContainer);
-
     this.statusContainer.append(this.message);
-
     this.container.append(this.statusContainer, this.boardContainer);
-
     this.resetButton.render(this.container);
+    this.resultContent.append(this.resultMessage);
+    this.resultButton.render(this.resultContent);
   }
 
   // ========================================
@@ -104,13 +100,10 @@ export class GamePage {
 
   async startGame() {
     gameState.gameOver = false;
-
+    this.resultModal.close();
     this.board.clearBoard();
-
     this.board.setPlayerTile(gameState.myTile);
-
     this.screenManager.showGameScreen();
-
     this.playBoardEntrance();
 
     await this.loadBoard();
@@ -125,7 +118,6 @@ export class GamePage {
 
     // Restart the entrance animation for every newly started match.
     void this.boardContainer.offsetWidth;
-
     this.boardContainer.classList.add("board-stage-enter");
   }
 
@@ -143,13 +135,10 @@ export class GamePage {
     // Someone reset/removed room
     if (!started) {
       this.pollingService.stopRefresh();
-
       gameState.reset();
-
       this.board.clearBoard();
-
+      this.resultModal.close();
       this.onReturnHome("The game room was removed.");
-
       return;
     }
 
@@ -167,7 +156,6 @@ export class GamePage {
 
     if (board.status === "waiting") {
       this.message.textContent = "Waiting for another player.";
-
       return;
     }
 
@@ -177,7 +165,6 @@ export class GamePage {
 
     if (boardState.status === "finished") {
       this.finishGame(boardState.result);
-
       return;
     }
 
@@ -190,7 +177,6 @@ export class GamePage {
 
   updateTurn(turn) {
     const players = getPlayerNames(gameState.gameCode);
-
     const playerName = players[turn];
 
     this.turnDisplay.textContent = `${playerName}'s Turn (${turn})`;
@@ -213,36 +199,29 @@ export class GamePage {
 
     if (!gameState.gameStarted) {
       this.message.textContent = "Game has not started.";
-
       return;
     }
 
     try {
       const result = await submitMove(
         gameState.gameCode,
-
         gameState.myTile,
-
         x,
-
         y,
       );
 
       if (result.reason === "waiting") {
         this.message.textContent = "Waiting for another player.";
-
         return;
       }
 
       if (result.reason === "game_over") {
         this.finishGame(result.result);
-
         return;
       }
 
       if (result.reason === "not_your_turn") {
         this.message.textContent = `It is Player ${result.currentTurn}'s turn.`;
-
         return;
       }
 
@@ -259,7 +238,6 @@ export class GamePage {
       await this.loadBoard();
     } catch (error) {
       console.error(error);
-
       this.message.textContent = "Could not send move.";
     }
   }
@@ -270,26 +248,25 @@ export class GamePage {
 
   finishGame(result) {
     gameState.gameOver = true;
-
     this.board.disableBoard();
-
     this.turnDisplay.textContent = "Game Over";
 
     if (result.status === "draw") {
-      this.message.textContent = "The game is a draw!";
-
+      this.resultMessage.textContent = "It's a Draw!";
+      this.resultModal.open();
       return;
     }
 
     const players = getPlayerNames(gameState.gameCode);
-
     const winnerName = players[result.winner];
 
     if (result.winner === gameState.myTile) {
-      this.message.textContent = `You win! ${winnerName} (${result.winner}) won the game.`;
+      this.resultMessage.textContent = `You Win! ${winnerName} (${result.winner}) won the game.`;
     } else {
-      this.message.textContent = `${winnerName} (${result.winner}) won the game.`;
+      this.resultMessage.textContent = `You Lose! ${winnerName} (${result.winner}) won the game.`;
     }
+
+    this.resultModal.open();
   }
 
   // ========================================
@@ -305,15 +282,12 @@ export class GamePage {
 
     try {
       await resetGameSession(oldGameCode);
-
       this.pollingService.stopRefresh();
-
       this.board.clearBoard();
-
+      this.resultModal.close();
       this.onReturnHome("Game reset.");
     } catch (error) {
       console.error(error);
-
       this.message.textContent = "Could not reset game.";
     }
   }
@@ -327,6 +301,7 @@ export class GamePage {
 
     if (parent) {
       parent.append(this.container);
+      this.resultModal.render(document.body);
     } else {
       console.error("GamePage target not found.");
     }
