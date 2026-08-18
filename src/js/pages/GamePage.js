@@ -1,17 +1,14 @@
-import { checkGame, getBoard, move, resetGame } from "../api/tictactoeApi.js";
-
 import { gameState } from "../state/gameState.js";
 
-import {
-  parseBoard,
-  getCurrentTurn,
-  checkGameResult,
-} from "../game/boardLogic.js";
+import { getPlayerNames } from "../services/storageService.js";
 
 import {
-  getPlayerNames,
-  clearPlayerNames,
-} from "../services/storageService.js";
+  fetchAndParseBoard,
+  evaluateBoard,
+  submitMove,
+  checkGameStillActive,
+  resetGameSession,
+} from "../services/gameFlowService.js";
 
 import { Board } from "../components/Board.js";
 
@@ -141,7 +138,7 @@ export class GamePage {
       return;
     }
 
-    const started = await checkGame(gameState.gameCode);
+    const started = await checkGameStillActive(gameState.gameCode);
 
     // Someone reset/removed room
     if (!started) {
@@ -166,29 +163,25 @@ export class GamePage {
   // ========================================
 
   async loadBoard() {
-    const boardData = await getBoard(gameState.gameCode);
+    const board = await fetchAndParseBoard(gameState.gameCode);
 
-    if (boardData === "[GAME NOT YET STARTED]") {
+    if (board.status === "waiting") {
       this.message.textContent = "Waiting for another player.";
 
       return;
     }
 
-    const cells = parseBoard(boardData);
+    this.board.displayBoard(board.cells);
 
-    this.board.displayBoard(cells);
+    const boardState = evaluateBoard(board.cells);
 
-    const result = checkGameResult(cells);
-
-    if (result.status !== "playing") {
-      this.finishGame(result);
+    if (boardState.status === "finished") {
+      this.finishGame(boardState.result);
 
       return;
     }
 
-    const turn = getCurrentTurn(cells);
-
-    this.updateTurn(turn);
+    this.updateTurn(boardState.turn);
   }
 
   // ========================================
@@ -225,79 +218,40 @@ export class GamePage {
     }
 
     try {
-      // Always get latest board
-      // before submitting a move.
+      const result = await submitMove(
+        gameState.gameCode,
 
-      const boardData = await getBoard(gameState.gameCode);
+        gameState.myTile,
 
-      if (boardData === "[GAME NOT YET STARTED]") {
+        x,
+
+        y,
+      );
+
+      if (result.reason === "waiting") {
         this.message.textContent = "Waiting for another player.";
 
         return;
       }
 
-      const cells = parseBoard(boardData);
-
-      // -------------------------
-      // CHECK GAME ALREADY ENDED
-      // -------------------------
-
-      const result = checkGameResult(cells);
-
-      if (result.status !== "playing") {
-        this.finishGame(result);
+      if (result.reason === "game_over") {
+        this.finishGame(result.result);
 
         return;
       }
 
-      // -------------------------
-      // WHOSE TURN?
-      // -------------------------
-
-      const currentTurn = getCurrentTurn(cells);
-
-      // X/O must alternate.
-      //
-      // Also prevents O from
-      // submitting an X turn.
-      if (currentTurn !== gameState.myTile) {
-        this.message.textContent = `It is Player ${currentTurn}'s turn.`;
+      if (result.reason === "not_your_turn") {
+        this.message.textContent = `It is Player ${result.currentTurn}'s turn.`;
 
         return;
       }
 
-      // -------------------------
-      // CHECK CELL
-      // -------------------------
-
-      const index = y * 3 + x;
-
-      if (cells[index] === "X" || cells[index] === "O") {
+      if (result.reason === "cell_taken") {
         this.message.textContent = "That square is already taken.";
 
-        return;
-      }
-
-      // -------------------------
-      // SEND MOVE
-      // -------------------------
-
-      const moveResult = await move(
-        gameState.gameCode,
-
-        // Player cannot choose this.
-        // The server assigned it.
-        gameState.myTile,
-
-        y,
-
-        x,
-      );
-
-      if (moveResult === "[TAKEN]") {
-        this.message.textContent = "That square is already taken.";
-
-        await this.loadBoard();
+        if (result.refreshBoard) {
+          await this.loadBoard();
+        }
 
         return;
       }
@@ -350,13 +304,9 @@ export class GamePage {
     const oldGameCode = gameState.gameCode;
 
     try {
-      await resetGame(oldGameCode);
-
-      clearPlayerNames(oldGameCode);
+      await resetGameSession(oldGameCode);
 
       this.pollingService.stopRefresh();
-
-      gameState.reset();
 
       this.board.clearBoard();
 

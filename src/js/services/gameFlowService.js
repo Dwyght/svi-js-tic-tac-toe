@@ -1,14 +1,29 @@
 import {
   createGame as createGameApi,
   checkGame,
+  getBoard,
+  move,
   resetGame,
 } from "../api/tictactoeApi.js";
+
+import {
+  parseBoard,
+  getCurrentTurn,
+  checkGameResult,
+} from "../game/boardLogic.js";
 
 import { generateGameCode } from "../game/gameCode.js";
 
 import { gameState } from "../state/gameState.js";
 
-import { savePlayerName } from "./storageService.js";
+import {
+  savePlayerName,
+  clearPlayerNames,
+} from "./storageService.js";
+
+// ========================================
+// HOME FLOW
+// ========================================
 
 // ========================================
 // CREATE GAME
@@ -141,4 +156,171 @@ export async function joinGame(gameCode, playerName) {
       message: "Could not connect to the server.",
     };
   }
+}
+
+// ========================================
+// GAME FLOW
+// ========================================
+
+// ========================================
+// FETCH AND PARSE BOARD
+// ========================================
+
+export async function fetchAndParseBoard(gameCode) {
+  const boardData = await getBoard(gameCode);
+
+  if (boardData === "[GAME NOT YET STARTED]") {
+    return {
+      status: "waiting",
+    };
+  }
+
+  return {
+    status: "ok",
+
+    cells: parseBoard(boardData),
+  };
+}
+
+// ========================================
+// EVALUATE BOARD
+// ========================================
+
+export function evaluateBoard(cells) {
+  const result = checkGameResult(cells);
+
+  if (result.status !== "playing") {
+    return {
+      status: "finished",
+
+      result: result,
+    };
+  }
+
+  return {
+    status: "playing",
+
+    turn: getCurrentTurn(cells),
+  };
+}
+
+// ========================================
+// SUBMIT MOVE
+// ========================================
+
+export async function submitMove(gameCode, tile, x, y) {
+  // Always get latest board
+  // before submitting a move.
+
+  const board = await fetchAndParseBoard(gameCode);
+
+  if (board.status === "waiting") {
+    return {
+      ok: false,
+
+      reason: "waiting",
+    };
+  }
+
+  // -------------------------
+  // CHECK GAME ALREADY ENDED
+  // -------------------------
+
+  const result = checkGameResult(board.cells);
+
+  if (result.status !== "playing") {
+    return {
+      ok: false,
+
+      reason: "game_over",
+
+      result: result,
+    };
+  }
+
+  // -------------------------
+  // WHOSE TURN?
+  // -------------------------
+
+  const currentTurn = getCurrentTurn(board.cells);
+
+  // X/O must alternate.
+  //
+  // Also prevents O from
+  // submitting an X turn.
+  if (currentTurn !== tile) {
+    return {
+      ok: false,
+
+      reason: "not_your_turn",
+
+      currentTurn: currentTurn,
+    };
+  }
+
+  // -------------------------
+  // CHECK CELL
+  // -------------------------
+
+  const index = y * 3 + x;
+
+  if (board.cells[index] === "X" || board.cells[index] === "O") {
+    return {
+      ok: false,
+
+      reason: "cell_taken",
+
+      refreshBoard: false,
+    };
+  }
+
+  // -------------------------
+  // SEND MOVE
+  // -------------------------
+
+  const moveResult = await move(
+    gameCode,
+
+    // Player cannot choose this.
+    // The server assigned it.
+    tile,
+
+    y,
+
+    x,
+  );
+
+  if (moveResult === "[TAKEN]") {
+    return {
+      ok: false,
+
+      reason: "cell_taken",
+
+      refreshBoard: true,
+    };
+  }
+
+  return {
+    ok: true,
+  };
+}
+
+// ========================================
+// CHECK GAME STILL ACTIVE
+// ========================================
+
+export async function checkGameStillActive(gameCode) {
+  return checkGame(gameCode);
+}
+
+// ========================================
+// RESET GAME SESSION
+// ========================================
+
+export async function resetGameSession(gameCode) {
+  await resetGame(gameCode);
+
+  clearPlayerNames(gameCode);
+
+  gameState.reset();
 }
