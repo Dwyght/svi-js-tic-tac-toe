@@ -1,20 +1,16 @@
-import {
-  createGame as createGameApi,
-  checkGame,
-  resetGame,
-} from "../api/tictactoeApi.js";
-
 import { Button } from "../components/Button.js";
 
 import { Card } from "../components/Card.js";
 
 import { Modal } from "../components/Modal.js";
 
-import { gameState } from "../state/gameState.js";
+import {
+  createGame as createGameService,
+  joinGame as joinGameService,
+  waitForPlayerO as waitForPlayerOService,
+} from "../services/gameFlowService.js";
 
-import { generateGameCode } from "../game/gameCode.js";
-
-import { savePlayerName } from "../services/storageService.js";
+import { readClipboardText } from "../utils/clipboard.js";
 
 import { resolveTarget } from "../utils/dom.js";
 
@@ -341,9 +337,7 @@ export class HomePage {
 
   async pasteGameCode() {
     try {
-      const gameCode = (await navigator.clipboard.readText())
-        .trim()
-        .toUpperCase();
+      const gameCode = await readClipboardText();
 
       if (gameCode === "") {
         this.setMessage("The clipboard does not contain a game code.");
@@ -374,57 +368,32 @@ export class HomePage {
       return;
     }
 
-    const gameCode = generateGameCode();
+    const result = await createGameService(playerName);
 
-    try {
-      const result = await createGameApi(gameCode);
+    if (!result.ok) {
+      this.setMessage(result.message);
 
-      console.log("Create Game:", result);
-
-      // Creator must receive X.
-      if (result !== "X") {
-        this.setMessage("Could not create the room. Please try again.");
-
-        return;
-      }
-
-      gameState.setSession({
-        gameCode: gameCode,
-
-        myTile: "X",
-
-        myName: playerName,
-
-        gameStarted: false,
-      });
-
-      savePlayerName(gameCode, "X", playerName);
-
-      this.createModal.close();
-
-      this.screenManager.showWaitingScreen(gameCode, playerName);
-
-      this.waitForPlayerO();
-    } catch (error) {
-      console.error(error);
-
-      this.setMessage("Could not connect to the server.");
+      return;
     }
+
+    this.createModal.close();
+
+    this.screenManager.showWaitingScreen(result.gameCode, playerName);
+
+    this.waitForPlayerO(result.gameCode);
   }
 
   // ========================================
   // WAIT FOR PLAYER O
   // ========================================
 
-  waitForPlayerO() {
+  waitForPlayerO(gameCode) {
     this.pollingService.startRefresh(async () => {
-      const started = await checkGame(gameState.gameCode);
+      const result = await waitForPlayerOService(gameCode);
 
-      if (!started) {
+      if (!result.started) {
         return;
       }
-
-      gameState.gameStarted = true;
 
       this.pollingService.stopRefresh();
 
@@ -437,7 +406,8 @@ export class HomePage {
   // ========================================
 
   async joinGame() {
-    const gameCode = this.joinCodeInput.value.trim().toUpperCase();
+    const gameCode = this.joinCodeInput.value.trim();
+    // .toUpperCase();
 
     const playerName = this.joinNameInput.value.trim();
 
@@ -453,49 +423,17 @@ export class HomePage {
       return;
     }
 
-    try {
-      const result = await createGameApi(gameCode);
+    const result = await joinGameService(gameCode, playerName);
 
-      console.log("Join Game:", result);
+    if (!result.ok) {
+      this.setMessage(result.message);
 
-      // The endpoint also creates rooms.
-      //
-      // Therefore if joining returns X,
-      // the room did not exist.
-      if (result === "X") {
-        await resetGame(gameCode);
-
-        this.setMessage("Game code does not exist.");
-
-        return;
-      }
-
-      if (result !== "O") {
-        this.setMessage(result);
-
-        return;
-      }
-
-      gameState.setSession({
-        gameCode: gameCode,
-
-        myTile: "O",
-
-        myName: playerName,
-
-        gameStarted: true,
-      });
-
-      savePlayerName(gameCode, "O", playerName);
-
-      this.joinModal.close();
-
-      this.onGameStarted();
-    } catch (error) {
-      console.error(error);
-
-      this.setMessage("Could not connect to the server.");
+      return;
     }
+
+    this.joinModal.close();
+
+    this.onGameStarted();
   }
 
   // ========================================
