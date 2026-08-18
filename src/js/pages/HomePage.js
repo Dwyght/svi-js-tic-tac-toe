@@ -87,19 +87,19 @@ export class HomePage {
 
   initializeComponents() {
     this.openCreateButton = new Button({
-      label: "Create Game",
+      label: "CREATE GAME",
       className: "home-action-button",
       onClick: () => this.openCreateModal(),
     });
 
     this.openJoinButton = new Button({
-      label: "Join Game",
+      label: "JOIN GAME",
       className: "home-action-button",
       onClick: () => this.openJoinModal(),
     });
 
     this.howToPlayButton = new Button({
-      label: "How to Play",
+      label: "HOW TO PLAY",
       className: "home-action-button",
       onClick: () => this.openHowToPlayModal(),
     });
@@ -107,19 +107,21 @@ export class HomePage {
     this.howToPlayButton.element.classList.add("button-utility");
 
     this.createButton = new Button({
-      label: "Create Game",
+      label: "CREATE GAME",
       type: "submit",
+      className: "button-confirm",
     });
 
     this.pasteButton = new Button({
-      label: "Paste",
+      label: "PASTE",
       className: "button-utility",
       onClick: () => this.pasteGameCode(),
     });
 
     this.joinButton = new Button({
-      label: "Join Game",
+      label: "JOIN GAME",
       type: "submit",
+      className: "button-confirm",
     });
 
     this.createModal = new Modal({

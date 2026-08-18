@@ -6,16 +6,16 @@
   min-height: 46px;
   padding: 11px 22px;
 
-  color: #3a271c;
-  background: #df765d;
+  color: #3a2115;
+  background: #f6e7c8;
 
-  border: 2px solid #70472f;
+  border: 2px solid #5b341e;
   border-radius: 14px;
   box-shadow:
-    0 4px 0 #a14e3b,
-    0 7px 14px rgb(72 42 24 / 18%);
+    0 4px 0 #402414,
+    0 7px 14px rgb(64 36 20 / 18%);
 
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.035em;
 
   transition:
@@ -25,64 +25,89 @@
 }
 
 .button:hover:not(:disabled) {
-  background: #ea876d;
+  background: #fff3d8;
   transform: translateY(-1px);
 }
 
 .button:active:not(:disabled) {
-  background: #c85f49;
+  background: #e3c99c;
   box-shadow:
-    0 1px 0 #934532,
-    0 3px 7px rgb(72 42 24 / 18%);
+    0 1px 0 #402414,
+    0 3px 7px rgb(64 36 20 / 18%);
   transform: translateY(3px);
 }
 
 .button:focus-visible {
-  outline: 3px solid #fff8ec;
+  outline: 3px solid #fff9e9;
   outline-offset: 3px;
 }
 
-.button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.button-secondary {
-  color: #25301d;
-  background: #829d68;
+.button-confirm {
+  color: #fff8e8;
+  background: #7f9a5b;
+  border-color: #42552f;
   box-shadow:
-    0 4px 0 #5f774a,
-    0 7px 14px rgb(72 42 24 / 18%);
+    0 4px 0 #42552f,
+    0 7px 14px rgb(66 85 47 / 18%);
 }
 
-.button-secondary:hover:not(:disabled) {
-  background: #91ac76;
+.button-confirm:hover:not(:disabled) {
+  background: #94ac6c;
 }
 
-.button-secondary:active:not(:disabled) {
-  background: #6d8756;
+.button-confirm:active:not(:disabled) {
+  background: #667d48;
   box-shadow:
-    0 1px 0 #536b40,
-    0 3px 7px rgb(72 42 24 / 18%);
+    0 1px 0 #42552f,
+    0 3px 7px rgb(66 85 47 / 18%);
 }
 
 .button-utility {
-  color: #fff8ec;
-  background: #38506b;
+  color: #fff3d8;
+  background: #31465b;
+  border-color: #192832;
   box-shadow:
-    0 4px 0 #273a4e,
-    0 7px 14px rgb(72 42 24 / 18%);
+    0 4px 0 #192832,
+    0 7px 14px rgb(25 40 50 / 18%);
 }
 
 .button-utility:hover:not(:disabled) {
-  background: #496681;
+  background: #405b73;
 }
 
 .button-utility:active:not(:disabled) {
-  background: #2f4359;
+  background: #253746;
   box-shadow:
-    0 1px 0 #223547,
-    0 3px 7px rgb(72 42 24 / 18%);
+    0 1px 0 #192832,
+    0 3px 7px rgb(25 40 50 / 18%);
+}
+
+.button-danger {
+  color: #fff8e8;
+  background: #b85f43;
+  border-color: #713522;
+  box-shadow:
+    0 4px 0 #713522,
+    0 7px 14px rgb(113 53 34 / 18%);
+}
+
+.button-danger:hover:not(:disabled) {
+  background: #cf7255;
+}
+
+.button-danger:active:not(:disabled) {
+  background: #934832;
+  box-shadow:
+    0 1px 0 #713522,
+    0 3px 7px rgb(113 53 34 / 18%);
+}
+
+.button:disabled {
+  color: #6d6254;
+  background: #b9ac96;
+  border-color: #827462;
+  box-shadow: none;
+  cursor: not-allowed;
 }
 
 /* =========================
@@ -90,12 +115,12 @@
 ========================= */
 
 .card {
-  color: #3a271c;
-  background: #fdf8f0;
+  color: #3b2416;
+  background: #fff8ec;
 
-  border: 3px solid #a86f43;
+  border: 3px solid #70401f;
   border-radius: 18px;
-  box-shadow: 0 8px 20px rgb(72 42 24 / 22%);
+  box-shadow: 0 8px 20px rgb(75 43 24 / 22%);
 }
 
 .turn-card {
@@ -124,16 +149,16 @@
 
   overflow: hidden;
 
-  color: #3a271c;
-  background: #fdf8f0;
+  color: #3b2416;
+  background: #fff8ec;
 
-  border: 4px solid #a86f43;
+  border: 4px solid #70401f;
   border-radius: 24px;
-  box-shadow: 0 18px 45px rgb(72 42 24 / 25%);
+  box-shadow: 0 18px 45px rgb(75 43 24 / 25%);
 }
 
 .modal::backdrop {
-  background: rgb(58 39 28 / 48%);
+  background: rgb(47 28 16 / 48%);
 }
 
 .modal-header {
@@ -147,15 +172,15 @@
 
   padding: 20px 20px 16px 24px;
 
-  background: #fdf8f0;
+  background: #fff8ec;
 
-  border-bottom: 2px solid #e9c99f;
+  border-bottom: 2px solid #e6d0a9;
 }
 
 .modal-header h2 {
   margin: 0;
 
-  color: #3a271c;
+  color: #3b2416;
 
   font-size: clamp(1.5rem, 5vw, 2rem);
   line-height: 1.15;
@@ -170,13 +195,13 @@
   min-height: 40px;
   padding: 0;
 
-  background: #e9c99f;
+  background: #e6d0a9;
 
-  border-color: #a86f43;
+  border-color: #70401f;
   border-radius: 50%;
   box-shadow:
-    0 3px 0 #a86f43,
-    0 5px 10px rgb(72 42 24 / 16%);
+    0 3px 0 #4b2b18,
+    0 5px 10px rgb(75 43 24 / 16%);
 }
 
 .modal-close-button::before,
@@ -189,7 +214,7 @@
   height: 3px;
 
   content: "";
-  background: #3a271c;
+  background: #3b2416;
   border-radius: 999px;
 }
 
@@ -202,12 +227,12 @@
 }
 
 .modal-close-button:hover:not(:disabled) {
-  background: #f0d6b3;
+  background: #ffe2a3;
 }
 
 .modal-close-button:active:not(:disabled) {
-  background: #dcb889;
-  box-shadow: 0 1px 0 #956039;
+  background: #c98a43;
+  box-shadow: 0 1px 0 #4b2b18;
   transform: translateY(2px);
 }
 
@@ -222,7 +247,7 @@
 
   gap: 12px;
 
-  color: #3a271c;
+  color: #3b2416;
 
   text-align: left;
 }
@@ -234,25 +259,25 @@
 .modal-form input {
   width: 100%;
 
-  color: #3a271c;
+  color: #3b2416;
   background: #fff8ec;
 
-  border: 2px solid #c99b70;
+  border: 2px solid #e6d0a9;
   border-radius: 12px;
   outline: none;
 
-  box-shadow: inset 0 2px 4px rgb(72 42 24 / 8%);
+  box-shadow: inset 0 2px 4px rgb(75 43 24 / 8%);
 }
 
 .modal-form input::placeholder {
-  color: rgb(58 39 28 / 58%);
+  color: rgb(59 36 22 / 58%);
 }
 
 .modal-form input:focus {
-  border-color: #a86f43;
+  border-color: #70401f;
   box-shadow:
-    0 0 0 3px rgb(233 201 159 / 65%),
-    inset 0 2px 4px rgb(72 42 24 / 8%);
+    0 0 0 3px rgb(255 226 163 / 65%),
+    inset 0 2px 4px rgb(75 43 24 / 8%);
 }
 
 .modal-form > .button {
@@ -270,7 +295,7 @@
 }
 
 .how-to-play-content {
-  color: #3a271c;
+  color: #3b2416;
 
   line-height: 1.5;
 }
@@ -321,10 +346,10 @@
 #waiting-game-code {
   padding: 15px 25px;
 
-  color: #3a271c;
+  color: #3b2416;
   background: #fff8ec;
 
-  border: 2px solid #a86f43;
+  border: 2px solid #70401f;
   border-radius: 12px;
 
   font-size: 24px;
@@ -354,7 +379,7 @@
   background-repeat: no-repeat;
   background-size: contain;
 
-  filter: drop-shadow(0 16px 14px rgb(58 32 18 / 28%));
+  filter: drop-shadow(0 16px 14px rgb(75 43 24 / 28%));
 }
 
 .board-stage-enter {
@@ -422,11 +447,11 @@
 
 .cell:nth-child(3n + 1),
 .cell:nth-child(3n + 2) {
-  border-right: var(--grid-line) solid #70472f;
+  border-right: var(--grid-line) solid #70401f;
 }
 
 .cell:nth-child(-n + 6) {
-  border-bottom: var(--grid-line) solid #70472f;
+  border-bottom: var(--grid-line) solid #70401f;
 }
 
 .cell::before {
@@ -488,7 +513,7 @@
 .cell:focus-visible {
   z-index: 1;
 
-  outline: 3px solid #38506b;
+  outline: 3px solid #ffe2a3;
   outline-offset: -5px;
 }
 
@@ -515,5 +540,5 @@
 }
 
 .hint {
-  color: rgb(58 39 28 / 72%);
+  color: rgb(59 36 22 / 72%);
 }
