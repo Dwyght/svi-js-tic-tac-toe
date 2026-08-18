@@ -343,7 +343,7 @@
   margin: 20px 0;
 }
 
-#waiting-game-code {
+.game-code {
   padding: 15px 25px;
 
   color: #3b2416;

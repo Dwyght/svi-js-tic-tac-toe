@@ -74,6 +74,8 @@ export class ScreenManager {
 
     this.waitingGameCode.id = "waiting-game-code";
 
+    this.waitingGameCode.classList.add("game-code");
+
     this.waitingHint.classList.add("hint");
 
     this.waitingHint.textContent =

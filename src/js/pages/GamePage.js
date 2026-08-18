@@ -52,6 +52,16 @@ export class GamePage {
     this.message = document.createElement("p");
     this.boardContainer = document.createElement("div");
 
+    // Game code
+    this.gameCodeContainer = document.createElement("div");
+    this.gameCodeLabel = document.createElement("span");
+    this.gameCodeDisplay = document.createElement("span");
+    this.copyCodeButton = new Button({
+      label: "Copy",
+      className: "button-utility",
+      onClick: () => this.copyGameCode(),
+    });
+
     // Game result
     this.resultContent = document.createElement("div");
     this.resultMessage = document.createElement("p");
@@ -108,6 +118,14 @@ export class GamePage {
     this.statusContainer.classList.add("game-status");
     this.message.classList.add("message");
     this.boardContainer.classList.add("board-stage");
+    this.gameCodeContainer.classList.add(
+      "game-code-container",
+      "active-game-code-container",
+    );
+    this.gameCodeLabel.classList.add("game-code-label");
+    this.gameCodeLabel.textContent = "Game Code:";
+    this.gameCodeDisplay.classList.add("game-code");
+    this.copyCodeButton.element.classList.add("game-code-copy-button");
     this.resultContent.classList.add("modal-form");
     this.quitContent.classList.add("modal-form");
     this.quitMessage.textContent =
@@ -120,7 +138,9 @@ export class GamePage {
 
   appendElements() {
     this.turnCard.render(this.statusContainer);
-    this.statusContainer.append(this.message);
+    this.statusContainer.append(this.gameCodeContainer, this.message);
+    this.gameCodeContainer.append(this.gameCodeLabel, this.gameCodeDisplay);
+    this.copyCodeButton.render(this.gameCodeContainer);
     this.container.append(this.statusContainer, this.boardContainer);
     this.resetButton.render(this.container);
     this.resultContent.append(this.resultMessage);
@@ -152,12 +172,32 @@ export class GamePage {
   }
 
   // ========================================
+  // COPY GAME CODE
+  // ========================================
+
+  async copyGameCode() {
+    try {
+      await navigator.clipboard.writeText(this.gameCodeDisplay.textContent);
+      this.copyCodeButton.setLabel("Copied!");
+
+      setTimeout(() => {
+        this.copyCodeButton.setLabel("Copy");
+      }, 1500);
+    } catch (error) {
+      console.error("Could not copy game code.", error);
+      this.copyCodeButton.setLabel("Copy Failed");
+    }
+  }
+
+  // ========================================
   // START GAME PAGE
   // ========================================
 
   async startGame() {
     gameState.gameOver = false;
     this.inactiveGameOverRefreshes = 0;
+    this.gameCodeDisplay.textContent = gameState.gameCode;
+    this.copyCodeButton.setLabel("Copy");
     this.resultModal.close();
     this.quitModal.close();
     this.board.clearBoard();
