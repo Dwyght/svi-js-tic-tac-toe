@@ -54,10 +54,14 @@ export class GamePage {
     this.resultContent = document.createElement("div");
     this.resultMessage = document.createElement("p");
 
+    // Quit confirmation
+    this.quitContent = document.createElement("div");
+    this.quitMessage = document.createElement("p");
+
     this.resetButton = new Button({
       label: "QUIT GAME",
       className: "button-danger",
-      onClick: () => this.handleReset(),
+      onClick: () => this.openQuitModal(),
     });
     this.resetButton.element.classList.add("reset-button");
 
@@ -69,12 +73,27 @@ export class GamePage {
     this.resultQuitButton = new Button({
       label: "QUIT GAME",
       className: "button-danger",
-      onClick: () => this.handleReset(),
+      onClick: () => this.openQuitModal(),
     });
     this.resultModal = new Modal({
       title: "Game Over",
       content: this.resultContent,
       closable: false,
+    });
+
+    this.cancelQuitButton = new Button({
+      label: "CANCEL",
+      className: "button-utility",
+      onClick: () => this.quitModal.close(),
+    });
+    this.confirmQuitButton = new Button({
+      label: "YES, QUIT",
+      className: "button-danger",
+      onClick: () => this.confirmQuit(),
+    });
+    this.quitModal = new Modal({
+      title: "Quit Game",
+      content: this.quitContent,
     });
   }
 
@@ -88,6 +107,9 @@ export class GamePage {
     this.message.classList.add("message");
     this.boardContainer.classList.add("board-stage");
     this.resultContent.classList.add("modal-form");
+    this.quitContent.classList.add("modal-form");
+    this.quitMessage.textContent =
+      "Are you sure you want to quit? This will end the game for both players.";
   }
 
   // ========================================
@@ -102,6 +124,9 @@ export class GamePage {
     this.resultContent.append(this.resultMessage);
     this.playAgainButton.render(this.resultContent);
     this.resultQuitButton.render(this.resultContent);
+    this.quitContent.append(this.quitMessage);
+    this.cancelQuitButton.render(this.quitContent);
+    this.confirmQuitButton.render(this.quitContent);
   }
 
   // ========================================
@@ -112,6 +137,7 @@ export class GamePage {
     gameState.gameOver = false;
     this.inactiveGameOverRefreshes = 0;
     this.resultModal.close();
+    this.quitModal.close();
     this.board.clearBoard();
     this.board.setPlayerTile(gameState.myTile);
     this.screenManager.showGameScreen();
@@ -157,6 +183,7 @@ export class GamePage {
       gameState.reset();
       this.board.clearBoard();
       this.resultModal.close();
+      this.quitModal.close();
       this.onReturnHome("The game room was removed.");
       return;
     }
@@ -348,6 +375,19 @@ export class GamePage {
   }
 
   // ========================================
+  // QUIT CONFIRMATION
+  // ========================================
+
+  openQuitModal() {
+    this.quitModal.open();
+  }
+
+  async confirmQuit() {
+    this.quitModal.close();
+    await this.handleReset();
+  }
+
+  // ========================================
   // RESET
   // ========================================
 
@@ -363,6 +403,7 @@ export class GamePage {
       this.pollingService.stopRefresh();
       this.board.clearBoard();
       this.resultModal.close();
+      this.quitModal.close();
       this.onReturnHome("Game reset.");
     } catch (error) {
       console.error(error);
@@ -380,6 +421,7 @@ export class GamePage {
     if (parent) {
       parent.append(this.container);
       this.resultModal.render(document.body);
+      this.quitModal.render(document.body);
     } else {
       console.error("GamePage target not found.");
     }
