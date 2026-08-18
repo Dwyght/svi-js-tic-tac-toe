@@ -364,7 +364,7 @@
 ========================= */
 
 .board-stage {
-  --plate-size: min(520px, calc(100vw - 30px), calc(100dvh - 210px));
+  --plate-size: min(520px, calc(100vw - 30px), calc(100dvh - 275px));
 
   width: var(--plate-size);
   aspect-ratio: 1;
