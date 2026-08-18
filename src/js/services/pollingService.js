@@ -3,9 +3,7 @@ import { REFRESH_INTERVAL_MS } from "../config/constants.js";
 export class PollingService {
   constructor() {
     this.intervalId = null;
-
     this.refreshCallback = null;
-
     this.isRefreshing = false;
   }
 
@@ -15,12 +13,10 @@ export class PollingService {
 
   startRefresh(refreshCallback) {
     this.stopRefresh();
-
     this.refreshCallback = refreshCallback;
 
     // Run immediately once
     this.refreshGame();
-
     this.intervalId = setInterval(() => {
       this.refreshGame();
     }, REFRESH_INTERVAL_MS);
@@ -36,7 +32,6 @@ export class PollingService {
     }
 
     this.isRefreshing = true;
-
     try {
       await this.refreshCallback();
     } catch (error) {
@@ -54,11 +49,8 @@ export class PollingService {
     if (this.intervalId !== null) {
       clearInterval(this.intervalId);
     }
-
     this.intervalId = null;
-
     this.refreshCallback = null;
-
     this.isRefreshing = false;
   }
 }

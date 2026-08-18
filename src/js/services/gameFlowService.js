@@ -5,21 +5,14 @@ import {
   move,
   resetGame,
 } from "../api/tictactoeApi.js";
-
 import {
   parseBoard,
   getCurrentTurn,
   checkGameResult,
 } from "../game/boardLogic.js";
-
 import { generateGameCode } from "../game/gameCode.js";
-
 import { gameState } from "../state/gameState.js";
-
-import {
-  savePlayerName,
-  clearPlayerNames,
-} from "./storageService.js";
+import { savePlayerName, clearPlayerNames } from "./storageService.js";
 
 // ========================================
 // HOME FLOW
@@ -34,33 +27,26 @@ export async function createGame(playerName) {
 
   try {
     const result = await createGameApi(gameCode);
-
     console.log("Create Game:", result);
 
     // Creator must receive X.
     if (result !== "X") {
       return {
         ok: false,
-
         message: "Could not create the room. Please try again.",
       };
     }
 
     gameState.setSession({
       gameCode: gameCode,
-
       myTile: "X",
-
       myName: playerName,
-
       gameStarted: false,
     });
-
     savePlayerName(gameCode, "X", playerName);
 
     return {
       ok: true,
-
       gameCode: gameCode,
     };
   } catch (error) {
@@ -68,7 +54,6 @@ export async function createGame(playerName) {
 
     return {
       ok: false,
-
       message: "Could not connect to the server.",
     };
   }
@@ -84,7 +69,6 @@ export async function waitForPlayerO(gameCode) {
   if (!started) {
     return {
       ok: true,
-
       started: false,
     };
   }
@@ -93,7 +77,6 @@ export async function waitForPlayerO(gameCode) {
 
   return {
     ok: true,
-
     started: true,
   };
 }
@@ -105,19 +88,15 @@ export async function waitForPlayerO(gameCode) {
 export async function joinGame(gameCode, playerName) {
   try {
     const result = await createGameApi(gameCode);
-
     console.log("Join Game:", result);
 
     // The endpoint also creates rooms.
-    //
-    // Therefore if joining returns X,
-    // the room did not exist.
+    // Therefore if joining returns X, the room did not exist.
     if (result === "X") {
       await resetGame(gameCode);
 
       return {
         ok: false,
-
         message: "Game code does not exist.",
       };
     }
@@ -125,26 +104,20 @@ export async function joinGame(gameCode, playerName) {
     if (result !== "O") {
       return {
         ok: false,
-
         message: result,
       };
     }
 
     gameState.setSession({
       gameCode: gameCode,
-
       myTile: "O",
-
       myName: playerName,
-
       gameStarted: true,
     });
-
     savePlayerName(gameCode, "O", playerName);
 
     return {
       ok: true,
-
       gameCode: gameCode,
     };
   } catch (error) {
@@ -152,7 +125,6 @@ export async function joinGame(gameCode, playerName) {
 
     return {
       ok: false,
-
       message: "Could not connect to the server.",
     };
   }
@@ -177,7 +149,6 @@ export async function fetchAndParseBoard(gameCode) {
 
   return {
     status: "ok",
-
     cells: parseBoard(boardData),
   };
 }
@@ -192,14 +163,12 @@ export function evaluateBoard(cells) {
   if (result.status !== "playing") {
     return {
       status: "finished",
-
       result: result,
     };
   }
 
   return {
     status: "playing",
-
     turn: getCurrentTurn(cells),
   };
 }
@@ -209,15 +178,12 @@ export function evaluateBoard(cells) {
 // ========================================
 
 export async function submitMove(gameCode, tile, x, y) {
-  // Always get latest board
-  // before submitting a move.
-
+  // Always get latest board before submitting a move.
   const board = await fetchAndParseBoard(gameCode);
 
   if (board.status === "waiting") {
     return {
       ok: false,
-
       reason: "waiting",
     };
   }
@@ -231,9 +197,7 @@ export async function submitMove(gameCode, tile, x, y) {
   if (result.status !== "playing") {
     return {
       ok: false,
-
       reason: "game_over",
-
       result: result,
     };
   }
@@ -244,16 +208,11 @@ export async function submitMove(gameCode, tile, x, y) {
 
   const currentTurn = getCurrentTurn(board.cells);
 
-  // X/O must alternate.
-  //
-  // Also prevents O from
-  // submitting an X turn.
+  // X/O must alternate. Also prevents O from submitting an X turn.
   if (currentTurn !== tile) {
     return {
       ok: false,
-
       reason: "not_your_turn",
-
       currentTurn: currentTurn,
     };
   }
@@ -267,9 +226,7 @@ export async function submitMove(gameCode, tile, x, y) {
   if (board.cells[index] === "X" || board.cells[index] === "O") {
     return {
       ok: false,
-
       reason: "cell_taken",
-
       refreshBoard: false,
     };
   }
@@ -280,22 +237,16 @@ export async function submitMove(gameCode, tile, x, y) {
 
   const moveResult = await move(
     gameCode,
-
-    // Player cannot choose this.
-    // The server assigned it.
+    // Player cannot choose this. The server assigned it.
     tile,
-
     y,
-
     x,
   );
 
   if (moveResult === "[TAKEN]") {
     return {
       ok: false,
-
       reason: "cell_taken",
-
       refreshBoard: true,
     };
   }
@@ -358,8 +309,6 @@ export function notifyGameSessionLeaving(gameCode) {
 
 export async function resetGameSession(gameCode) {
   await resetGame(gameCode);
-
   clearPlayerNames(gameCode);
-
   gameState.reset();
 }

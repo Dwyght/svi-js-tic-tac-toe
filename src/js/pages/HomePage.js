@@ -1,7 +1,5 @@
 import { Button } from "../components/Button.js";
 
-import { Card } from "../components/Card.js";
-
 import { Modal } from "../components/Modal.js";
 
 import {
@@ -43,8 +41,6 @@ export class HomePage {
     this.banner = document.createElement("div");
 
     this.bannerImage = document.createElement("img");
-
-    this.bannerTitle = document.createElement("h1");
 
     this.actions = document.createElement("div");
 
@@ -90,11 +86,6 @@ export class HomePage {
   // ========================================
 
   initializeComponents() {
-    this.actionsCard = new Card({
-      content: this.actions,
-      className: "home-actions-card",
-    });
-
     this.openCreateButton = new Button({
       label: "CREATE GAME",
       className: "home-action-button",
@@ -160,11 +151,7 @@ export class HomePage {
 
     this.bannerImage.src = "./src/assets/images/banner.png";
 
-    this.bannerImage.alt = "";
-
-    this.bannerImage.setAttribute("aria-hidden", "true");
-
-    this.bannerTitle.textContent = "TIC TAC TOE";
+    this.bannerImage.alt = "Tic Tac Toe";
 
     this.actions.classList.add("home-actions");
 
@@ -250,11 +237,11 @@ export class HomePage {
   // ========================================
 
   appendElements() {
-    this.banner.append(this.bannerImage, this.bannerTitle);
+    this.banner.append(this.bannerImage);
 
     this.container.append(this.banner);
 
-    this.actionsCard.render(this.container);
+    this.container.append(this.actions);
 
     this.container.append(this.message);
 
