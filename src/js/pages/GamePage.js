@@ -5,6 +5,7 @@ import {
   evaluateBoard,
   submitMove,
   checkGameStillActive,
+  restartGameSession,
   resetGameSession,
 } from "../services/gameFlowService.js";
 import { Board } from "../components/Board.js";
@@ -13,11 +14,14 @@ import { Card } from "../components/Card.js";
 import { Modal } from "../components/Modal.js";
 import { resolveTarget } from "../utils/dom.js";
 
+const GAME_OVER_INACTIVE_GRACE_REFRESHES = 3;
+
 export class GamePage {
   constructor({ screenManager, pollingService, onReturnHome }) {
     this.screenManager = screenManager;
     this.pollingService = pollingService;
     this.onReturnHome = onReturnHome;
+    this.inactiveGameOverRefreshes = 0;
 
     this.initializeElements();
     this.setAttributes();
@@ -57,9 +61,14 @@ export class GamePage {
     });
     this.resetButton.element.classList.add("reset-button");
 
-    this.resultButton = new Button({
-      label: "RETURN HOME",
+    this.playAgainButton = new Button({
+      label: "PLAY AGAIN",
       className: "button-confirm",
+      onClick: () => this.handlePlayAgain(),
+    });
+    this.resultQuitButton = new Button({
+      label: "QUIT GAME",
+      className: "button-danger",
       onClick: () => this.handleReset(),
     });
     this.resultModal = new Modal({
@@ -91,7 +100,8 @@ export class GamePage {
     this.container.append(this.statusContainer, this.boardContainer);
     this.resetButton.render(this.container);
     this.resultContent.append(this.resultMessage);
-    this.resultButton.render(this.resultContent);
+    this.playAgainButton.render(this.resultContent);
+    this.resultQuitButton.render(this.resultContent);
   }
 
   // ========================================
@@ -100,6 +110,7 @@ export class GamePage {
 
   async startGame() {
     gameState.gameOver = false;
+    this.inactiveGameOverRefreshes = 0;
     this.resultModal.close();
     this.board.clearBoard();
     this.board.setPlayerTile(gameState.myTile);
@@ -134,6 +145,14 @@ export class GamePage {
 
     // Someone reset/removed room
     if (!started) {
+      if (
+        gameState.gameOver &&
+        this.inactiveGameOverRefreshes < GAME_OVER_INACTIVE_GRACE_REFRESHES
+      ) {
+        this.inactiveGameOverRefreshes++;
+        return;
+      }
+
       this.pollingService.stopRefresh();
       gameState.reset();
       this.board.clearBoard();
@@ -142,9 +161,8 @@ export class GamePage {
       return;
     }
 
-    if (!gameState.gameOver) {
-      await this.loadBoard();
-    }
+    this.inactiveGameOverRefreshes = 0;
+    await this.loadBoard();
   }
 
   // ========================================
@@ -164,8 +182,15 @@ export class GamePage {
     const boardState = evaluateBoard(board.cells);
 
     if (boardState.status === "finished") {
-      this.finishGame(boardState.result);
+      if (!gameState.gameOver) {
+        this.finishGame(boardState.result);
+      }
+
       return;
+    }
+
+    if (gameState.gameOver) {
+      this.resumeGame();
     }
 
     this.updateTurn(boardState.turn);
@@ -248,8 +273,18 @@ export class GamePage {
 
   finishGame(result) {
     gameState.gameOver = true;
+    this.inactiveGameOverRefreshes = 0;
     this.board.disableBoard();
     this.turnDisplay.textContent = "Game Over";
+
+    const canPlayAgain = gameState.myTile === "X";
+
+    this.playAgainButton.element.disabled = !canPlayAgain;
+    this.playAgainButton.setLabel(
+      canPlayAgain
+        ? "PLAY AGAIN"
+        : "WAITING FOR PLAYER X TO START A NEW MATCH",
+    );
 
     if (result.status === "draw") {
       this.resultMessage.textContent = "It's a Draw!";
@@ -267,6 +302,49 @@ export class GamePage {
     }
 
     this.resultModal.open();
+  }
+
+  // ========================================
+  // PLAY AGAIN
+  // ========================================
+
+  async handlePlayAgain() {
+    if (
+      gameState.gameCode === null ||
+      gameState.myTile !== "X" ||
+      !gameState.gameOver
+    ) {
+      return;
+    }
+
+    this.playAgainButton.element.disabled = true;
+    this.playAgainButton.setLabel("STARTING NEW MATCH...");
+
+    try {
+      await restartGameSession(gameState.gameCode);
+      this.resumeGame(true);
+      await this.loadBoard();
+    } catch (error) {
+      console.error(error);
+      this.resultMessage.textContent = "Could not start a new match.";
+      this.playAgainButton.element.disabled = false;
+      this.playAgainButton.setLabel("PLAY AGAIN");
+    }
+  }
+
+  resumeGame(clearBoard = false) {
+    gameState.gameStarted = true;
+    gameState.gameOver = false;
+    this.inactiveGameOverRefreshes = 0;
+    this.resultModal.close();
+
+    if (clearBoard) {
+      this.board.clearBoard();
+    } else {
+      this.board.enableBoard();
+    }
+
+    this.playBoardEntrance();
   }
 
   // ========================================

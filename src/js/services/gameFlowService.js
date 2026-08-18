@@ -314,6 +314,35 @@ export async function checkGameStillActive(gameCode) {
 }
 
 // ========================================
+// RESTART GAME SESSION
+// ========================================
+
+export async function restartGameSession(gameCode) {
+  if (gameState.myTile !== "X") {
+    throw new Error("Only Player X can start a new match.");
+  }
+
+  await resetGame(gameCode);
+
+  // Recreate both server-side player slots under the same game code.
+  // The clients keep their existing names and X/O assignments locally.
+  const playerX = await createGameApi(gameCode);
+
+  if (playerX !== "X") {
+    throw new Error("Could not recreate the Player X slot.");
+  }
+
+  const playerO = await createGameApi(gameCode);
+
+  if (playerO !== "O") {
+    throw new Error("Could not recreate the Player O slot.");
+  }
+
+  gameState.gameStarted = true;
+  gameState.gameOver = false;
+}
+
+// ========================================
 // RESET GAME SESSION
 // ========================================
 
