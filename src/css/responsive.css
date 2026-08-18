@@ -8,56 +8,23 @@
   }
 
   .home-banner {
-    top: 42%;
-
     aspect-ratio: 1173 / 941;
-
-    animation-name: lower-home-banner-mobile;
   }
 
   .home-actions {
-    width: var(--home-banner-width);
+    width: calc(var(--home-banner-width) - 24px);
 
     align-self: center;
   }
 
   .home-action-button {
     width: 100%;
+    min-height: 48px;
+    padding: 11px 22px;
   }
 
   .board-stage {
     --plate-size: min(520px, calc(100vw - 30px), calc(100dvh - 230px));
-  }
-}
-
-@keyframes lower-home-banner-mobile {
-  0% {
-    transform: translate(-50%, -220%) rotate(-1deg);
-  }
-
-  72% {
-    transform: translate(-50%, -47%) rotate(1.75deg);
-  }
-
-  86% {
-    transform: translate(-50%, -51.5%) rotate(-0.5deg);
-  }
-
-  100% {
-    transform: translate(-50%, -50%) rotate(0);
-  }
-}
-
-@media (max-width: 650px) and (prefers-reduced-motion: reduce) {
-  .home-banner {
-    animation: none;
-    transform: translate(-50%, -50%);
-  }
-}
-
-@media (max-width: 650px) and (max-height: 500px) {
-  .home-banner {
-    top: 35%;
   }
 }
 
