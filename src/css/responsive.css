@@ -22,7 +22,6 @@
     min-height: 48px;
     padding: 11px 22px;
   }
-
 }
 
 @media (max-height: 500px) {
@@ -44,19 +43,24 @@
   }
 
   .game-page {
-    --game-layout-gap: clamp(14px, 2.5vw, 24px);
+    --game-column-gap: clamp(10px, 2vw, 18px);
+    --game-row-gap: 4px;
+    --game-info-width: clamp(150px, 19vw, 180px);
     --game-viewport-inline-space: 30px;
-    --game-viewport-block-space: 30px;
+    --game-viewport-block-reserve: 160px;
   }
 
-  .game-status {
-    height: 100%;
-    padding: 0;
+  .game-side-panel {
+    padding-top: 0;
     gap: 4px;
   }
 
   .turn-card {
     padding: 8px 16px;
+  }
+
+  .turn-card h2 {
+    font-size: 1.1rem;
   }
 
   .score-card {
@@ -114,47 +118,57 @@
 }
 
 @media (max-width: 650px), (orientation: portrait) {
-  .game-page {
-    --game-layout-gap: clamp(6px, 1.5dvh, 12px);
-
+  .game-layout {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto minmax(0, 1fr);
-    align-items: start;
+    grid-template-rows: auto auto auto auto;
+    align-content: center;
+    column-gap: 0;
+    row-gap: clamp(6px, 1.25dvh, 10px);
   }
 
   .game-status {
-    width: min(520px, 100%);
-    height: auto;
+    width: min(340px, 100%);
+
+    grid-column: 1;
+    grid-row: 1;
+    align-self: auto;
+  }
+
+  .game-side-panel {
+    width: min(340px, 100%);
     padding: 0;
 
     justify-self: center;
-    gap: clamp(5px, 1dvh, 8px);
+    gap: clamp(4px, 0.75dvh, 6px);
+
+    grid-column: 1;
+    grid-row: 2;
+    align-self: auto;
   }
 
-  .game-status .turn-card {
-    width: min(340px, 100%);
-
-    align-self: center;
-  }
-
-  .game-status .score-card,
-  .game-status > .reset-button {
+  .game-side-panel .score-card {
     width: min(280px, 100%);
 
     align-self: center;
   }
 
-  .game-status > .reset-button {
-    margin-top: 0;
+  .game-actions {
+    width: min(280px, 100%);
+
+    grid-column: 1;
+    grid-row: 4;
+    align-self: center;
   }
 
-  .game-page > .board-stage {
+  .game-layout > .board-stage {
     --plate-size: min(
       520px,
       calc(100vw - 30px),
       calc(100dvh - 300px)
     );
 
+    grid-column: 1;
+    grid-row: 3;
     align-self: center;
   }
 }

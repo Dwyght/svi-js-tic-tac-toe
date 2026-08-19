@@ -85,7 +85,7 @@ function handleReturnHome(message = "") {
   homePage.resetForm();
 
   if (message !== "") {
-    homePage.setMessage(message);
+    homePage.showNotice(message);
   }
 }
 

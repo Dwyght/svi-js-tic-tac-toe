@@ -45,8 +45,6 @@ export class HomePage {
 
     this.actions = document.createElement("div");
 
-    this.message = document.createElement("p");
-
     // HOW TO PLAY
 
     this.howToPlayContent = document.createElement("div");
@@ -90,6 +88,12 @@ export class HomePage {
     this.spectateCodeInput = document.createElement("input");
 
     this.spectateMessage = document.createElement("p");
+
+    // NOTICE
+
+    this.noticeContent = document.createElement("div");
+
+    this.noticeMessage = document.createElement("p");
   }
 
   // ========================================
@@ -162,6 +166,18 @@ export class HomePage {
       content: this.spectateForm,
     });
 
+    this.noticeButton = new Button({
+      label: "OK",
+      className: "button-confirm",
+      onClick: () => this.noticeModal.close(),
+    });
+
+    this.noticeModal = new Modal({
+      title: "Game Update",
+      content: this.noticeContent,
+      closable: false,
+    });
+
     this.howToPlayModal = new Modal({
       title: "How to Play",
       content: this.howToPlayContent,
@@ -182,8 +198,6 @@ export class HomePage {
     this.bannerImage.alt = "Tic Tac Toe";
 
     this.actions.classList.add("home-actions");
-
-    this.message.classList.add("message");
 
     // HOW TO PLAY
 
@@ -278,6 +292,10 @@ export class HomePage {
     this.spectateCodeInput.spellcheck = false;
 
     this.spectateMessage.classList.add("message");
+
+    // NOTICE
+
+    this.noticeContent.classList.add("modal-form");
   }
 
   // ========================================
@@ -290,8 +308,6 @@ export class HomePage {
     this.container.append(this.banner);
 
     this.container.append(this.actions);
-
-    this.container.append(this.message);
 
     this.openCreateButton.render(this.actions);
 
@@ -332,6 +348,10 @@ export class HomePage {
     );
 
     this.spectateButton.render(this.spectateForm);
+
+    this.noticeContent.append(this.noticeMessage);
+
+    this.noticeButton.render(this.noticeContent);
   }
 
   // ========================================
@@ -388,6 +408,12 @@ export class HomePage {
 
   openHowToPlayModal() {
     this.howToPlayModal.open();
+  }
+
+  showNotice(message) {
+    this.noticeMessage.textContent = message;
+
+    this.noticeModal.open();
   }
 
   // ========================================
@@ -544,7 +570,7 @@ export class HomePage {
       return;
     }
 
-    this.message.textContent = message;
+    this.showNotice(message);
   }
 
   // ========================================
@@ -560,8 +586,6 @@ export class HomePage {
 
     this.spectateCodeInput.value = "";
 
-    this.message.textContent = "";
-
     this.createMessage.textContent = "";
 
     this.joinMessage.textContent = "";
@@ -573,6 +597,8 @@ export class HomePage {
     this.joinModal.close();
 
     this.spectateModal.close();
+
+    this.noticeModal.close();
 
     this.howToPlayModal.close();
   }
@@ -592,6 +618,8 @@ export class HomePage {
       this.joinModal.render(document.body);
 
       this.spectateModal.render(document.body);
+
+      this.noticeModal.render(document.body);
 
       this.howToPlayModal.render(document.body);
     } else {

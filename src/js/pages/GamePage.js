@@ -44,6 +44,9 @@ export class GamePage {
 
   initializeElements() {
     this.container = document.createElement("div");
+    this.gameLayout = document.createElement("div");
+    this.sidePanel = document.createElement("aside");
+    this.gameActions = document.createElement("div");
 
     // Game information
     this.statusContainer = document.createElement("div");
@@ -136,6 +139,9 @@ export class GamePage {
 
   setAttributes() {
     this.container.classList.add("game-page");
+    this.gameLayout.classList.add("game-layout");
+    this.sidePanel.classList.add("game-side-panel");
+    this.gameActions.classList.add("game-actions");
     this.statusContainer.classList.add("game-status");
     this.scoreDisplay.classList.add("score-display");
     this.scoreDisplay.setAttribute("aria-live", "polite");
@@ -162,11 +168,18 @@ export class GamePage {
 
   appendElements() {
     this.turnCard.render(this.statusContainer);
-    this.statusContainer.append(this.message, this.gameCodeContainer);
+    this.statusContainer.append(this.message);
     this.gameCodeContainer.append(this.gameCodeLabel, this.gameCodeDisplay);
     this.copyCodeButton.render(this.gameCodeContainer);
-    this.scoreCard.render(this.statusContainer);
-    this.container.append(this.statusContainer, this.boardContainer);
+    this.sidePanel.append(this.gameCodeContainer);
+    this.scoreCard.render(this.sidePanel);
+    this.gameLayout.append(
+      this.statusContainer,
+      this.sidePanel,
+      this.boardContainer,
+      this.gameActions,
+    );
+    this.container.append(this.gameLayout);
     this.resultContent.append(this.resultMessage, this.resultScoreDisplay);
     this.quitContent.append(this.quitMessage);
     this.cancelQuitButton.render(this.quitContent);
@@ -181,13 +194,13 @@ export class GamePage {
     this.resultLeaveButton.element.remove();
 
     if (gameState.isSpectator) {
-      this.leaveButton.render(this.statusContainer);
+      this.leaveButton.render(this.gameActions);
       this.resultLeaveButton.render(this.resultContent);
       this.quitModal.dialog.remove();
       return;
     }
 
-    this.resetButton.render(this.statusContainer);
+    this.resetButton.render(this.gameActions);
     this.playAgainButton.render(this.resultContent);
     this.resultQuitButton.render(this.resultContent);
 
@@ -313,7 +326,7 @@ export class GamePage {
     const board = await fetchAndParseBoard(gameState.gameCode);
 
     if (board.status === "waiting") {
-      this.message.textContent = "Waiting for another player.";
+      this.message.textContent = "";
       return;
     }
 
@@ -347,20 +360,20 @@ export class GamePage {
   updateTurn(turn) {
     if (gameState.isSpectator) {
       this.turnDisplay.textContent = `${turn}'s Turn`;
-      this.message.textContent = "Watching the game.";
+      this.message.textContent = "";
       return;
     }
 
     const players = getPlayerNames(gameState.gameCode);
     const playerName = players[turn];
 
-    this.turnDisplay.textContent = `${playerName}'s Turn (${turn})`;
-
     if (turn === gameState.myTile) {
-      this.message.textContent = "Your turn.";
+      this.turnDisplay.textContent = "Your turn.";
     } else {
-      this.message.textContent = "Waiting for the other player.";
+      this.turnDisplay.textContent = `${playerName}'s turn.`;
     }
+
+    this.message.textContent = "";
   }
 
   // ========================================
@@ -390,7 +403,7 @@ export class GamePage {
       );
 
       if (result.reason === "waiting") {
-        this.message.textContent = "Waiting for another player.";
+        this.message.textContent = "";
         return;
       }
 
