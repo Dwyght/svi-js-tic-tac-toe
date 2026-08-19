@@ -152,12 +152,12 @@ export class GamePage {
 
   appendElements() {
     this.turnCard.render(this.statusContainer);
-    this.scoreCard.render(this.statusContainer);
-    this.statusContainer.append(this.gameCodeContainer, this.message);
+    this.statusContainer.append(this.message, this.gameCodeContainer);
     this.gameCodeContainer.append(this.gameCodeLabel, this.gameCodeDisplay);
     this.copyCodeButton.render(this.gameCodeContainer);
+    this.scoreCard.render(this.statusContainer);
+    this.resetButton.render(this.statusContainer);
     this.container.append(this.statusContainer, this.boardContainer);
-    this.resetButton.render(this.container);
     this.resultContent.append(this.resultMessage, this.resultScoreDisplay);
     this.playAgainButton.render(this.resultContent);
     this.resultQuitButton.render(this.resultContent);

@@ -23,9 +23,6 @@
     padding: 11px 22px;
   }
 
-  .board-stage {
-    --plate-size: min(520px, calc(100vw - 30px), calc(100dvh - 230px));
-  }
 }
 
 @media (max-height: 500px) {
@@ -46,23 +43,29 @@
     padding: 8px 20px;
   }
 
+  .game-page {
+    --game-layout-gap: clamp(14px, 2.5vw, 24px);
+    --game-viewport-inline-space: 30px;
+    --game-viewport-block-space: 30px;
+  }
+
+  .game-status {
+    height: 100%;
+    padding: 0;
+    gap: 4px;
+  }
+
   .turn-card {
-    margin-bottom: 4px;
     padding: 8px 16px;
   }
 
   .score-card {
-    margin: 0 auto 4px;
     padding: 4px 12px;
   }
 
   .game-status > .message {
     min-height: 20px;
-    margin: 4px 0;
-  }
-
-  .board-stage {
-    --plate-size: min(520px, calc(100vw - 30px), calc(100dvh - 180px));
+    margin: 0;
   }
 
   .reset-button {
@@ -105,7 +108,53 @@
     margin-top: 4px;
   }
 
-  .game-code-container {
+  .waiting-modal .game-code-container {
     margin: 10px 0;
+  }
+}
+
+@media (max-width: 650px), (orientation: portrait) {
+  .game-page {
+    --game-layout-gap: clamp(6px, 1.5dvh, 12px);
+
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .game-status {
+    width: min(520px, 100%);
+    height: auto;
+    padding: 0;
+
+    justify-self: center;
+    gap: clamp(5px, 1dvh, 8px);
+  }
+
+  .game-status .turn-card {
+    width: min(340px, 100%);
+
+    align-self: center;
+  }
+
+  .game-status .score-card,
+  .game-status > .reset-button {
+    width: min(280px, 100%);
+
+    align-self: center;
+  }
+
+  .game-status > .reset-button {
+    margin-top: 0;
+  }
+
+  .game-page > .board-stage {
+    --plate-size: min(
+      520px,
+      calc(100vw - 30px),
+      calc(100dvh - 300px)
+    );
+
+    align-self: center;
   }
 }

@@ -6,7 +6,7 @@
   width: 100%;
   height: 100%;
 
-  max-width: 700px;
+  max-width: 1040px;
 
   margin: 0 auto;
 
@@ -28,8 +28,10 @@
     max(80px, calc(165dvh - 495px))
   );
 
+  width: min(700px, 100%);
   height: 100%;
 
+  margin: 0 auto;
   padding-bottom: clamp(28px, 5dvh, 50px);
 
   display: flex;
@@ -123,33 +125,58 @@
 ========================= */
 
 .game-page {
+  --game-layout-gap: clamp(20px, 3vw, 40px);
+  --game-status-width: clamp(220px, 24vw, 280px);
+  --game-viewport-inline-space: 60px;
+  --game-viewport-block-space: 60px;
+
   width: 100%;
   height: 100%;
 
   display: grid;
-  place-items: center;
-
-  grid-template: 1fr / 1fr;
-}
-
-.game-status,
-.game-page > .board-stage,
-.game-page > .reset-button {
-  grid-area: 1 / 1;
+  grid-template-columns: var(--game-status-width) minmax(0, 520px);
+  grid-template-rows: minmax(0, 1fr);
+  justify-content: center;
+  align-items: center;
+  gap: var(--game-layout-gap);
 }
 
 .game-status {
+  min-width: 0;
   width: 100%;
+  height: min(620px, 100%);
 
-  align-self: start;
+  padding: clamp(6px, 1.5dvh, 12px) 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1.5dvh, 14px);
+
+  align-self: center;
+}
+
+.game-status .turn-card,
+.game-status .score-card {
+  width: 100%;
+  margin: 0;
+}
+
+.game-status .turn-card h2,
+.game-status > .message {
+  overflow-wrap: anywhere;
 }
 
 .game-status > .message {
-  margin: 8px 0 0;
+  min-height: 24px;
+  margin: 0;
 }
 
 .active-game-code-container {
+  width: 100%;
   margin: 0;
+
+  flex-wrap: wrap;
+  gap: 7px;
 
   font-size: 0.8rem;
 }
@@ -175,13 +202,24 @@
 }
 
 .game-page > .board-stage {
+  --plate-size: min(
+    520px,
+    calc(
+      100vw - var(--game-viewport-inline-space) - var(--game-status-width) -
+        var(--game-layout-gap)
+    ),
+    calc(100dvh - var(--game-viewport-block-space))
+  );
+
+  width: min(100%, var(--plate-size));
   margin: 0;
 
-  align-self: center;
+  justify-self: center;
 }
 
-.reset-button {
-  margin: 0;
+.game-status > .reset-button {
+  width: 100%;
+  margin: auto 0 0;
 
-  align-self: end;
+  flex: 0 0 auto;
 }
