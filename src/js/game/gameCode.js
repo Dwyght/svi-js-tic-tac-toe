@@ -3,7 +3,7 @@ export function generateGameCode() {
 
   let code = "";
 
-  for (let i = 0; i < 8; i++) {
+  for (let characterPosition = 0; characterPosition < 8; characterPosition++) {
     const randomIndex = Math.floor(Math.random() * characters.length);
 
     code += characters[randomIndex];

@@ -22,14 +22,14 @@ export class Board {
 
     this.cells = [];
 
-    for (let y = 0; y < 3; y++) {
-      for (let x = 0; x < 3; x++) {
+    for (let rowIndex = 0; rowIndex < 3; rowIndex++) {
+      for (let columnIndex = 0; columnIndex < 3; columnIndex++) {
         const cell = document.createElement("button");
 
         this.cells.push({
           element: cell,
-          x: x,
-          y: y,
+          x: columnIndex,
+          y: rowIndex,
         });
       }
     }
@@ -84,10 +84,10 @@ export class Board {
   // ========================================
 
   displayBoard(values) {
-    for (let i = 0; i < this.cells.length; i++) {
-      const cell = this.cells[i];
+    for (let cellIndex = 0; cellIndex < this.cells.length; cellIndex++) {
+      const cell = this.cells[cellIndex];
 
-      const value = values[i] || "";
+      const value = values[cellIndex] || "";
 
       cell.element.dataset.value = value;
 

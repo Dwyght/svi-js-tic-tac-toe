@@ -1,6 +1,6 @@
 export const BASE_URL = "http://localhost:8080/tictactoe/tictactoeserver";
 
-export const REFRESH_INTERVAL_MS = 1000;
+export const REFRESH_INTERVAL_MS = 500;
 
 export const WINNING_LINES = [
   // Rows
