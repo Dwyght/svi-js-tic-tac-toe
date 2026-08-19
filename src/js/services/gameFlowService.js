@@ -14,8 +14,10 @@ import { generateGameCode } from "../game/gameCode.js";
 import { gameState } from "../state/gameState.js";
 import {
   savePlayerName,
+  saveSession,
   clearPlayerNames,
   clearScores,
+  clearSession,
 } from "./storageService.js";
 
 // ========================================
@@ -48,6 +50,7 @@ export async function createGame(playerName) {
       gameStarted: false,
     });
     savePlayerName(gameCode, "X", playerName);
+    saveSession(gameCode, "X", playerName);
 
     return {
       ok: true,
@@ -119,6 +122,7 @@ export async function joinGame(gameCode, playerName) {
       gameStarted: true,
     });
     savePlayerName(gameCode, "O", playerName);
+    saveSession(gameCode, "O", playerName);
 
     return {
       ok: true,
@@ -298,16 +302,6 @@ export async function restartGameSession(gameCode) {
 }
 
 // ========================================
-// NOTIFY GAME SESSION LEAVING
-// ========================================
-
-export function notifyGameSessionLeaving(gameCode) {
-  return resetGame(gameCode, {
-    keepalive: true,
-  });
-}
-
-// ========================================
 // RESET GAME SESSION
 // ========================================
 
@@ -315,5 +309,6 @@ export async function resetGameSession(gameCode) {
   await resetGame(gameCode);
   clearPlayerNames(gameCode);
   clearScores(gameCode);
+  clearSession();
   gameState.reset();
 }

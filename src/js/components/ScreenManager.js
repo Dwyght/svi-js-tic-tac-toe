@@ -60,6 +60,8 @@ export class ScreenManager {
 
     this.homeScreen.id = "home-screen";
 
+    this.homeScreen.classList.add("hidden");
+
     this.gameScreen.id = "game-screen";
 
     this.gameScreen.classList.add("hidden");

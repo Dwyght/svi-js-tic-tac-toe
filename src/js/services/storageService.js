@@ -6,6 +6,10 @@ function getScoreStorageKey(gameCode) {
   return `tictactoe-scores-${gameCode}`;
 }
 
+function getSessionStorageKey() {
+  return "tictactoe-session";
+}
+
 function getDefaultScores() {
   return {
     X: 0,
@@ -120,4 +124,54 @@ export function getScores(gameCode) {
 
 export function clearScores(gameCode) {
   localStorage.removeItem(getScoreStorageKey(gameCode));
+}
+
+// ========================================
+// SAVE SESSION
+// ========================================
+
+export function saveSession(gameCode, tile, name) {
+  const storageKey = getSessionStorageKey();
+
+  const session = {
+    gameCode: gameCode,
+    tile: tile,
+    name: name,
+  };
+
+  sessionStorage.setItem(storageKey, JSON.stringify(session));
+}
+
+// ========================================
+// GET SESSION
+// ========================================
+
+export function getSession() {
+  const storageKey = getSessionStorageKey();
+
+  const saved = sessionStorage.getItem(storageKey);
+
+  if (saved === null) {
+    return null;
+  }
+
+  try {
+    const session = JSON.parse(saved);
+
+    return {
+      gameCode: session.gameCode,
+      tile: session.tile,
+      name: session.name,
+    };
+  } catch {
+    return null;
+  }
+}
+
+// ========================================
+// DELETE SESSION
+// ========================================
+
+export function clearSession() {
+  sessionStorage.removeItem(getSessionStorageKey());
 }
