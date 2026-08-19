@@ -139,6 +139,46 @@ export async function joinGame(gameCode, playerName) {
 }
 
 // ========================================
+// SPECTATE GAME
+// ========================================
+
+export async function spectateGame(gameCode) {
+  try {
+    const started = await checkGame(gameCode);
+
+    if (!started) {
+      return {
+        ok: false,
+        message: "That game doesn't exist or hasn't started yet.",
+      };
+    }
+
+    gameState.setSession({
+      gameCode: gameCode,
+      myTile: null,
+      myName: null,
+      gameStarted: true,
+      isSpectator: true,
+    });
+
+    // Spectator resume is intentionally separate from player resume and
+    // will use its own storage handling when it is implemented.
+
+    return {
+      ok: true,
+      gameCode: gameCode,
+    };
+  } catch (error) {
+    console.error(error);
+
+    return {
+      ok: false,
+      message: "Could not connect to the server.",
+    };
+  }
+}
+
+// ========================================
 // GAME FLOW
 // ========================================
 

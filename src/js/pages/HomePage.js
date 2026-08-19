@@ -5,6 +5,7 @@ import { Modal } from "../components/Modal.js";
 import {
   createGame as createGameService,
   joinGame as joinGameService,
+  spectateGame as spectateGameService,
   waitForPlayerO as waitForPlayerOService,
 } from "../services/gameFlowService.js";
 
@@ -79,6 +80,16 @@ export class HomePage {
     this.joinNameInput = document.createElement("input");
 
     this.joinMessage = document.createElement("p");
+
+    // SPECTATE FORM
+
+    this.spectateForm = document.createElement("form");
+
+    this.spectateCodeLabel = document.createElement("label");
+
+    this.spectateCodeInput = document.createElement("input");
+
+    this.spectateMessage = document.createElement("p");
   }
 
   // ========================================
@@ -96,6 +107,12 @@ export class HomePage {
       label: "JOIN GAME",
       className: "home-action-button",
       onClick: () => this.openJoinModal(),
+    });
+
+    this.openSpectateButton = new Button({
+      label: "SPECTATE GAME",
+      className: "home-action-button",
+      onClick: () => this.openSpectateModal(),
     });
 
     this.howToPlayButton = new Button({
@@ -124,6 +141,12 @@ export class HomePage {
       className: "button-confirm",
     });
 
+    this.spectateButton = new Button({
+      label: "SPECTATE GAME",
+      type: "submit",
+      className: "button-confirm",
+    });
+
     this.createModal = new Modal({
       title: "Create Game",
       content: this.createForm,
@@ -132,6 +155,11 @@ export class HomePage {
     this.joinModal = new Modal({
       title: "Join Game",
       content: this.joinForm,
+    });
+
+    this.spectateModal = new Modal({
+      title: "Spectate Game",
+      content: this.spectateForm,
     });
 
     this.howToPlayModal = new Modal({
@@ -230,6 +258,26 @@ export class HomePage {
     this.joinNameInput.autocomplete = "name";
 
     this.joinMessage.classList.add("message");
+
+    // SPECTATE
+
+    this.spectateForm.classList.add("modal-form");
+
+    this.spectateCodeLabel.textContent = "Game Code";
+
+    this.spectateCodeLabel.htmlFor = "spectate-game-code";
+
+    this.spectateCodeInput.id = "spectate-game-code";
+
+    this.spectateCodeInput.type = "text";
+
+    this.spectateCodeInput.placeholder = "Enter game code";
+
+    this.spectateCodeInput.autocomplete = "off";
+
+    this.spectateCodeInput.spellcheck = false;
+
+    this.spectateMessage.classList.add("message");
   }
 
   // ========================================
@@ -248,6 +296,8 @@ export class HomePage {
     this.openCreateButton.render(this.actions);
 
     this.openJoinButton.render(this.actions);
+
+    this.openSpectateButton.render(this.actions);
 
     this.howToPlayButton.render(this.actions);
 
@@ -274,6 +324,14 @@ export class HomePage {
     this.pasteButton.render(this.joinCodeField);
 
     this.joinButton.render(this.joinForm);
+
+    this.spectateForm.append(
+      this.spectateCodeLabel,
+      this.spectateCodeInput,
+      this.spectateMessage,
+    );
+
+    this.spectateButton.render(this.spectateForm);
   }
 
   // ========================================
@@ -291,6 +349,12 @@ export class HomePage {
       event.preventDefault();
 
       this.joinGame();
+    });
+
+    this.spectateForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      this.spectateGame();
     });
   }
 
@@ -312,6 +376,14 @@ export class HomePage {
     this.joinModal.open();
 
     this.joinCodeInput.focus();
+  }
+
+  openSpectateModal() {
+    this.spectateMessage.textContent = "";
+
+    this.spectateModal.open();
+
+    this.spectateCodeInput.focus();
   }
 
   openHowToPlayModal() {
@@ -424,6 +496,32 @@ export class HomePage {
   }
 
   // ========================================
+  // SPECTATE GAME
+  // ========================================
+
+  async spectateGame() {
+    const gameCode = this.spectateCodeInput.value.trim();
+
+    if (gameCode === "") {
+      this.setMessage("Please enter a game code.");
+
+      return;
+    }
+
+    const result = await spectateGameService(gameCode);
+
+    if (!result.ok) {
+      this.setMessage(result.message);
+
+      return;
+    }
+
+    this.spectateModal.close();
+
+    this.onGameStarted();
+  }
+
+  // ========================================
   // MESSAGE
   // ========================================
 
@@ -436,6 +534,12 @@ export class HomePage {
 
     if (this.joinModal.isOpen()) {
       this.joinMessage.textContent = message;
+
+      return;
+    }
+
+    if (this.spectateModal.isOpen()) {
+      this.spectateMessage.textContent = message;
 
       return;
     }
@@ -454,15 +558,21 @@ export class HomePage {
 
     this.joinNameInput.value = "";
 
+    this.spectateCodeInput.value = "";
+
     this.message.textContent = "";
 
     this.createMessage.textContent = "";
 
     this.joinMessage.textContent = "";
 
+    this.spectateMessage.textContent = "";
+
     this.createModal.close();
 
     this.joinModal.close();
+
+    this.spectateModal.close();
 
     this.howToPlayModal.close();
   }
@@ -480,6 +590,8 @@ export class HomePage {
       this.createModal.render(document.body);
 
       this.joinModal.render(document.body);
+
+      this.spectateModal.render(document.body);
 
       this.howToPlayModal.render(document.body);
     } else {

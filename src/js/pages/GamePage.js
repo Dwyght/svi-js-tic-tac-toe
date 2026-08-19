@@ -86,6 +86,13 @@ export class GamePage {
     });
     this.resetButton.element.classList.add("reset-button");
 
+    this.leaveButton = new Button({
+      label: "LEAVE",
+      className: "button-utility",
+      onClick: () => this.handleLeave(),
+    });
+    this.leaveButton.element.classList.add("reset-button");
+
     this.playAgainButton = new Button({
       label: "PLAY AGAIN",
       className: "button-confirm",
@@ -95,6 +102,11 @@ export class GamePage {
       label: "QUIT GAME",
       className: "button-danger",
       onClick: () => this.openQuitModal(),
+    });
+    this.resultLeaveButton = new Button({
+      label: "LEAVE",
+      className: "button-utility",
+      onClick: () => this.handleLeave(),
     });
     this.resultModal = new Modal({
       title: "Game Over",
@@ -154,14 +166,50 @@ export class GamePage {
     this.gameCodeContainer.append(this.gameCodeLabel, this.gameCodeDisplay);
     this.copyCodeButton.render(this.gameCodeContainer);
     this.scoreCard.render(this.statusContainer);
-    this.resetButton.render(this.statusContainer);
     this.container.append(this.statusContainer, this.boardContainer);
     this.resultContent.append(this.resultMessage, this.resultScoreDisplay);
-    this.playAgainButton.render(this.resultContent);
-    this.resultQuitButton.render(this.resultContent);
     this.quitContent.append(this.quitMessage);
     this.cancelQuitButton.render(this.quitContent);
     this.confirmQuitButton.render(this.quitContent);
+  }
+
+  configureViewerControls() {
+    this.resetButton.element.remove();
+    this.leaveButton.element.remove();
+    this.playAgainButton.element.remove();
+    this.resultQuitButton.element.remove();
+    this.resultLeaveButton.element.remove();
+
+    if (gameState.isSpectator) {
+      this.leaveButton.render(this.statusContainer);
+      this.resultLeaveButton.render(this.resultContent);
+      this.quitModal.dialog.remove();
+      return;
+    }
+
+    this.resetButton.render(this.statusContainer);
+    this.playAgainButton.render(this.resultContent);
+    this.resultQuitButton.render(this.resultContent);
+
+    if (!this.quitModal.dialog.isConnected) {
+      this.quitModal.render(document.body);
+    }
+  }
+
+  clearBoardForViewer(isSpectator = gameState.isSpectator) {
+    this.board.clearBoard();
+
+    if (isSpectator) {
+      this.board.disableBoard();
+    }
+  }
+
+  updateBoardInteraction() {
+    if (gameState.isSpectator) {
+      this.board.disableBoard();
+    } else {
+      this.board.enableBoard();
+    }
   }
 
   // ========================================
@@ -196,7 +244,8 @@ export class GamePage {
     this.copyCodeButton.setLabel("Copy");
     this.resultModal.close();
     this.quitModal.close();
-    this.board.clearBoard();
+    this.configureViewerControls();
+    this.clearBoardForViewer();
     this.board.setPlayerTile(gameState.myTile);
     this.screenManager.showGameScreen();
     this.playBoardEntrance();
@@ -237,12 +286,18 @@ export class GamePage {
         return;
       }
 
+      const wasSpectator = gameState.isSpectator;
+
       this.pollingService.stopRefresh();
       gameState.reset();
-      this.board.clearBoard();
+      this.clearBoardForViewer(wasSpectator);
       this.resultModal.close();
       this.quitModal.close();
-      this.onReturnHome("The other player has left the game.");
+      this.onReturnHome(
+        wasSpectator
+          ? "This game has ended."
+          : "The other player has left the game.",
+      );
       return;
     }
 
@@ -263,6 +318,10 @@ export class GamePage {
     }
 
     this.board.displayBoard(board.cells);
+
+    if (gameState.isSpectator) {
+      this.board.disableBoard();
+    }
 
     const boardState = evaluateBoard(board.cells);
 
@@ -286,6 +345,12 @@ export class GamePage {
   // ========================================
 
   updateTurn(turn) {
+    if (gameState.isSpectator) {
+      this.turnDisplay.textContent = `${turn}'s Turn`;
+      this.message.textContent = "Watching the game.";
+      return;
+    }
+
     const players = getPlayerNames(gameState.gameCode);
     const playerName = players[turn];
 
@@ -303,6 +368,10 @@ export class GamePage {
   // ========================================
 
   async makeMove(x, y) {
+    if (gameState.isSpectator) {
+      return;
+    }
+
     if (gameState.gameOver) {
       return;
     }
@@ -365,14 +434,16 @@ export class GamePage {
     this.scoreRound(result);
     this.updateScoreDisplays();
 
-    const canPlayAgain = gameState.myTile === "X";
+    if (!gameState.isSpectator) {
+      const canPlayAgain = gameState.myTile === "X";
 
-    this.playAgainButton.element.disabled = !canPlayAgain;
-    this.playAgainButton.setLabel(
-      canPlayAgain
-        ? "PLAY AGAIN"
-        : "WAITING FOR PLAYER X TO START A NEW MATCH",
-    );
+      this.playAgainButton.element.disabled = !canPlayAgain;
+      this.playAgainButton.setLabel(
+        canPlayAgain
+          ? "PLAY AGAIN"
+          : "WAITING FOR PLAYER X TO START A NEW MATCH",
+      );
+    }
 
     if (result.status === "draw") {
       this.resultMessage.textContent = "It's a Draw!";
@@ -383,7 +454,9 @@ export class GamePage {
     const players = getPlayerNames(gameState.gameCode);
     const winnerName = players[result.winner];
 
-    if (result.winner === gameState.myTile) {
+    if (gameState.isSpectator) {
+      this.resultMessage.textContent = `${winnerName} (${result.winner}) won the game.`;
+    } else if (result.winner === gameState.myTile) {
       this.resultMessage.textContent = `You Win! ${winnerName} (${result.winner}) won the game.`;
     } else {
       this.resultMessage.textContent = `You Lose! ${winnerName} (${result.winner}) won the game.`;
@@ -427,6 +500,7 @@ export class GamePage {
   async handlePlayAgain() {
     if (
       gameState.gameCode === null ||
+      gameState.isSpectator ||
       gameState.myTile !== "X" ||
       !gameState.gameOver
     ) {
@@ -456,9 +530,9 @@ export class GamePage {
     this.resultModal.close();
 
     if (clearBoard) {
-      this.board.clearBoard();
+      this.clearBoardForViewer();
     } else {
-      this.board.enableBoard();
+      this.updateBoardInteraction();
     }
 
     this.playBoardEntrance();
@@ -478,6 +552,23 @@ export class GamePage {
   }
 
   // ========================================
+  // LEAVE SPECTATOR VIEW
+  // ========================================
+
+  handleLeave() {
+    if (!gameState.isSpectator) {
+      return;
+    }
+
+    this.pollingService.stopRefresh();
+    this.clearBoardForViewer(true);
+    this.resultModal.close();
+    this.quitModal.close();
+    gameState.reset();
+    this.onReturnHome();
+  }
+
+  // ========================================
   // RESET
   // ========================================
 
@@ -491,7 +582,7 @@ export class GamePage {
     try {
       await resetGameSession(oldGameCode);
       this.pollingService.stopRefresh();
-      this.board.clearBoard();
+      this.clearBoardForViewer();
       this.resultModal.close();
       this.quitModal.close();
       this.onReturnHome("Game reset.");

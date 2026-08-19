@@ -64,6 +64,18 @@ class GameState {
   }
 
   // =========================
+  // SPECTATOR
+  // =========================
+
+  get isSpectator() {
+    return this._isSpectator;
+  }
+
+  set isSpectator(value) {
+    this._isSpectator = value;
+  }
+
+  // =========================
   // SCORES
   // =========================
 
@@ -79,12 +91,19 @@ class GameState {
   // SET SESSION
   // =========================
 
-  setSession({ gameCode, myTile, myName, gameStarted = false }) {
+  setSession({
+    gameCode,
+    myTile,
+    myName,
+    gameStarted = false,
+    isSpectator = false,
+  }) {
     this._gameCode = gameCode;
     this._myTile = myTile;
     this._myName = myName;
     this._gameStarted = gameStarted;
     this._gameOver = false;
+    this._isSpectator = isSpectator;
     this._scores = {
       X: 0,
       O: 0,
@@ -103,6 +122,7 @@ class GameState {
 
     this._gameStarted = false;
     this._gameOver = false;
+    this._isSpectator = false;
     this._scores = {
       X: 0,
       O: 0,
