@@ -12,7 +12,11 @@ import {
 } from "../game/boardLogic.js";
 import { generateGameCode } from "../game/gameCode.js";
 import { gameState } from "../state/gameState.js";
-import { savePlayerName, clearPlayerNames } from "./storageService.js";
+import {
+  savePlayerName,
+  clearPlayerNames,
+  clearScores,
+} from "./storageService.js";
 
 // ========================================
 // HOME FLOW
@@ -310,5 +314,6 @@ export function notifyGameSessionLeaving(gameCode) {
 export async function resetGameSession(gameCode) {
   await resetGame(gameCode);
   clearPlayerNames(gameCode);
+  clearScores(gameCode);
   gameState.reset();
 }

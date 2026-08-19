@@ -2,6 +2,18 @@ function getStorageKey(gameCode) {
   return `tictactoe-${gameCode}`;
 }
 
+function getScoreStorageKey(gameCode) {
+  return `tictactoe-scores-${gameCode}`;
+}
+
+function getDefaultScores() {
+  return {
+    X: 0,
+    O: 0,
+    draws: 0,
+  };
+}
+
 // ========================================
 // SAVE PLAYER NAME
 // ========================================
@@ -64,4 +76,48 @@ export function getPlayerNames(gameCode) {
 
 export function clearPlayerNames(gameCode) {
   localStorage.removeItem(getStorageKey(gameCode));
+}
+
+// ========================================
+// SAVE SCORE
+// ========================================
+
+export function saveScore(gameCode, scores) {
+  const storageKey = getScoreStorageKey(gameCode);
+
+  localStorage.setItem(storageKey, JSON.stringify(scores));
+}
+
+// ========================================
+// GET SCORES
+// ========================================
+
+export function getScores(gameCode) {
+  const storageKey = getScoreStorageKey(gameCode);
+
+  const saved = localStorage.getItem(storageKey);
+
+  if (saved === null) {
+    return getDefaultScores();
+  }
+
+  try {
+    const scores = JSON.parse(saved);
+
+    return {
+      X: Number.isFinite(scores.X) ? scores.X : 0,
+      O: Number.isFinite(scores.O) ? scores.O : 0,
+      draws: Number.isFinite(scores.draws) ? scores.draws : 0,
+    };
+  } catch {
+    return getDefaultScores();
+  }
+}
+
+// ========================================
+// DELETE SCORES
+// ========================================
+
+export function clearScores(gameCode) {
+  localStorage.removeItem(getScoreStorageKey(gameCode));
 }

@@ -136,6 +136,24 @@
   font-size: clamp(1.25rem, 4vw, 1.65rem);
 }
 
+.score-card {
+  width: min(280px, 100%);
+
+  margin: -6px auto 10px;
+  padding: 7px 14px;
+
+  border-width: 2px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgb(75 43 24 / 16%);
+}
+
+.score-display {
+  margin: 0;
+
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
 /* =========================
    MODAL
 ========================= */
@@ -282,6 +300,19 @@
 
 .modal-form > .button {
   width: 100%;
+}
+
+.result-score {
+  margin: 0 0 4px;
+  padding: 10px 12px;
+
+  background: #f6e7c8;
+
+  border: 2px solid #e6d0a9;
+  border-radius: 12px;
+
+  font-weight: 700;
+  text-align: center;
 }
 
 .join-code-field {

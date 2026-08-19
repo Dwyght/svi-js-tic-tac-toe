@@ -64,6 +64,18 @@ class GameState {
   }
 
   // =========================
+  // SCORES
+  // =========================
+
+  get scores() {
+    return this._scores;
+  }
+
+  set scores(value) {
+    this._scores = value;
+  }
+
+  // =========================
   // SET SESSION
   // =========================
 
@@ -73,6 +85,11 @@ class GameState {
     this._myName = myName;
     this._gameStarted = gameStarted;
     this._gameOver = false;
+    this._scores = {
+      X: 0,
+      O: 0,
+      draws: 0,
+    };
   }
 
   // =========================
@@ -86,6 +103,11 @@ class GameState {
 
     this._gameStarted = false;
     this._gameOver = false;
+    this._scores = {
+      X: 0,
+      O: 0,
+      draws: 0,
+    };
   }
 }
 

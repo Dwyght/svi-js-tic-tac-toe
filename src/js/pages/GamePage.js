@@ -1,5 +1,9 @@
 import { gameState } from "../state/gameState.js";
-import { getPlayerNames } from "../services/storageService.js";
+import {
+  getPlayerNames,
+  getScores,
+  saveScore,
+} from "../services/storageService.js";
 import {
   fetchAndParseBoard,
   evaluateBoard,
@@ -23,6 +27,7 @@ export class GamePage {
     this.pollingService = pollingService;
     this.onReturnHome = onReturnHome;
     this.inactiveGameOverRefreshes = 0;
+    this.roundScored = false;
 
     this.initializeElements();
     this.setAttributes();
@@ -49,6 +54,11 @@ export class GamePage {
       content: this.turnDisplay,
       className: "turn-card",
     });
+    this.scoreDisplay = document.createElement("p");
+    this.scoreCard = new Card({
+      content: this.scoreDisplay,
+      className: "score-card",
+    });
     this.message = document.createElement("p");
     this.boardContainer = document.createElement("div");
 
@@ -65,6 +75,7 @@ export class GamePage {
     // Game result
     this.resultContent = document.createElement("div");
     this.resultMessage = document.createElement("p");
+    this.resultScoreDisplay = document.createElement("p");
 
     // Quit confirmation
     this.quitContent = document.createElement("div");
@@ -116,6 +127,8 @@ export class GamePage {
   setAttributes() {
     this.container.classList.add("game-page");
     this.statusContainer.classList.add("game-status");
+    this.scoreDisplay.classList.add("score-display");
+    this.scoreDisplay.setAttribute("aria-live", "polite");
     this.message.classList.add("message");
     this.boardContainer.classList.add("board-stage");
     this.gameCodeContainer.classList.add(
@@ -127,6 +140,7 @@ export class GamePage {
     this.gameCodeDisplay.classList.add("game-code");
     this.copyCodeButton.element.classList.add("game-code-copy-button");
     this.resultContent.classList.add("modal-form");
+    this.resultScoreDisplay.classList.add("result-score");
     this.quitContent.classList.add("modal-form");
     this.quitMessage.textContent =
       "Are you sure you want to quit? This will end the game for both players.";
@@ -138,12 +152,13 @@ export class GamePage {
 
   appendElements() {
     this.turnCard.render(this.statusContainer);
+    this.scoreCard.render(this.statusContainer);
     this.statusContainer.append(this.gameCodeContainer, this.message);
     this.gameCodeContainer.append(this.gameCodeLabel, this.gameCodeDisplay);
     this.copyCodeButton.render(this.gameCodeContainer);
     this.container.append(this.statusContainer, this.boardContainer);
     this.resetButton.render(this.container);
-    this.resultContent.append(this.resultMessage);
+    this.resultContent.append(this.resultMessage, this.resultScoreDisplay);
     this.playAgainButton.render(this.resultContent);
     this.resultQuitButton.render(this.resultContent);
     this.quitContent.append(this.quitMessage);
@@ -196,6 +211,9 @@ export class GamePage {
   async startGame() {
     gameState.gameOver = false;
     this.inactiveGameOverRefreshes = 0;
+    this.roundScored = false;
+    gameState.scores = getScores(gameState.gameCode);
+    this.updateScoreDisplays();
     this.gameCodeDisplay.textContent = gameState.gameCode;
     this.copyCodeButton.setLabel("Copy");
     this.resultModal.close();
@@ -366,6 +384,9 @@ export class GamePage {
     this.board.disableBoard();
     this.turnDisplay.textContent = "Game Over";
 
+    this.scoreRound(result);
+    this.updateScoreDisplays();
+
     const canPlayAgain = gameState.myTile === "X";
 
     this.playAgainButton.element.disabled = !canPlayAgain;
@@ -391,6 +412,34 @@ export class GamePage {
     }
 
     this.resultModal.open();
+  }
+
+  scoreRound(result) {
+    if (this.roundScored) {
+      return;
+    }
+
+    const scores = {
+      ...gameState.scores,
+    };
+
+    if (result.status === "draw") {
+      scores.draws++;
+    } else if (result.winner === "X" || result.winner === "O") {
+      scores[result.winner]++;
+    }
+
+    gameState.scores = scores;
+    saveScore(gameState.gameCode, scores);
+    this.roundScored = true;
+  }
+
+  updateScoreDisplays() {
+    const scores = gameState.scores;
+    const scoreText = `X: ${scores.X} · O: ${scores.O} · Draws: ${scores.draws}`;
+
+    this.scoreDisplay.textContent = scoreText;
+    this.resultScoreDisplay.textContent = `Series score: ${scoreText}`;
   }
 
   // ========================================
@@ -425,6 +474,7 @@ export class GamePage {
     gameState.gameStarted = true;
     gameState.gameOver = false;
     this.inactiveGameOverRefreshes = 0;
+    this.roundScored = false;
     this.resultModal.close();
 
     if (clearBoard) {

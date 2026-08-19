@@ -51,6 +51,11 @@
     padding: 8px 16px;
   }
 
+  .score-card {
+    margin: 0 auto 4px;
+    padding: 4px 12px;
+  }
+
   .game-status > .message {
     min-height: 20px;
     margin: 4px 0;
