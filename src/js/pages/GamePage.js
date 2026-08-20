@@ -152,6 +152,9 @@ export class GamePage {
 
     this.resultScoreDisplay = resultScoreboard.display;
     this.resultScoreValues = resultScoreboard.values;
+    this.resultWaitingIndicator = document.createElement("div");
+    this.resultWaitingSpinner = document.createElement("span");
+    this.resultWaitingText = document.createElement("p");
 
     // Quit confirmation
     this.quitContent = document.createElement("div");
@@ -239,6 +242,16 @@ export class GamePage {
     this.resultScoreDisplay.classList.add("result-score");
     this.resultScoreLabel.classList.add("result-score-label");
     this.resultScoreLabel.textContent = "Series score";
+    this.resultWaitingIndicator.classList.add(
+      "result-waiting-indicator",
+      "hidden",
+    );
+    this.resultWaitingIndicator.setAttribute("role", "status");
+    this.resultWaitingIndicator.setAttribute("aria-live", "polite");
+    this.resultWaitingSpinner.classList.add("loading-spinner");
+    this.resultWaitingSpinner.setAttribute("aria-hidden", "true");
+    this.resultWaitingText.textContent =
+      "Waiting for Player X to start a new match.";
     this.quitContent.classList.add("modal-form");
     this.quitMessage.textContent =
       "Are you sure you want to quit? This will end the game for both players.";
@@ -266,6 +279,11 @@ export class GamePage {
       this.resultMessage,
       this.resultScoreLabel,
       this.resultScoreDisplay,
+      this.resultWaitingIndicator,
+    );
+    this.resultWaitingIndicator.append(
+      this.resultWaitingSpinner,
+      this.resultWaitingText,
     );
     this.quitContent.append(this.quitMessage);
     this.cancelQuitButton.render(this.quitContent);
@@ -278,6 +296,7 @@ export class GamePage {
     this.playAgainButton.element.remove();
     this.resultQuitButton.element.remove();
     this.resultLeaveButton.element.remove();
+    this.resultWaitingIndicator.classList.add("hidden");
 
     if (gameState.isSpectator) {
       this.leaveButton.render(this.pauseMenuContent);
@@ -287,7 +306,11 @@ export class GamePage {
     }
 
     this.quitButton.render(this.pauseMenuContent);
-    this.playAgainButton.render(this.resultContent);
+
+    if (gameState.myTile === "X") {
+      this.playAgainButton.render(this.resultContent);
+    }
+
     this.resultQuitButton.render(this.resultContent);
 
     if (!this.quitModal.dialog.isConnected) {
@@ -559,12 +582,14 @@ export class GamePage {
     if (!gameState.isSpectator) {
       const canPlayAgain = gameState.myTile === "X";
 
-      this.playAgainButton.element.disabled = !canPlayAgain;
-      this.playAgainButton.setLabel(
-        canPlayAgain
-          ? "PLAY AGAIN"
-          : "WAITING FOR PLAYER X TO START A NEW MATCH",
-      );
+      if (canPlayAgain) {
+        this.playAgainButton.element.disabled = false;
+        this.playAgainButton.setLabel("PLAY AGAIN");
+        this.resultWaitingIndicator.classList.add("hidden");
+      } else {
+        this.playAgainButton.element.remove();
+        this.resultWaitingIndicator.classList.remove("hidden");
+      }
     }
 
     if (result.status === "draw") {
@@ -651,6 +676,7 @@ export class GamePage {
     this.inactiveGameOverRefreshes = 0;
     this.roundScored = false;
     this.resultModal.close();
+    this.resultWaitingIndicator.classList.add("hidden");
 
     if (clearBoard) {
       this.clearBoardForViewer();

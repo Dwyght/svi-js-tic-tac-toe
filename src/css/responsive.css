@@ -74,6 +74,20 @@
     height: 28px;
   }
 
+  .result-waiting-indicator {
+    padding: 4px 8px;
+    gap: 5px;
+
+    font-size: 0.85rem;
+  }
+
+  .loading-spinner {
+    width: 28px;
+    height: 28px;
+
+    border-width: 3px;
+  }
+
   .game-status > .message {
     min-height: 20px;
     margin: 0;

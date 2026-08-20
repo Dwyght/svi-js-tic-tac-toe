@@ -44,8 +44,18 @@ export class ScreenManager {
 
     this.waitingHint = document.createElement("p");
 
+    this.waitingDots = document.createElement("span");
+
+    this.waitingDotElements = [];
+
+    for (let dotIndex = 0; dotIndex < 3; dotIndex++) {
+      const dot = document.createElement("span");
+
+      this.waitingDotElements.push(dot);
+    }
+
     this.waitingModal = new Modal({
-      title: "Waiting for another player...",
+      title: "Waiting for another player",
       content: this.waitingContent,
       closable: false,
     });
@@ -82,6 +92,16 @@ export class ScreenManager {
 
     this.waitingHint.textContent =
       "Duplicate this tab, choose Join Game, paste the code, and enter the second player's name.";
+
+    this.waitingDots.classList.add("waiting-dots");
+
+    this.waitingDots.setAttribute("aria-hidden", "true");
+
+    for (const dot of this.waitingDotElements) {
+      dot.classList.add("waiting-dot");
+
+      dot.textContent = ".";
+    }
   }
 
   // ========================================
@@ -90,6 +110,10 @@ export class ScreenManager {
 
   appendElements() {
     this.container.append(this.homeScreen, this.gameScreen);
+
+    this.waitingDots.append(...this.waitingDotElements);
+
+    this.waitingModal.title.append(this.waitingDots);
 
     this.waitingContent.append(
       this.waitingText,
