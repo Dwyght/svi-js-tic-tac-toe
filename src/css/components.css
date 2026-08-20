@@ -137,10 +137,10 @@
 }
 
 .score-card {
-  width: min(280px, 100%);
+  width: min(320px, 100%);
 
-  margin: -6px auto 10px;
-  padding: 7px 14px;
+  margin: 0 auto;
+  padding: 6px 14px;
 
   border-width: 2px;
   border-radius: 12px;
@@ -150,8 +150,42 @@
 .score-display {
   margin: 0;
 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(12px, 2vw, 20px);
+
   font-size: 0.9rem;
   font-weight: 600;
+}
+
+.score-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  white-space: nowrap;
+}
+
+.score-piece-image {
+  width: 32px;
+  height: 32px;
+
+  display: block;
+
+  object-fit: contain;
+
+  filter: drop-shadow(0 3px 2px rgb(0 0 0 / 28%));
+}
+
+.score-separator {
+  font-weight: 700;
+}
+
+.score-value {
+  min-width: 1ch;
+
+  font-variant-numeric: tabular-nums;
 }
 
 /* =========================
@@ -310,6 +344,13 @@
 
   border: 2px solid #e6d0a9;
   border-radius: 12px;
+
+  font-weight: 700;
+  text-align: center;
+}
+
+.result-score-label {
+  margin: 0;
 
   font-weight: 700;
   text-align: center;

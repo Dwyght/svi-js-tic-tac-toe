@@ -42,11 +42,66 @@ export class GamePage {
   // STEP 1
   // ========================================
 
+  createScoreEntry({ label, imageSource = "" }) {
+    const entry = document.createElement("span");
+    const separator = document.createElement("span");
+    const value = document.createElement("span");
+
+    entry.classList.add("score-entry");
+    separator.classList.add("score-separator");
+    separator.textContent = ":";
+    value.classList.add("score-value");
+
+    if (imageSource === "") {
+      const textLabel = document.createElement("span");
+
+      textLabel.classList.add("score-label");
+      textLabel.textContent = label;
+      entry.append(textLabel);
+    } else {
+      const image = document.createElement("img");
+
+      image.classList.add("score-piece-image");
+      image.src = imageSource;
+      image.alt = label;
+      entry.append(image);
+    }
+
+    entry.append(separator, value);
+
+    return { entry, value };
+  }
+
+  createScoreDisplay() {
+    const display = document.createElement("div");
+    const playerX = this.createScoreEntry({
+      label: "Player X",
+      imageSource: "./src/assets/images/mushroom.png",
+    });
+    const playerO = this.createScoreEntry({
+      label: "Player O",
+      imageSource: "./src/assets/images/coin.png",
+    });
+    const draws = this.createScoreEntry({ label: "Draws" });
+
+    display.classList.add("score-display");
+    display.append(playerX.entry, playerO.entry, draws.entry);
+
+    return {
+      display,
+      values: {
+        X: playerX.value,
+        O: playerO.value,
+        draws: draws.value,
+      },
+    };
+  }
+
   initializeElements() {
     this.container = document.createElement("div");
     this.gameLayout = document.createElement("div");
-    this.sidePanel = document.createElement("aside");
-    this.gameActions = document.createElement("div");
+    this.pauseMenuAnchor = document.createElement("div");
+    this.scoreRegion = document.createElement("div");
 
     // Game information
     this.statusContainer = document.createElement("div");
@@ -55,7 +110,10 @@ export class GamePage {
       content: this.turnDisplay,
       className: "turn-card",
     });
-    this.scoreDisplay = document.createElement("p");
+    const scoreboard = this.createScoreDisplay();
+
+    this.scoreDisplay = scoreboard.display;
+    this.scoreValues = scoreboard.values;
     this.scoreCard = new Card({
       content: this.scoreDisplay,
       className: "score-card",
@@ -73,28 +131,44 @@ export class GamePage {
       onClick: () => this.copyGameCode(),
     });
 
+    // Pause menu
+    this.pauseMenuContent = document.createElement("div");
+    this.pauseMenuButton = new Button({
+      label: "\u2630",
+      className: "button-utility",
+      onClick: () => this.pauseModal.open(),
+    });
+    this.pauseModal = new Modal({
+      title: "Pause Menu",
+      content: this.pauseMenuContent,
+    });
+
     // Game result
     this.resultContent = document.createElement("div");
     this.resultMessage = document.createElement("p");
-    this.resultScoreDisplay = document.createElement("p");
+    this.resultScoreLabel = document.createElement("p");
+    const resultScoreboard = this.createScoreDisplay();
+
+    this.resultScoreDisplay = resultScoreboard.display;
+    this.resultScoreValues = resultScoreboard.values;
 
     // Quit confirmation
     this.quitContent = document.createElement("div");
     this.quitMessage = document.createElement("p");
 
-    this.resetButton = new Button({
+    this.quitButton = new Button({
       label: "QUIT GAME",
       className: "button-danger",
       onClick: () => this.openQuitModal(),
     });
-    this.resetButton.element.classList.add("reset-button");
+    this.quitButton.element.classList.add("pause-menu-exit-button");
 
     this.leaveButton = new Button({
       label: "LEAVE",
       className: "button-utility",
       onClick: () => this.handleLeave(),
     });
-    this.leaveButton.element.classList.add("reset-button");
+    this.leaveButton.element.classList.add("pause-menu-exit-button");
 
     this.playAgainButton = new Button({
       label: "PLAY AGAIN",
@@ -140,10 +214,9 @@ export class GamePage {
   setAttributes() {
     this.container.classList.add("game-page");
     this.gameLayout.classList.add("game-layout");
-    this.sidePanel.classList.add("game-side-panel");
-    this.gameActions.classList.add("game-actions");
+    this.pauseMenuAnchor.classList.add("pause-menu-anchor");
+    this.scoreRegion.classList.add("game-score-region");
     this.statusContainer.classList.add("game-status");
-    this.scoreDisplay.classList.add("score-display");
     this.scoreDisplay.setAttribute("aria-live", "polite");
     this.message.classList.add("message");
     this.boardContainer.classList.add("board-stage");
@@ -155,8 +228,16 @@ export class GamePage {
     this.gameCodeLabel.textContent = "Game Code:";
     this.gameCodeDisplay.classList.add("game-code");
     this.copyCodeButton.element.classList.add("game-code-copy-button");
+    this.pauseMenuContent.classList.add("modal-form", "pause-menu-content");
+    this.pauseMenuButton.element.classList.add("pause-menu-button");
+    this.pauseMenuButton.element.setAttribute("aria-label", "Open pause menu");
+    this.pauseMenuButton.element.setAttribute("aria-haspopup", "dialog");
+    this.pauseMenuButton.element.title = "Pause menu";
+    this.pauseModal.dialog.classList.add("pause-menu-modal");
     this.resultContent.classList.add("modal-form");
     this.resultScoreDisplay.classList.add("result-score");
+    this.resultScoreLabel.classList.add("result-score-label");
+    this.resultScoreLabel.textContent = "Series score";
     this.quitContent.classList.add("modal-form");
     this.quitMessage.textContent =
       "Are you sure you want to quit? This will end the game for both players.";
@@ -171,36 +252,40 @@ export class GamePage {
     this.statusContainer.append(this.message);
     this.gameCodeContainer.append(this.gameCodeLabel, this.gameCodeDisplay);
     this.copyCodeButton.render(this.gameCodeContainer);
-    this.sidePanel.append(this.gameCodeContainer);
-    this.scoreCard.render(this.sidePanel);
+    this.pauseMenuContent.append(this.gameCodeContainer);
+    this.pauseMenuButton.render(this.pauseMenuAnchor);
+    this.scoreCard.render(this.scoreRegion);
     this.gameLayout.append(
       this.statusContainer,
-      this.sidePanel,
       this.boardContainer,
-      this.gameActions,
+      this.scoreRegion,
     );
-    this.container.append(this.gameLayout);
-    this.resultContent.append(this.resultMessage, this.resultScoreDisplay);
+    this.container.append(this.gameLayout, this.pauseMenuAnchor);
+    this.resultContent.append(
+      this.resultMessage,
+      this.resultScoreLabel,
+      this.resultScoreDisplay,
+    );
     this.quitContent.append(this.quitMessage);
     this.cancelQuitButton.render(this.quitContent);
     this.confirmQuitButton.render(this.quitContent);
   }
 
   configureViewerControls() {
-    this.resetButton.element.remove();
+    this.quitButton.element.remove();
     this.leaveButton.element.remove();
     this.playAgainButton.element.remove();
     this.resultQuitButton.element.remove();
     this.resultLeaveButton.element.remove();
 
     if (gameState.isSpectator) {
-      this.leaveButton.render(this.gameActions);
+      this.leaveButton.render(this.pauseMenuContent);
       this.resultLeaveButton.render(this.resultContent);
       this.quitModal.dialog.remove();
       return;
     }
 
-    this.resetButton.render(this.gameActions);
+    this.quitButton.render(this.pauseMenuContent);
     this.playAgainButton.render(this.resultContent);
     this.resultQuitButton.render(this.resultContent);
 
@@ -256,6 +341,7 @@ export class GamePage {
     this.gameCodeDisplay.textContent = gameState.gameCode;
     this.copyCodeButton.setLabel("Copy");
     this.resultModal.close();
+    this.pauseModal.close();
     this.quitModal.close();
     this.configureViewerControls();
     this.clearBoardForViewer();
@@ -305,6 +391,7 @@ export class GamePage {
       gameState.reset();
       this.clearBoardForViewer(wasSpectator);
       this.resultModal.close();
+      this.pauseModal.close();
       this.quitModal.close();
       this.onReturnHome(
         wasSpectator
@@ -500,10 +587,11 @@ export class GamePage {
 
   updateScoreDisplays() {
     const scores = gameState.scores;
-    const scoreText = `X: ${scores.X} · O: ${scores.O} · Draws: ${scores.draws}`;
 
-    this.scoreDisplay.textContent = scoreText;
-    this.resultScoreDisplay.textContent = `Series score: ${scoreText}`;
+    for (const key of ["X", "O", "draws"]) {
+      this.scoreValues[key].textContent = scores[key];
+      this.resultScoreValues[key].textContent = scores[key];
+    }
   }
 
   // ========================================
@@ -556,6 +644,7 @@ export class GamePage {
   // ========================================
 
   openQuitModal() {
+    this.pauseModal.close();
     this.quitModal.open();
   }
 
@@ -576,6 +665,7 @@ export class GamePage {
     this.pollingService.stopRefresh();
     this.clearBoardForViewer(true);
     this.resultModal.close();
+    this.pauseModal.close();
     this.quitModal.close();
     gameState.reset();
     this.onReturnHome();
@@ -597,6 +687,7 @@ export class GamePage {
       this.pollingService.stopRefresh();
       this.clearBoardForViewer();
       this.resultModal.close();
+      this.pauseModal.close();
       this.quitModal.close();
       this.onReturnHome("Game reset.");
     } catch (error) {
@@ -615,6 +706,7 @@ export class GamePage {
     if (parent) {
       parent.append(this.container);
       this.resultModal.render(document.body);
+      this.pauseModal.render(document.body);
       this.quitModal.render(document.body);
     } else {
       console.error("GamePage target not found.");

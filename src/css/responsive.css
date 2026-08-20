@@ -43,16 +43,18 @@
   }
 
   .game-page {
-    --game-column-gap: clamp(10px, 2vw, 18px);
     --game-row-gap: 4px;
-    --game-info-width: clamp(150px, 19vw, 180px);
     --game-viewport-inline-space: 30px;
     --game-viewport-block-reserve: 160px;
   }
 
-  .game-side-panel {
-    padding-top: 0;
-    gap: 4px;
+  .pause-menu-button {
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    min-height: 42px;
+
+    font-size: 1.25rem;
   }
 
   .turn-card {
@@ -67,14 +69,14 @@
     padding: 4px 12px;
   }
 
+  .score-piece-image {
+    width: 28px;
+    height: 28px;
+  }
+
   .game-status > .message {
     min-height: 20px;
     margin: 0;
-  }
-
-  .reset-button {
-    min-height: 42px;
-    padding: 8px 18px;
   }
 
   .modal {
@@ -119,10 +121,11 @@
 
 @media (max-width: 650px), (orientation: portrait) {
   .game-layout {
+    height: 100%;
+    padding-top: 54px;
+
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto auto auto auto;
-    align-content: center;
-    column-gap: 0;
+    grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
     row-gap: clamp(6px, 1.25dvh, 10px);
   }
 
@@ -131,44 +134,24 @@
 
     grid-column: 1;
     grid-row: 1;
-    align-self: auto;
   }
 
-  .game-side-panel {
-    width: min(340px, 100%);
-    padding: 0;
-
-    justify-self: center;
-    gap: clamp(4px, 0.75dvh, 6px);
+  .game-score-region {
+    width: min(320px, 100%);
 
     grid-column: 1;
-    grid-row: 2;
-    align-self: auto;
-  }
-
-  .game-side-panel .score-card {
-    width: min(280px, 100%);
-
-    align-self: center;
-  }
-
-  .game-actions {
-    width: min(280px, 100%);
-
-    grid-column: 1;
-    grid-row: 4;
-    align-self: center;
+    grid-row: 3;
   }
 
   .game-layout > .board-stage {
     --plate-size: min(
       520px,
       calc(100vw - 30px),
-      calc(100dvh - 300px)
+      calc(100dvh - 250px)
     );
 
     grid-column: 1;
-    grid-row: 3;
+    grid-row: 2;
     align-self: center;
   }
 }
