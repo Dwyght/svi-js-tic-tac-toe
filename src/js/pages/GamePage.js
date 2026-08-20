@@ -27,6 +27,7 @@ export class GamePage {
     this.onReturnHome = onReturnHome;
     this.inactiveGameOverRefreshes = 0;
     this.roundScored = false;
+    this.isSubmittingMove = false;
 
     this.initializeElements();
     this.setAttributes();
@@ -303,7 +304,11 @@ export class GamePage {
   }
 
   updateBoardInteraction() {
-    if (gameState.isSpectator) {
+    if (
+      gameState.isSpectator ||
+      gameState.gameOver ||
+      this.isSubmittingMove
+    ) {
       this.board.disableBoard();
     } else {
       this.board.enableBoard();
@@ -448,6 +453,7 @@ export class GamePage {
     if (gameState.isSpectator) {
       this.turnDisplay.textContent = `${turn}'s Turn`;
       this.message.textContent = "";
+      this.board.disableBoard();
       return;
     }
 
@@ -456,8 +462,15 @@ export class GamePage {
 
     if (turn === gameState.myTile) {
       this.turnDisplay.textContent = "Your turn.";
+
+      if (this.isSubmittingMove) {
+        this.board.disableBoard();
+      } else {
+        this.board.enableBoard();
+      }
     } else {
       this.turnDisplay.textContent = `${playerName}'s turn.`;
+      this.board.disableBoard();
     }
 
     this.message.textContent = "";
@@ -468,20 +481,27 @@ export class GamePage {
   // ========================================
 
   async makeMove(x, y) {
-    if (gameState.isSpectator) {
+    if (this.isSubmittingMove) {
       return;
     }
 
-    if (gameState.gameOver) {
-      return;
-    }
-
-    if (!gameState.gameStarted) {
-      this.message.textContent = "Game has not started.";
-      return;
-    }
+    this.isSubmittingMove = true;
+    this.board.disableBoard();
 
     try {
+      if (gameState.isSpectator) {
+        return;
+      }
+
+      if (gameState.gameOver) {
+        return;
+      }
+
+      if (!gameState.gameStarted) {
+        this.message.textContent = "Game has not started.";
+        return;
+      }
+
       const result = await submitMove(
         gameState.gameCode,
         gameState.myTile,
@@ -518,6 +538,8 @@ export class GamePage {
     } catch (error) {
       console.error(error);
       this.message.textContent = "Could not send move.";
+    } finally {
+      this.isSubmittingMove = false;
     }
   }
 

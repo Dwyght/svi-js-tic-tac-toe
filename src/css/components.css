@@ -579,7 +579,7 @@
 }
 
 .cell.disabled {
-  cursor: not-allowed;
+  cursor: default;
 }
 
 .cell:focus-visible {
