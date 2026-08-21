@@ -1,0 +1,77 @@
+/* =========================
+   CARDS
+========================= */
+
+.card {
+  color: var(--color-text);
+  background: var(--color-surface);
+
+  border: 3px solid var(--color-primary);
+  border-radius: 18px;
+  box-shadow: 0 8px 20px rgb(75 43 24 / 22%);
+}
+
+.turn-card {
+  width: min(340px, 100%);
+
+  margin: 0 auto 14px;
+  padding: 14px 22px;
+}
+
+.turn-card h2 {
+  margin: 0;
+
+  font-size: clamp(1.25rem, 4vw, 1.65rem);
+}
+
+.score-card {
+  width: min(320px, 100%);
+
+  margin: 0 auto;
+  padding: 6px 14px;
+
+  border-width: 2px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgb(75 43 24 / 16%);
+}
+
+.score-display {
+  margin: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(12px, 2vw, 20px);
+
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.score-entry {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  white-space: nowrap;
+}
+
+.score-piece-image {
+  width: 32px;
+  height: 32px;
+
+  display: block;
+
+  object-fit: contain;
+
+  filter: drop-shadow(0 3px 2px rgb(0 0 0 / 28%));
+}
+
+.score-separator {
+  font-weight: 700;
+}
+
+.score-value {
+  min-width: 1ch;
+
+  font-variant-numeric: tabular-nums;
+}

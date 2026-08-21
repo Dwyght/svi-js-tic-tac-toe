@@ -1,0 +1,111 @@
+/* =========================
+   BUTTONS
+========================= */
+
+.button {
+  min-height: 46px;
+  padding: 11px 22px;
+
+  color: #3a2115;
+  background: var(--color-surface-muted);
+
+  border: 2px solid #5b341e;
+  border-radius: 14px;
+  box-shadow:
+    0 4px 0 var(--color-button-shadow),
+    0 7px 14px var(--color-button-shadow-soft);
+
+  font-weight: 700;
+  letter-spacing: 0.035em;
+
+  transition:
+    background-color 140ms ease,
+    box-shadow 100ms ease,
+    transform 100ms ease;
+}
+
+.button:hover:not(:disabled) {
+  background: var(--color-highlight);
+  transform: translateY(-1px);
+}
+
+.button:active:not(:disabled) {
+  background: #e3c99c;
+  box-shadow:
+    0 1px 0 var(--color-button-shadow),
+    0 3px 7px var(--color-button-shadow-soft);
+  transform: translateY(3px);
+}
+
+.button:focus-visible {
+  outline: 3px solid #fff9e9;
+  outline-offset: 3px;
+}
+
+.button-confirm {
+  color: var(--color-action-text);
+  background: #7f9a5b;
+  border-color: var(--color-confirm-dark);
+  box-shadow:
+    0 4px 0 var(--color-confirm-dark),
+    0 7px 14px var(--color-confirm-shadow-soft);
+}
+
+.button-confirm:hover:not(:disabled) {
+  background: #94ac6c;
+}
+
+.button-confirm:active:not(:disabled) {
+  background: #667d48;
+  box-shadow:
+    0 1px 0 var(--color-confirm-dark),
+    0 3px 7px var(--color-confirm-shadow-soft);
+}
+
+.button-utility {
+  color: var(--color-highlight);
+  background: #31465b;
+  border-color: var(--color-utility-dark);
+  box-shadow:
+    0 4px 0 var(--color-utility-dark),
+    0 7px 14px var(--color-utility-shadow-soft);
+}
+
+.button-utility:hover:not(:disabled) {
+  background: #405b73;
+}
+
+.button-utility:active:not(:disabled) {
+  background: #253746;
+  box-shadow:
+    0 1px 0 var(--color-utility-dark),
+    0 3px 7px var(--color-utility-shadow-soft);
+}
+
+.button-danger {
+  color: var(--color-action-text);
+  background: #b85f43;
+  border-color: var(--color-danger-dark);
+  box-shadow:
+    0 4px 0 var(--color-danger-dark),
+    0 7px 14px var(--color-danger-shadow-soft);
+}
+
+.button-danger:hover:not(:disabled) {
+  background: #cf7255;
+}
+
+.button-danger:active:not(:disabled) {
+  background: #934832;
+  box-shadow:
+    0 1px 0 var(--color-danger-dark),
+    0 3px 7px var(--color-danger-shadow-soft);
+}
+
+.button:disabled {
+  color: #6d6254;
+  background: #b9ac96;
+  border-color: #827462;
+  box-shadow: none;
+  cursor: not-allowed;
+}

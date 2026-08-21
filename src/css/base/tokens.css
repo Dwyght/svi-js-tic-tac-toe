@@ -9,4 +9,12 @@
   --color-highlight: #fff3d8;
   --color-accent: #ffe2a3;
   --color-surface-muted: #f6e7c8;
+  --color-action-text: #fff8e8;
+  --color-button-shadow: #402414;
+  --color-button-shadow-soft: rgb(64 36 20 / 18%);
+  --color-confirm-shadow-soft: rgb(66 85 47 / 18%);
+  --color-utility-shadow-soft: rgb(25 40 50 / 18%);
+  --color-danger-shadow-soft: rgb(113 53 34 / 18%);
+  --color-modal-close-shadow: #4b2b18;
+  --color-input-shadow-inset: rgb(75 43 24 / 8%);
 }
