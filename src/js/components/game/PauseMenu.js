@@ -25,7 +25,7 @@ export class PauseMenu {
       onClick: () => this.copyGameCode(),
     });
     this.menuButton = new Button({
-      label: "\u2630",
+      label: "",
       className: "button-utility",
       onClick: () => this.modal.open(),
     });

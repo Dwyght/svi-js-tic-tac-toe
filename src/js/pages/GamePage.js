@@ -272,7 +272,7 @@ export class GamePage {
 
     if (boardState.status === "finished") {
       if (!gameState.gameOver) {
-        this.finishGame(boardState.result);
+        await this.finishGame(boardState.result);
       }
 
       return;
@@ -301,7 +301,7 @@ export class GamePage {
     const playerName = players[turn];
 
     if (turn === gameState.myTile) {
-      this.turnDisplay.textContent = "Your turn.";
+      this.turnDisplay.textContent = "It's your turn.";
 
       if (this.isSubmittingMove) {
         this.board.disableBoard();
@@ -309,7 +309,7 @@ export class GamePage {
         this.board.enableBoard();
       }
     } else {
-      this.turnDisplay.textContent = `${playerName}'s turn.`;
+      this.turnDisplay.textContent = `It's ${playerName}'s turn.`;
       this.board.disableBoard();
     }
 
@@ -359,7 +359,7 @@ export class GamePage {
       }
 
       if (result.reason === "game_over") {
-        this.finishGame(result.result);
+        await this.finishGame(result.result);
         return;
       }
 
@@ -394,7 +394,7 @@ export class GamePage {
   // FINISH GAME
   // ========================================
 
-  finishGame(result) {
+  async finishGame(result) {
     if (this.isQuitting) {
       return;
     }
@@ -418,26 +418,25 @@ export class GamePage {
     }
 
     if (result.status === "draw") {
-      this.resultModal.setMessage("It's a Draw!");
-      this.resultModal.open();
+      await this.resultModal.setOutcome("draw");
+
+      if (!this.isQuitting) {
+        this.resultModal.open();
+      }
+
       return;
     }
 
-    const players = getPlayerNames(gameState.gameCode);
-    const winnerName = players[result.winner];
-
     if (gameState.isSpectator) {
-      this.resultModal.setMessage(
-        `${winnerName} (${result.winner}) won the game.`,
-      );
+      await this.resultModal.setOutcome("victory");
     } else if (result.winner === gameState.myTile) {
-      this.resultModal.setMessage(
-        `You Win! ${winnerName} (${result.winner}) won the game.`,
-      );
+      await this.resultModal.setOutcome("victory");
     } else {
-      this.resultModal.setMessage(
-        `You Lose! ${winnerName} (${result.winner}) won the game.`,
-      );
+      await this.resultModal.setOutcome("defeat");
+    }
+
+    if (this.isQuitting) {
+      return;
     }
 
     this.resultModal.open();

@@ -55,6 +55,23 @@
     min-height: 48px;
     padding: 11px 22px;
   }
+
+  .result-modal {
+    --result-banner-space: 86px;
+
+    width: min(350px, calc(100vw - 20px));
+    max-width: calc(100vw - 20px);
+
+    transform: translateY(5dvh);
+  }
+
+  .result-outcome-banner {
+    width: min(168%, 540px, calc(100vw + 150px));
+  }
+
+  .result-modal .modal-body {
+    padding-top: 112px;
+  }
 }
 
 @media (max-height: 500px) {
@@ -116,11 +133,43 @@
     height: 28px;
   }
 
+  .game-score-region .score-card {
+    padding: 4px 12px;
+  }
+
+  .game-score-region .score-display {
+    gap: 12px;
+
+    font-size: 0.9rem;
+  }
+
+  .game-score-region .score-piece-image {
+    width: 32px;
+    height: 32px;
+  }
+
   .result-waiting-indicator {
     padding: 4px 8px;
     gap: 5px;
 
     font-size: 0.85rem;
+  }
+
+  .result-modal {
+    --result-banner-space: 90px;
+
+    transform: translateY(-2dvh);
+  }
+
+  .result-outcome-banner {
+    width: min(108%, 360px, calc(100vw - 12px));
+
+    transform: translate(-50%, -45%);
+  }
+
+  .result-modal .modal-body {
+    max-height: calc(100dvh - var(--result-banner-space) - 30px);
+    padding: 18px 16px 16px;
   }
 
   .loading-spinner {
@@ -199,7 +248,8 @@
   }
 
   .game-score-region {
-    width: min(320px, 100%);
+    width: fit-content;
+    max-width: 100%;
 
     grid-column: 1;
     grid-row: 3;

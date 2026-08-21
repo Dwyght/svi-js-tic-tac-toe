@@ -3,6 +3,21 @@ import { Modal } from "../base/Modal.js";
 import { Scoreboard } from "./Scoreboard.js";
 import { resolveTarget } from "../../utils/dom.js";
 
+const OUTCOME_BANNERS = {
+  victory: {
+    source: "./src/assets/images/victory.png",
+    alt: "Victory",
+  },
+  draw: {
+    source: "./src/assets/images/draw.png",
+    alt: "Draw",
+  },
+  defeat: {
+    source: "./src/assets/images/defeat.png",
+    alt: "Defeat",
+  },
+};
+
 export class ResultModal {
   constructor({ onPlayAgain, onQuit, onLeave }) {
     this.onPlayAgain = onPlayAgain;
@@ -16,8 +31,8 @@ export class ResultModal {
 
   initializeElements() {
     this.content = document.createElement("div");
+    this.outcomeBanner = document.createElement("img");
     this.message = document.createElement("p");
-    this.scoreLabel = document.createElement("p");
     this.scoreboard = new Scoreboard();
     this.waitingIndicator = document.createElement("div");
     this.waitingSpinner = document.createElement("span");
@@ -46,9 +61,9 @@ export class ResultModal {
 
   setAttributes() {
     this.content.classList.add("modal-form");
+    this.outcomeBanner.classList.add("result-outcome-banner");
+    this.message.classList.add("result-message", "hidden");
     this.scoreboard.element.classList.add("result-score");
-    this.scoreLabel.classList.add("result-score-label");
-    this.scoreLabel.textContent = "Series score";
     this.waitingIndicator.classList.add(
       "result-waiting-indicator",
       "hidden",
@@ -59,12 +74,13 @@ export class ResultModal {
     this.waitingSpinner.setAttribute("aria-hidden", "true");
     this.waitingText.textContent =
       "Waiting for Player X to start a new match.";
+    this.modal.dialog.classList.add("result-modal");
   }
 
   appendElements() {
+    this.modal.dialog.prepend(this.outcomeBanner);
     this.content.append(
       this.message,
-      this.scoreLabel,
       this.scoreboard.element,
       this.waitingIndicator,
     );
@@ -91,6 +107,27 @@ export class ResultModal {
 
   setMessage(message) {
     this.message.textContent = message;
+    this.message.classList.remove("hidden");
+  }
+
+  async setOutcome(outcome) {
+    const banner = OUTCOME_BANNERS[outcome];
+
+    if (!banner) {
+      console.error(`Unknown result outcome: ${outcome}`);
+      return;
+    }
+
+    this.outcomeBanner.src = banner.source;
+    this.outcomeBanner.alt = banner.alt;
+    this.message.textContent = "";
+    this.message.classList.add("hidden");
+
+    try {
+      await this.outcomeBanner.decode();
+    } catch (error) {
+      console.error(`Could not decode ${outcome} banner.`, error);
+    }
   }
 
   showPlayAgainButton() {
