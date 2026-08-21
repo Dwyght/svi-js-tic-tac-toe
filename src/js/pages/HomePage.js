@@ -1,6 +1,14 @@
 import { Button } from "../components/Button.js";
 
+import { CreateGameModal } from "../components/CreateGameModal.js";
+
+import { HowToPlayModal } from "../components/HowToPlayModal.js";
+
+import { JoinGameModal } from "../components/JoinGameModal.js";
+
 import { Modal } from "../components/Modal.js";
+
+import { SpectateModal } from "../components/SpectateModal.js";
 
 import {
   createGame as createGameService,
@@ -28,8 +36,6 @@ export class HomePage {
     this.setAttributes();
 
     this.appendElements();
-
-    this.bindEvents();
   }
 
   // ========================================
@@ -44,50 +50,6 @@ export class HomePage {
     this.bannerImage = document.createElement("img");
 
     this.actions = document.createElement("div");
-
-    // HOW TO PLAY
-
-    this.howToPlayContent = document.createElement("div");
-
-    this.howToPlayIntro = document.createElement("p");
-
-    this.howToPlaySteps = document.createElement("ol");
-
-    // CREATE FORM
-
-    this.createForm = document.createElement("form");
-
-    this.createNameLabel = document.createElement("label");
-
-    this.createNameInput = document.createElement("input");
-
-    this.createMessage = document.createElement("p");
-
-    // JOIN FORM
-
-    this.joinForm = document.createElement("form");
-
-    this.joinCodeLabel = document.createElement("label");
-
-    this.joinCodeField = document.createElement("div");
-
-    this.joinCodeInput = document.createElement("input");
-
-    this.joinNameLabel = document.createElement("label");
-
-    this.joinNameInput = document.createElement("input");
-
-    this.joinMessage = document.createElement("p");
-
-    // SPECTATE FORM
-
-    this.spectateForm = document.createElement("form");
-
-    this.spectateCodeLabel = document.createElement("label");
-
-    this.spectateCodeInput = document.createElement("input");
-
-    this.spectateMessage = document.createElement("p");
 
     // NOTICE
 
@@ -127,44 +89,20 @@ export class HomePage {
 
     this.howToPlayButton.element.classList.add("button-utility");
 
-    this.createButton = new Button({
-      label: "CREATE GAME",
-      type: "submit",
-      className: "button-confirm",
+    this.createGameModal = new CreateGameModal({
+      onCreateGame: () => this.createGame(),
     });
 
-    this.pasteButton = new Button({
-      label: "PASTE",
-      className: "button-utility",
-      onClick: () => this.pasteGameCode(),
+    this.joinGameModal = new JoinGameModal({
+      onJoinGame: () => this.joinGame(),
+      onPasteGameCode: () => this.pasteGameCode(),
     });
 
-    this.joinButton = new Button({
-      label: "JOIN GAME",
-      type: "submit",
-      className: "button-confirm",
+    this.spectateModal = new SpectateModal({
+      onSpectateGame: () => this.spectateGame(),
     });
 
-    this.spectateButton = new Button({
-      label: "SPECTATE GAME",
-      type: "submit",
-      className: "button-confirm",
-    });
-
-    this.createModal = new Modal({
-      title: "Create Game",
-      content: this.createForm,
-    });
-
-    this.joinModal = new Modal({
-      title: "Join Game",
-      content: this.joinForm,
-    });
-
-    this.spectateModal = new Modal({
-      title: "Spectate Game",
-      content: this.spectateForm,
-    });
+    this.howToPlayModal = new HowToPlayModal();
 
     this.noticeButton = new Button({
       label: "OK",
@@ -176,11 +114,6 @@ export class HomePage {
       title: "Game Update",
       content: this.noticeContent,
       closable: false,
-    });
-
-    this.howToPlayModal = new Modal({
-      title: "How to Play",
-      content: this.howToPlayContent,
     });
   }
 
@@ -198,100 +131,6 @@ export class HomePage {
     this.bannerImage.alt = "Tic Tac Toe";
 
     this.actions.classList.add("home-actions");
-
-    // HOW TO PLAY
-
-    this.howToPlayContent.classList.add("how-to-play-content");
-
-    this.howToPlayIntro.textContent =
-      "Play with a friend and be the first to make a row of three.";
-
-    const steps = [
-      "Choose Create Game, enter your name, and share the game code.",
-      "Your friend chooses Join Game and enters the shared code.",
-      "Player X goes first. Take turns choosing an empty square.",
-      "Make three matching pieces in a row, column, or diagonal to win.",
-    ];
-
-    for (const step of steps) {
-      const item = document.createElement("li");
-
-      item.textContent = step;
-
-      this.howToPlaySteps.append(item);
-    }
-
-    // CREATE
-
-    this.createForm.classList.add("modal-form");
-
-    this.createNameLabel.textContent = "Player Name";
-
-    this.createNameLabel.htmlFor = "create-player-name";
-
-    this.createNameInput.id = "create-player-name";
-
-    this.createNameInput.type = "text";
-
-    this.createNameInput.placeholder = "Enter your name";
-
-    this.createNameInput.autocomplete = "name";
-
-    this.createMessage.classList.add("message");
-
-    // JOIN
-
-    this.joinForm.classList.add("modal-form");
-
-    this.joinCodeLabel.textContent = "Game Code";
-
-    this.joinCodeLabel.htmlFor = "join-game-code";
-
-    this.joinCodeInput.id = "join-game-code";
-
-    this.joinCodeInput.type = "text";
-
-    this.joinCodeInput.placeholder = "Enter or paste game code";
-
-    this.joinCodeInput.autocomplete = "off";
-
-    this.joinCodeInput.spellcheck = false;
-
-    this.joinCodeField.classList.add("join-code-field");
-
-    this.joinNameLabel.textContent = "Player Name";
-
-    this.joinNameLabel.htmlFor = "join-player-name";
-
-    this.joinNameInput.id = "join-player-name";
-
-    this.joinNameInput.type = "text";
-
-    this.joinNameInput.placeholder = "Enter Player O's name";
-
-    this.joinNameInput.autocomplete = "name";
-
-    this.joinMessage.classList.add("message");
-
-    // SPECTATE
-
-    this.spectateForm.classList.add("modal-form");
-
-    this.spectateCodeLabel.textContent = "Game Code";
-
-    this.spectateCodeLabel.htmlFor = "spectate-game-code";
-
-    this.spectateCodeInput.id = "spectate-game-code";
-
-    this.spectateCodeInput.type = "text";
-
-    this.spectateCodeInput.placeholder = "Enter game code";
-
-    this.spectateCodeInput.autocomplete = "off";
-
-    this.spectateCodeInput.spellcheck = false;
-
-    this.spectateMessage.classList.add("message");
 
     // NOTICE
 
@@ -317,65 +156,9 @@ export class HomePage {
 
     this.howToPlayButton.render(this.actions);
 
-    this.howToPlayContent.append(this.howToPlayIntro, this.howToPlaySteps);
-
-    this.createForm.append(
-      this.createNameLabel,
-      this.createNameInput,
-      this.createMessage,
-    );
-
-    this.createButton.render(this.createForm);
-
-    this.joinForm.append(
-      this.joinCodeLabel,
-      this.joinCodeField,
-      this.joinNameLabel,
-      this.joinNameInput,
-      this.joinMessage,
-    );
-
-    this.joinCodeField.append(this.joinCodeInput);
-
-    this.pasteButton.render(this.joinCodeField);
-
-    this.joinButton.render(this.joinForm);
-
-    this.spectateForm.append(
-      this.spectateCodeLabel,
-      this.spectateCodeInput,
-      this.spectateMessage,
-    );
-
-    this.spectateButton.render(this.spectateForm);
-
     this.noticeContent.append(this.noticeMessage);
 
     this.noticeButton.render(this.noticeContent);
-  }
-
-  // ========================================
-  // EVENTS
-  // ========================================
-
-  bindEvents() {
-    this.createForm.addEventListener("submit", (event) => {
-      event.preventDefault();
-
-      this.createGame();
-    });
-
-    this.joinForm.addEventListener("submit", (event) => {
-      event.preventDefault();
-
-      this.joinGame();
-    });
-
-    this.spectateForm.addEventListener("submit", (event) => {
-      event.preventDefault();
-
-      this.spectateGame();
-    });
   }
 
   // ========================================
@@ -383,27 +166,15 @@ export class HomePage {
   // ========================================
 
   openCreateModal() {
-    this.createMessage.textContent = "";
-
-    this.createModal.open();
-
-    this.createNameInput.focus();
+    this.createGameModal.open();
   }
 
   openJoinModal() {
-    this.joinMessage.textContent = "";
-
-    this.joinModal.open();
-
-    this.joinCodeInput.focus();
+    this.joinGameModal.open();
   }
 
   openSpectateModal() {
-    this.spectateMessage.textContent = "";
-
     this.spectateModal.open();
-
-    this.spectateCodeInput.focus();
   }
 
   openHowToPlayModal() {
@@ -425,18 +196,20 @@ export class HomePage {
       const gameCode = await readClipboardText();
 
       if (gameCode === "") {
-        this.setMessage("The clipboard does not contain a game code.");
+        this.joinGameModal.setMessage(
+          "The clipboard does not contain a game code.",
+        );
 
         return;
       }
 
-      this.joinCodeInput.value = gameCode;
+      this.joinGameModal.setGameCode(gameCode);
 
-      this.joinNameInput.focus();
+      this.joinGameModal.focusPlayerName();
     } catch (error) {
       console.error("Could not read the clipboard.", error);
 
-      this.setMessage("Could not paste the game code.");
+      this.joinGameModal.setMessage("Could not paste the game code.");
     }
   }
 
@@ -445,10 +218,10 @@ export class HomePage {
   // ========================================
 
   async createGame() {
-    const playerName = this.createNameInput.value.trim();
+    const playerName = this.createGameModal.getPlayerName();
 
     if (playerName === "") {
-      this.setMessage("Please enter your name.");
+      this.createGameModal.setMessage("Please enter your name.");
 
       return;
     }
@@ -456,12 +229,12 @@ export class HomePage {
     const result = await createGameService(playerName);
 
     if (!result.ok) {
-      this.setMessage(result.message);
+      this.createGameModal.setMessage(result.message);
 
       return;
     }
 
-    this.createModal.close();
+    this.createGameModal.close();
 
     this.screenManager.showWaitingScreen(result.gameCode, playerName);
 
@@ -491,19 +264,19 @@ export class HomePage {
   // ========================================
 
   async joinGame() {
-    const gameCode = this.joinCodeInput.value.trim();
+    const gameCode = this.joinGameModal.getGameCode();
     // .toUpperCase();
 
-    const playerName = this.joinNameInput.value.trim();
+    const playerName = this.joinGameModal.getPlayerName();
 
     if (gameCode === "") {
-      this.setMessage("Please enter a game code.");
+      this.joinGameModal.setMessage("Please enter a game code.");
 
       return;
     }
 
     if (playerName === "") {
-      this.setMessage("Please enter your name.");
+      this.joinGameModal.setMessage("Please enter your name.");
 
       return;
     }
@@ -511,12 +284,12 @@ export class HomePage {
     const result = await joinGameService(gameCode, playerName);
 
     if (!result.ok) {
-      this.setMessage(result.message);
+      this.joinGameModal.setMessage(result.message);
 
       return;
     }
 
-    this.joinModal.close();
+    this.joinGameModal.close();
 
     this.onGameStarted();
   }
@@ -526,10 +299,10 @@ export class HomePage {
   // ========================================
 
   async spectateGame() {
-    const gameCode = this.spectateCodeInput.value.trim();
+    const gameCode = this.spectateModal.getGameCode();
 
     if (gameCode === "") {
-      this.setMessage("Please enter a game code.");
+      this.spectateModal.setMessage("Please enter a game code.");
 
       return;
     }
@@ -537,7 +310,7 @@ export class HomePage {
     const result = await spectateGameService(gameCode);
 
     if (!result.ok) {
-      this.setMessage(result.message);
+      this.spectateModal.setMessage(result.message);
 
       return;
     }
@@ -548,53 +321,19 @@ export class HomePage {
   }
 
   // ========================================
-  // MESSAGE
-  // ========================================
-
-  setMessage(message) {
-    if (this.createModal.isOpen()) {
-      this.createMessage.textContent = message;
-
-      return;
-    }
-
-    if (this.joinModal.isOpen()) {
-      this.joinMessage.textContent = message;
-
-      return;
-    }
-
-    if (this.spectateModal.isOpen()) {
-      this.spectateMessage.textContent = message;
-
-      return;
-    }
-
-    this.showNotice(message);
-  }
-
-  // ========================================
   // RESET FORM
   // ========================================
 
   resetForm() {
-    this.createNameInput.value = "";
+    this.createGameModal.reset();
 
-    this.joinCodeInput.value = "";
+    this.joinGameModal.reset();
 
-    this.joinNameInput.value = "";
+    this.spectateModal.reset();
 
-    this.spectateCodeInput.value = "";
+    this.createGameModal.close();
 
-    this.createMessage.textContent = "";
-
-    this.joinMessage.textContent = "";
-
-    this.spectateMessage.textContent = "";
-
-    this.createModal.close();
-
-    this.joinModal.close();
+    this.joinGameModal.close();
 
     this.spectateModal.close();
 
@@ -613,9 +352,9 @@ export class HomePage {
     if (parent) {
       parent.append(this.container);
 
-      this.createModal.render(document.body);
+      this.createGameModal.render(document.body);
 
-      this.joinModal.render(document.body);
+      this.joinGameModal.render(document.body);
 
       this.spectateModal.render(document.body);
 
