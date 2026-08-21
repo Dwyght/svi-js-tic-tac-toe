@@ -1,0 +1,142 @@
+import { Button } from "./Button.js";
+import { Modal } from "./Modal.js";
+import { Scoreboard } from "./Scoreboard.js";
+import { resolveTarget } from "../utils/dom.js";
+
+export class ResultModal {
+  constructor({ onPlayAgain, onQuit, onLeave }) {
+    this.onPlayAgain = onPlayAgain;
+    this.onQuit = onQuit;
+    this.onLeave = onLeave;
+
+    this.initializeElements();
+    this.setAttributes();
+    this.appendElements();
+  }
+
+  initializeElements() {
+    this.content = document.createElement("div");
+    this.message = document.createElement("p");
+    this.scoreLabel = document.createElement("p");
+    this.scoreboard = new Scoreboard();
+    this.waitingIndicator = document.createElement("div");
+    this.waitingSpinner = document.createElement("span");
+    this.waitingText = document.createElement("p");
+    this.playAgainButton = new Button({
+      label: "PLAY AGAIN",
+      className: "button-confirm",
+      onClick: () => this.onPlayAgain(),
+    });
+    this.quitButton = new Button({
+      label: "QUIT GAME",
+      className: "button-danger",
+      onClick: () => this.onQuit(),
+    });
+    this.leaveButton = new Button({
+      label: "LEAVE",
+      className: "button-utility",
+      onClick: () => this.onLeave(),
+    });
+    this.modal = new Modal({
+      title: "Game Over",
+      content: this.content,
+      closable: false,
+    });
+  }
+
+  setAttributes() {
+    this.content.classList.add("modal-form");
+    this.scoreboard.element.classList.add("result-score");
+    this.scoreLabel.classList.add("result-score-label");
+    this.scoreLabel.textContent = "Series score";
+    this.waitingIndicator.classList.add(
+      "result-waiting-indicator",
+      "hidden",
+    );
+    this.waitingIndicator.setAttribute("role", "status");
+    this.waitingIndicator.setAttribute("aria-live", "polite");
+    this.waitingSpinner.classList.add("loading-spinner");
+    this.waitingSpinner.setAttribute("aria-hidden", "true");
+    this.waitingText.textContent =
+      "Waiting for Player X to start a new match.";
+  }
+
+  appendElements() {
+    this.content.append(
+      this.message,
+      this.scoreLabel,
+      this.scoreboard.element,
+      this.waitingIndicator,
+    );
+    this.waitingIndicator.append(this.waitingSpinner, this.waitingText);
+  }
+
+  configureViewerControls({ isSpectator, canPlayAgain }) {
+    this.playAgainButton.element.remove();
+    this.quitButton.element.remove();
+    this.leaveButton.element.remove();
+    this.hideWaitingIndicator();
+
+    if (isSpectator) {
+      this.leaveButton.render(this.content);
+      return;
+    }
+
+    if (canPlayAgain) {
+      this.playAgainButton.render(this.content);
+    }
+
+    this.quitButton.render(this.content);
+  }
+
+  setMessage(message) {
+    this.message.textContent = message;
+  }
+
+  showPlayAgainButton() {
+    if (this.playAgainButton.element.parentElement !== this.content) {
+      this.playAgainButton.render(this.content);
+    }
+
+    this.setPlayAgainPending(false);
+    this.hideWaitingIndicator();
+  }
+
+  showWaitingIndicator() {
+    this.playAgainButton.element.remove();
+    this.waitingIndicator.classList.remove("hidden");
+  }
+
+  hideWaitingIndicator() {
+    this.waitingIndicator.classList.add("hidden");
+  }
+
+  setPlayAgainPending(isPending) {
+    this.playAgainButton.element.disabled = isPending;
+    this.playAgainButton.setLabel(
+      isPending ? "STARTING NEW MATCH..." : "PLAY AGAIN",
+    );
+  }
+
+  updateScore(scores) {
+    this.scoreboard.update(scores);
+  }
+
+  open() {
+    this.modal.open();
+  }
+
+  close() {
+    this.modal.close();
+  }
+
+  render(target) {
+    const parent = resolveTarget(target);
+
+    if (parent) {
+      this.modal.render(parent);
+    } else {
+      console.error("ResultModal target not found.");
+    }
+  }
+}

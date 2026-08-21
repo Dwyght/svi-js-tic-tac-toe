@@ -17,6 +17,7 @@ import { Button } from "../components/Button.js";
 import { Card } from "../components/Card.js";
 import { Modal } from "../components/Modal.js";
 import { PauseMenu } from "../components/PauseMenu.js";
+import { ResultModal } from "../components/ResultModal.js";
 import { Scoreboard } from "../components/Scoreboard.js";
 import { resolveTarget } from "../utils/dom.js";
 
@@ -73,38 +74,15 @@ export class GamePage {
     });
 
     // Game result
-    this.resultContent = document.createElement("div");
-    this.resultMessage = document.createElement("p");
-    this.resultScoreLabel = document.createElement("p");
-    this.resultScoreboard = new Scoreboard();
-    this.resultWaitingIndicator = document.createElement("div");
-    this.resultWaitingSpinner = document.createElement("span");
-    this.resultWaitingText = document.createElement("p");
+    this.resultModal = new ResultModal({
+      onPlayAgain: () => this.handlePlayAgain(),
+      onQuit: () => this.openQuitModal(),
+      onLeave: () => this.handleLeave(),
+    });
 
     // Quit confirmation
     this.quitContent = document.createElement("div");
     this.quitMessage = document.createElement("p");
-
-    this.playAgainButton = new Button({
-      label: "PLAY AGAIN",
-      className: "button-confirm",
-      onClick: () => this.handlePlayAgain(),
-    });
-    this.resultQuitButton = new Button({
-      label: "QUIT GAME",
-      className: "button-danger",
-      onClick: () => this.openQuitModal(),
-    });
-    this.resultLeaveButton = new Button({
-      label: "LEAVE",
-      className: "button-utility",
-      onClick: () => this.handleLeave(),
-    });
-    this.resultModal = new Modal({
-      title: "Game Over",
-      content: this.resultContent,
-      closable: false,
-    });
 
     this.cancelQuitButton = new Button({
       label: "CANCEL",
@@ -134,20 +112,6 @@ export class GamePage {
     this.scoreboard.element.setAttribute("aria-live", "polite");
     this.message.classList.add("message");
     this.boardContainer.classList.add("board-stage");
-    this.resultContent.classList.add("modal-form");
-    this.resultScoreboard.element.classList.add("result-score");
-    this.resultScoreLabel.classList.add("result-score-label");
-    this.resultScoreLabel.textContent = "Series score";
-    this.resultWaitingIndicator.classList.add(
-      "result-waiting-indicator",
-      "hidden",
-    );
-    this.resultWaitingIndicator.setAttribute("role", "status");
-    this.resultWaitingIndicator.setAttribute("aria-live", "polite");
-    this.resultWaitingSpinner.classList.add("loading-spinner");
-    this.resultWaitingSpinner.setAttribute("aria-hidden", "true");
-    this.resultWaitingText.textContent =
-      "Waiting for Player X to start a new match.";
     this.quitContent.classList.add("modal-form");
     this.quitMessage.textContent =
       "Are you sure you want to quit? This will end the game for both players.";
@@ -167,16 +131,6 @@ export class GamePage {
       this.scoreRegion,
     );
     this.container.append(this.gameLayout);
-    this.resultContent.append(
-      this.resultMessage,
-      this.resultScoreLabel,
-      this.resultScoreboard.element,
-      this.resultWaitingIndicator,
-    );
-    this.resultWaitingIndicator.append(
-      this.resultWaitingSpinner,
-      this.resultWaitingText,
-    );
     this.quitContent.append(this.quitMessage);
     this.cancelQuitButton.render(this.quitContent);
     this.confirmQuitButton.render(this.quitContent);
@@ -184,22 +138,15 @@ export class GamePage {
 
   configureViewerControls() {
     this.pauseMenu.configureViewerControls(gameState.isSpectator);
-    this.playAgainButton.element.remove();
-    this.resultQuitButton.element.remove();
-    this.resultLeaveButton.element.remove();
-    this.resultWaitingIndicator.classList.add("hidden");
+    this.resultModal.configureViewerControls({
+      isSpectator: gameState.isSpectator,
+      canPlayAgain: gameState.myTile === "X",
+    });
 
     if (gameState.isSpectator) {
-      this.resultLeaveButton.render(this.resultContent);
       this.quitModal.dialog.remove();
       return;
     }
-
-    if (gameState.myTile === "X") {
-      this.playAgainButton.render(this.resultContent);
-    }
-
-    this.resultQuitButton.render(this.resultContent);
 
     if (!this.quitModal.dialog.isConnected) {
       this.quitModal.render(document.body);
@@ -460,17 +407,14 @@ export class GamePage {
       const canPlayAgain = gameState.myTile === "X";
 
       if (canPlayAgain) {
-        this.playAgainButton.element.disabled = false;
-        this.playAgainButton.setLabel("PLAY AGAIN");
-        this.resultWaitingIndicator.classList.add("hidden");
+        this.resultModal.showPlayAgainButton();
       } else {
-        this.playAgainButton.element.remove();
-        this.resultWaitingIndicator.classList.remove("hidden");
+        this.resultModal.showWaitingIndicator();
       }
     }
 
     if (result.status === "draw") {
-      this.resultMessage.textContent = "It's a Draw!";
+      this.resultModal.setMessage("It's a Draw!");
       this.resultModal.open();
       return;
     }
@@ -479,11 +423,17 @@ export class GamePage {
     const winnerName = players[result.winner];
 
     if (gameState.isSpectator) {
-      this.resultMessage.textContent = `${winnerName} (${result.winner}) won the game.`;
+      this.resultModal.setMessage(
+        `${winnerName} (${result.winner}) won the game.`,
+      );
     } else if (result.winner === gameState.myTile) {
-      this.resultMessage.textContent = `You Win! ${winnerName} (${result.winner}) won the game.`;
+      this.resultModal.setMessage(
+        `You Win! ${winnerName} (${result.winner}) won the game.`,
+      );
     } else {
-      this.resultMessage.textContent = `You Lose! ${winnerName} (${result.winner}) won the game.`;
+      this.resultModal.setMessage(
+        `You Lose! ${winnerName} (${result.winner}) won the game.`,
+      );
     }
 
     this.resultModal.open();
@@ -513,7 +463,7 @@ export class GamePage {
     const scores = gameState.scores;
 
     this.scoreboard.update(scores);
-    this.resultScoreboard.update(scores);
+    this.resultModal.updateScore(scores);
   }
 
   // ========================================
@@ -530,8 +480,7 @@ export class GamePage {
       return;
     }
 
-    this.playAgainButton.element.disabled = true;
-    this.playAgainButton.setLabel("STARTING NEW MATCH...");
+    this.resultModal.setPlayAgainPending(true);
 
     try {
       await restartGameSession(gameState.gameCode);
@@ -539,9 +488,8 @@ export class GamePage {
       await this.loadBoard();
     } catch (error) {
       console.error(error);
-      this.resultMessage.textContent = "Could not start a new match.";
-      this.playAgainButton.element.disabled = false;
-      this.playAgainButton.setLabel("PLAY AGAIN");
+      this.resultModal.setMessage("Could not start a new match.");
+      this.resultModal.setPlayAgainPending(false);
     }
   }
 
@@ -551,7 +499,7 @@ export class GamePage {
     this.inactiveGameOverRefreshes = 0;
     this.roundScored = false;
     this.resultModal.close();
-    this.resultWaitingIndicator.classList.add("hidden");
+    this.resultModal.hideWaitingIndicator();
 
     if (clearBoard) {
       this.clearBoardForViewer();
