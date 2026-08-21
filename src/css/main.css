@@ -7,5 +7,7 @@
 @import "./components/board.css";
 @import "./components/message.css";
 @import "./components/screen-manager.css";
-@import "./pages.css";
+@import "./components/pause-menu.css";
+@import "./pages/home-page.css";
+@import "./pages/game-page.css";
 @import "./responsive.css";

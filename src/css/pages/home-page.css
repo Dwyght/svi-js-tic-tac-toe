@@ -1,0 +1,93 @@
+/* =========================
+   HOME PAGE
+========================= */
+
+.home-page {
+  --home-banner-width: min(
+    520px,
+    90vw,
+    max(80px, calc(165dvh - 495px))
+  );
+
+  width: min(700px, 100%);
+  height: 100%;
+
+  margin: 0 auto;
+  padding-bottom: clamp(28px, 5dvh, 50px);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.home-banner {
+  --rope-overhang: clamp(10px, 2vw, 18px);
+
+  position: fixed;
+  top: calc(0px - var(--rope-overhang));
+  left: 50%;
+
+  width: var(--home-banner-width);
+  aspect-ratio: 1.8;
+
+  pointer-events: none;
+
+  transform-origin: top center;
+
+  animation: lower-home-banner 1.15s cubic-bezier(0.22, 0.8, 0.3, 1.05) both;
+}
+
+.home-banner img {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+
+  width: 100%;
+  height: auto;
+
+  display: block;
+
+  filter: drop-shadow(0 12px 12px rgb(47 28 16 / 24%));
+}
+
+@keyframes lower-home-banner {
+  0% {
+    transform: translate(-50%, -110%) rotate(-1deg);
+  }
+
+  72% {
+    transform: translate(-50%, 3%) rotate(1.75deg);
+  }
+
+  86% {
+    transform: translate(-50%, -1.5%) rotate(-0.5deg);
+  }
+
+  100% {
+    transform: translate(-50%, 0) rotate(0);
+  }
+}
+
+.home-actions {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 14px;
+}
+
+.home-action-button {
+  width: min(280px, 100%);
+  min-height: 52px;
+
+  padding: 13px 26px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-banner {
+    animation: none;
+    transform: translateX(-50%);
+  }
+}
