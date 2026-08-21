@@ -18,12 +18,13 @@ The frontend uses native ES modules and does not require a bundler or an npm bui
 - Emotes between same-origin browser tabs that appear on the other player's screen
 - Pause, resume, copy-code, quit, and leave confirmation flows
 - Resume prompt after refreshing an active player session
+- Duplicate active-player tabs return Home instead of controlling the same player
 - One splash-screen appearance per browser tab session
 - Responsive layouts, modal-aware background-video pausing, and reduced-motion support
 
 ## Requirements
 
-- A modern browser with support for JavaScript modules, `dialog`, Fetch, and Web Storage
+- A modern browser with support for JavaScript modules, `dialog`, Fetch, Web Storage, and the Web Locks API
 - A local static HTTP server for the frontend
 - A compatible Tic-Tac-Toe backend running at:
 
@@ -60,7 +61,7 @@ There is no `npm install` or build command for this project.
 4. Player X takes the first turn.
 5. After a round, Player X can select **Play Again**. Player O waits for X to start the next round.
 
-Opening a fresh second tab is safer than duplicating an active player tab because some browsers clone `sessionStorage` when a tab is duplicated.
+Open a fresh second tab when joining as Player O. If an active player tab is duplicated, the duplicate returns Home while the original tab keeps control of that player.
 
 ## Game rules and session behavior
 
@@ -71,6 +72,7 @@ Opening a fresh second tab is safer than duplicating an active player tab becaus
 - Only Player X can reset the board for another round.
 - Confirming **Quit Game** resets the server room and returns the player home. The other active client detects the missing room during polling and returns home.
 - A spectator's **Leave** action only exits the spectator view; it does not reset the game.
+- Only one active tab can control each player slot. Refreshing or restoring the owning tab can still resume the session.
 - Closing a tab abruptly does not currently notify the server or delete the room.
 
 ## Browser storage
@@ -86,6 +88,8 @@ The project uses both storage types intentionally:
 | `localStorage` | Latest emote event | Delivered to other same-origin tabs through the browser `storage` event |
 
 Spectator sessions are intentionally not saved for resume. A browser may also restore `sessionStorage` as part of its own tab/session restoration behavior.
+
+Active player ownership is guarded separately with a browser Web Lock keyed by room code and tile. Web Locks are not copied with `sessionStorage`, so a duplicated active-player tab can discard its copied session without affecting the original tab.
 
 Because names, sushi choices, scores, and emotes are stored locally, the complete experience is designed primarily for same-origin tabs in the same browser. The server board can still be fetched elsewhere, but those locally stored details are not synchronized across different browsers or devices.
 

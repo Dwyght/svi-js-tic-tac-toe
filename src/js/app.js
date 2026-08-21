@@ -12,6 +12,11 @@ import { GamePage } from "./pages/GamePage.js";
 
 import { PollingService } from "./services/pollingService.js";
 
+import {
+  claimPlayerTab,
+  releasePlayerTab,
+} from "./services/playerTabLockService.js";
+
 import { checkGameStillActive } from "./services/gameFlowService.js";
 
 import {
@@ -130,6 +135,20 @@ resumeGameModal.render(document.body);
 // ========================================
 
 async function handleGameStarted() {
+  if (!gameState.isSpectator) {
+    const session = getSession();
+
+    if (
+      !isValidPlayerSession(session) ||
+      !(await claimPlayerTab(session))
+    ) {
+      clearSession();
+      gameState.reset();
+      handleReturnHome();
+      return;
+    }
+  }
+
   await gamePage.startGame();
 }
 
@@ -139,6 +158,8 @@ async function handleGameStarted() {
 
 function handleReturnHome(message = "", title = "Game Update") {
   pollingService.stopRefresh();
+
+  releasePlayerTab();
 
   resumeGameModal.close();
 
@@ -207,6 +228,15 @@ async function startApplication() {
     if (!gameIsActive) {
       clearSession();
       screenManager.showHomeScreen();
+      return;
+    }
+
+    const ownsPlayerTab = await claimPlayerTab(session);
+
+    if (!ownsPlayerTab) {
+      clearSession();
+      gameState.reset();
+      handleReturnHome();
       return;
     }
 
