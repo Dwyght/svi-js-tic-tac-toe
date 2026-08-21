@@ -20,6 +20,18 @@ import {
   clearSession,
 } from "./storageService.js";
 
+const JOIN_GAME_ERROR_MESSAGES = Object.freeze({
+  "[GAME ALREADY STARTED]":
+    "This game has already started. You can spectate it instead.",
+});
+
+function getJoinGameErrorMessage(serverResponse) {
+  return (
+    JOIN_GAME_ERROR_MESSAGES[serverResponse] ??
+    "Could not join the game. Please check the code and try again."
+  );
+}
+
 // ========================================
 // HOME FLOW
 // ========================================
@@ -111,7 +123,7 @@ export async function joinGame(gameCode, playerName) {
     if (result !== "O") {
       return {
         ok: false,
-        message: result,
+        message: getJoinGameErrorMessage(result),
       };
     }
 
