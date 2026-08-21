@@ -1,6 +1,11 @@
 import { Button } from "./Button.js";
 import { resolveTarget } from "../../utils/dom.js";
 
+export const MODAL_EVENTS = Object.freeze({
+  opened: "app-modal-opened",
+  closed: "app-modal-closed",
+});
+
 export class Modal {
   constructor({ title, content, closable = true }) {
     this.dialog = document.createElement("dialog");
@@ -44,11 +49,20 @@ export class Modal {
         event.preventDefault();
       }
     });
+
+    this.dialog.addEventListener("close", () => {
+      this.dialog.dispatchEvent(
+        new Event(MODAL_EVENTS.closed, { bubbles: true }),
+      );
+    });
   }
 
   open() {
     if (!this.dialog.open) {
       this.dialog.showModal();
+      this.dialog.dispatchEvent(
+        new Event(MODAL_EVENTS.opened, { bubbles: true }),
+      );
     }
   }
 
@@ -60,6 +74,10 @@ export class Modal {
 
   isOpen() {
     return this.dialog.open;
+  }
+
+  setTitle(title) {
+    this.title.textContent = title;
   }
 
   setDismissEnabled(isEnabled) {

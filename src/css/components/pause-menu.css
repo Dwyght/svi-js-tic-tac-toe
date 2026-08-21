@@ -21,6 +21,27 @@
   border-radius: 50%;
 }
 
+.pause-menu-button.button-utility {
+  color: var(--color-text);
+  background: var(--color-accent);
+
+  border-color: var(--color-primary);
+  box-shadow:
+    0 4px 0 var(--color-button-shadow),
+    0 7px 14px var(--color-button-shadow-soft);
+}
+
+.pause-menu-button.button-utility:hover:not(:disabled) {
+  background: var(--color-highlight);
+}
+
+.pause-menu-button.button-utility:active:not(:disabled) {
+  background: var(--color-surface-muted);
+  box-shadow:
+    0 1px 0 var(--color-button-shadow),
+    0 3px 7px var(--color-button-shadow-soft);
+}
+
 .pause-menu-button::before,
 .pause-menu-button::after {
   position: absolute;
@@ -56,32 +77,47 @@
 
 .pause-menu-content .active-game-code-container {
   width: 100%;
+  min-height: 46px;
   margin: 0;
 
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
   gap: 7px;
 
-  font-size: 0.8rem;
+  font-size: 1rem;
 }
 
 .pause-menu-content .active-game-code-container .game-code {
+  min-height: 46px;
   padding: 5px 9px;
 
-  font-size: 0.85rem;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 1rem;
   letter-spacing: 2px;
 }
 
 .game-code-label {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+
+  grid-column: 1 / -1;
+
+  font-size: 1rem;
   font-weight: 700;
 }
 
 .game-code-copy-button {
-  min-height: 30px;
+  min-height: 46px;
   padding: 4px 9px;
 
   border-radius: 9px;
 
-  font-size: 0.72rem;
+  font-size: 1rem;
 }
 
 .pause-menu-exit-button {

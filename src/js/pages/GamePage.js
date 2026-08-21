@@ -229,11 +229,15 @@ export class GamePage {
       this.resultModal.close();
       this.pauseMenu.close();
       this.quitConfirmModal.close();
-      this.onReturnHome(
-        wasSpectator
-          ? "This game has ended."
-          : "The other player has left the game.",
-      );
+      if (wasSpectator) {
+        this.onReturnHome("This game has ended.");
+      } else {
+        this.onReturnHome(
+          "The other player has left the game.",
+          "Oh No!",
+        );
+      }
+
       return;
     }
 
@@ -420,7 +424,7 @@ export class GamePage {
     if (result.status === "draw") {
       await this.resultModal.setOutcome("draw");
 
-      if (!this.isQuitting) {
+      if (!this.isQuitting && gameState.gameCode !== null) {
         this.resultModal.open();
       }
 
@@ -435,7 +439,7 @@ export class GamePage {
       await this.resultModal.setOutcome("defeat");
     }
 
-    if (this.isQuitting) {
+    if (this.isQuitting || gameState.gameCode === null) {
       return;
     }
 

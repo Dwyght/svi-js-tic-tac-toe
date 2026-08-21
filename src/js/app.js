@@ -1,5 +1,7 @@
 import { ScreenManager } from "./components/ScreenManager.js";
 
+import { MODAL_EVENTS } from "./components/base/Modal.js";
+
 import { ResumeGameModal } from "./components/game/ResumeGameModal.js";
 
 import { HomePage } from "./pages/HomePage.js";
@@ -24,6 +26,45 @@ import { gameState } from "./state/gameState.js";
 const screenManager = new ScreenManager();
 
 const pollingService = new PollingService();
+
+// ========================================
+// BACKGROUND VIDEO DURING MODALS
+// ========================================
+
+const backgroundVideo = document.querySelector(".bg-video");
+
+let backgroundVideoPausedByModal = false;
+
+document.addEventListener(MODAL_EVENTS.opened, () => {
+  if (!backgroundVideo) {
+    return;
+  }
+
+  backgroundVideoPausedByModal = true;
+  backgroundVideo.pause();
+});
+
+document.addEventListener(MODAL_EVENTS.closed, () => {
+  queueMicrotask(() => {
+    if (
+      !backgroundVideo ||
+      !backgroundVideoPausedByModal ||
+      document.querySelector("dialog[open]")
+    ) {
+      return;
+    }
+
+    backgroundVideoPausedByModal = false;
+
+    const playRequest = backgroundVideo.play();
+
+    if (playRequest) {
+      playRequest.catch((error) => {
+        console.error("Could not resume background video.", error);
+      });
+    }
+  });
+});
 
 // ========================================
 // RENDER SCREEN STRUCTURE
@@ -82,7 +123,7 @@ async function handleGameStarted() {
 // RETURN HOME
 // ========================================
 
-function handleReturnHome(message = "") {
+function handleReturnHome(message = "", title = "Game Update") {
   pollingService.stopRefresh();
 
   resumeGameModal.close();
@@ -92,7 +133,7 @@ function handleReturnHome(message = "") {
   homePage.resetForm();
 
   if (message !== "") {
-    homePage.showNotice(message);
+    homePage.showNotice(message, title);
   }
 }
 

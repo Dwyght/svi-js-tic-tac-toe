@@ -156,7 +156,8 @@ export class HomePage {
     this.howToPlayModal.open();
   }
 
-  showNotice(message) {
+  showNotice(message, title = "Game Update") {
+    this.noticeModal.setTitle(title);
     this.noticeMessage.textContent = message;
     this.noticeModal.open();
   }
