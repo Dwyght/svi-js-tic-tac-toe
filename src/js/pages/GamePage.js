@@ -234,7 +234,7 @@ export class GamePage {
       } else {
         this.onReturnHome(
           "The other player has left the game.",
-          "Oh No!",
+          "Oopsies!",
         );
       }
 
@@ -417,6 +417,9 @@ export class GamePage {
       if (canPlayAgain) {
         this.resultModal.showPlayAgainButton();
       } else {
+        const players = getPlayerNames(gameState.gameCode);
+
+        this.resultModal.setWaitingPlayerName(players.X);
         this.resultModal.showWaitingIndicator();
       }
     }

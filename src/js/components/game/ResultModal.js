@@ -144,6 +144,13 @@ export class ResultModal {
     this.waitingIndicator.classList.remove("hidden");
   }
 
+  setWaitingPlayerName(playerName) {
+    const displayName = playerName?.trim() || "Player X";
+
+    this.waitingText.textContent =
+      `Waiting for ${displayName} to start a new match.`;
+  }
+
   hideWaitingIndicator() {
     this.waitingIndicator.classList.add("hidden");
   }

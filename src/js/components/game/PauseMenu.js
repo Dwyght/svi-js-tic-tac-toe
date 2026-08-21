@@ -33,6 +33,11 @@ export class PauseMenu {
       title: "Pause Menu",
       content: this.content,
     });
+    this.resumeButton = new Button({
+      label: "RESUME GAME",
+      className: "button-confirm",
+      onClick: () => this.close(),
+    });
     this.quitButton = new Button({
       label: "QUIT GAME",
       className: "button-danger",
@@ -61,6 +66,9 @@ export class PauseMenu {
     this.menuButton.element.setAttribute("aria-haspopup", "dialog");
     this.menuButton.element.title = "Pause menu";
     this.modal.dialog.classList.add("pause-menu-modal");
+    this.resumeButton.element.classList.add(
+      "pause-menu-resume-button",
+    );
     this.quitButton.element.classList.add("pause-menu-exit-button");
     this.leaveButton.element.classList.add("pause-menu-exit-button");
   }
@@ -72,6 +80,7 @@ export class PauseMenu {
     );
     this.copyCodeButton.render(this.gameCodeContainer);
     this.content.append(this.gameCodeContainer);
+    this.resumeButton.render(this.content);
     this.menuButton.render(this.anchor);
   }
 

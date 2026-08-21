@@ -28,7 +28,7 @@ export class ScreenManager {
 
     this.waitingContent = document.createElement("div");
 
-    this.waitingText = document.createElement("p");
+    this.waitingText = document.createElement("div");
 
     this.gameCodeContainer = document.createElement("div");
 
@@ -73,6 +73,8 @@ export class ScreenManager {
     this.gameScreen.classList.add("hidden");
 
     this.waitingContent.classList.add("waiting-modal-content");
+
+    this.waitingText.classList.add("waiting-greeting");
 
     this.waitingModal.dialog.classList.add("waiting-modal");
 
