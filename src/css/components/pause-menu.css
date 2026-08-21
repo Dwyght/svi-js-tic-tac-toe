@@ -67,10 +67,6 @@
   transform: translate(-50%, -50%);
 }
 
-.pause-menu-modal {
-  width: min(360px, calc(100vw - 30px));
-}
-
 .pause-menu-content {
   text-align: center;
 }

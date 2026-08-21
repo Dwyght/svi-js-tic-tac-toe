@@ -20,6 +20,13 @@ export class Board {
   initializeElements() {
     this.container = document.createElement("div");
 
+    this.separators = [
+      this.createSeparator("vertical", "first"),
+      this.createSeparator("vertical", "second"),
+      this.createSeparator("horizontal", "first"),
+      this.createSeparator("horizontal", "second"),
+    ];
+
     this.cells = [];
 
     for (let rowIndex = 0; rowIndex < 3; rowIndex++) {
@@ -35,6 +42,14 @@ export class Board {
     }
   }
 
+  createSeparator(orientation, position) {
+    return {
+      element: document.createElement("span"),
+      orientation,
+      position,
+    };
+  }
+
   // ========================================
   // STEP 2: ATTRIBUTES
   // ========================================
@@ -43,6 +58,16 @@ export class Board {
     this.container.id = "board";
 
     this.container.classList.add("board");
+
+    for (const separator of this.separators) {
+      separator.element.classList.add(
+        "board-separator",
+        `board-separator-${separator.orientation}`,
+        `board-separator-${separator.position}`,
+      );
+
+      separator.element.setAttribute("aria-hidden", "true");
+    }
 
     for (const cell of this.cells) {
       cell.element.classList.add("cell");
@@ -62,6 +87,10 @@ export class Board {
   // ========================================
 
   appendElements() {
+    this.container.append(
+      ...this.separators.map((separator) => separator.element),
+    );
+
     for (const cell of this.cells) {
       this.container.append(cell.element);
     }

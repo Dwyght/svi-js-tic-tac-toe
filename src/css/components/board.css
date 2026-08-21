@@ -40,6 +40,8 @@
 .board {
   --grid-line: clamp(3px, 0.5vw, 5px);
 
+  position: relative;
+
   width: 76%;
   aspect-ratio: 1;
 
@@ -56,6 +58,56 @@
   padding: 0;
 
   background: transparent;
+}
+
+.board-separator {
+  position: absolute;
+
+  display: block;
+
+  background: var(--color-primary);
+
+  border-radius: 999px;
+
+  pointer-events: none;
+}
+
+.board-separator-vertical {
+  top: 0;
+  bottom: 0;
+
+  width: var(--grid-line);
+}
+
+.board-separator-horizontal {
+  right: 0;
+  left: 0;
+
+  height: var(--grid-line);
+}
+
+.board-separator-vertical.board-separator-first {
+  left: 33.333%;
+
+  transform: translateX(-50%);
+}
+
+.board-separator-vertical.board-separator-second {
+  left: 66.667%;
+
+  transform: translateX(-50%);
+}
+
+.board-separator-horizontal.board-separator-first {
+  top: 33.333%;
+
+  transform: translateY(-50%);
+}
+
+.board-separator-horizontal.board-separator-second {
+  top: 66.667%;
+
+  transform: translateY(-50%);
 }
 
 .cell {
@@ -82,15 +134,6 @@
   border: 0;
 
   cursor: pointer;
-}
-
-.cell:nth-child(3n + 1),
-.cell:nth-child(3n + 2) {
-  border-right: var(--grid-line) solid var(--color-primary);
-}
-
-.cell:nth-child(-n + 6) {
-  border-bottom: var(--grid-line) solid var(--color-primary);
 }
 
 .cell::before {

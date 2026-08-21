@@ -6,6 +6,12 @@
   --game-row-gap: clamp(6px, 1.5dvh, 12px);
   --game-viewport-inline-space: 60px;
   --game-viewport-block-reserve: 200px;
+  --game-status-inline-inset: clamp(48px, 6vw, 64px);
+  --game-board-size: min(
+    520px,
+    calc(100vw - var(--game-viewport-inline-space)),
+    calc(100dvh - var(--game-viewport-block-reserve))
+  );
 
   position: relative;
 
@@ -25,8 +31,14 @@
 }
 
 .game-status {
+  position: relative;
+  z-index: 1;
+
   min-width: 0;
-  width: min(420px, 100%);
+  width: min(
+    100%,
+    calc(var(--game-board-size) - var(--game-status-inline-inset))
+  );
 
   display: flex;
   flex-direction: column;
@@ -57,11 +69,7 @@
 }
 
 .game-layout > .board-stage {
-  --plate-size: min(
-    520px,
-    calc(100vw - var(--game-viewport-inline-space)),
-    calc(100dvh - var(--game-viewport-block-reserve))
-  );
+  --plate-size: var(--game-board-size);
 
   width: min(100%, var(--plate-size));
   margin: 0;
@@ -82,18 +90,20 @@
 }
 
 .game-score-region .score-card {
-  width: fit-content;
+  width: min(360px, calc(100vw - 30px));
   margin: 0;
-  padding: 10px 18px;
+  padding: 14px 26px;
+
+  border-width: 3px;
 }
 
 .game-score-region .score-display {
-  gap: 24px;
+  gap: 34px;
 
-  font-size: 1.1rem;
+  font-size: 1.35rem;
 }
 
 .game-score-region .score-piece-image {
-  width: 40px;
-  height: 40px;
+  width: 54px;
+  height: 54px;
 }

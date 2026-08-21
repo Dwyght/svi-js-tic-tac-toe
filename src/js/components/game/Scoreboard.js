@@ -1,4 +1,7 @@
+import { EMOTES } from "../../config/constants.js";
 import { resolveTarget } from "../../utils/dom.js";
+
+const EMOTE_DISPLAY_DURATION = 3000;
 
 export class Scoreboard {
   constructor() {
@@ -9,6 +12,10 @@ export class Scoreboard {
 
   initializeElements() {
     this.element = document.createElement("div");
+    this.emoteTimeouts = {
+      X: null,
+      O: null,
+    };
     this.entries = {
       X: this.createEntryElements(),
       O: this.createEntryElements(),
@@ -25,6 +32,8 @@ export class Scoreboard {
       label: document.createElement("img"),
       separator: document.createElement("span"),
       value: document.createElement("span"),
+      emoteBubble: document.createElement("span"),
+      emoteImage: document.createElement("img"),
     };
   }
 
@@ -49,13 +58,22 @@ export class Scoreboard {
     entry.label.classList.add("score-piece-image");
     entry.label.src = imageSource;
     entry.label.alt = label;
+    entry.emoteBubble.classList.add("emote-bubble", "hidden");
+    entry.emoteBubble.setAttribute("role", "status");
+    entry.emoteImage.classList.add("emote-bubble-image");
   }
 
   appendElements() {
     for (const key of ["X", "O"]) {
       const entry = this.entries[key];
 
-      entry.entry.append(entry.label, entry.separator, entry.value);
+      entry.emoteBubble.append(entry.emoteImage);
+      entry.entry.append(
+        entry.label,
+        entry.separator,
+        entry.value,
+        entry.emoteBubble,
+      );
       this.element.append(entry.entry);
     }
   }
@@ -63,6 +81,39 @@ export class Scoreboard {
   update({ X, O }) {
     this.values.X.textContent = X;
     this.values.O.textContent = O;
+  }
+
+  showEmoteBubble(tile, emoteId) {
+    const entry = this.entries[tile];
+    const emote = EMOTES.find((candidate) => candidate.id === emoteId);
+
+    if (!entry || !emote) {
+      return;
+    }
+
+    if (this.emoteTimeouts[tile] !== null) {
+      clearTimeout(this.emoteTimeouts[tile]);
+    }
+
+    entry.emoteImage.src = emote.src;
+    entry.emoteImage.alt = emote.alt;
+    entry.emoteBubble.classList.remove("hidden");
+
+    this.emoteTimeouts[tile] = setTimeout(() => {
+      entry.emoteBubble.classList.add("hidden");
+      this.emoteTimeouts[tile] = null;
+    }, EMOTE_DISPLAY_DURATION);
+  }
+
+  clearEmoteBubbles() {
+    for (const tile of ["X", "O"]) {
+      if (this.emoteTimeouts[tile] !== null) {
+        clearTimeout(this.emoteTimeouts[tile]);
+        this.emoteTimeouts[tile] = null;
+      }
+
+      this.entries[tile].emoteBubble.classList.add("hidden");
+    }
   }
 
   render(target) {
