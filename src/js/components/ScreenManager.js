@@ -55,7 +55,7 @@ export class ScreenManager {
     }
 
     this.waitingModal = new Modal({
-      title: "Waiting for another player",
+      title: "Waiting for opponent",
       content: this.waitingContent,
       closable: false,
     });

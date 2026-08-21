@@ -16,6 +16,7 @@ import { Board } from "../components/Board.js";
 import { Button } from "../components/Button.js";
 import { Card } from "../components/Card.js";
 import { Modal } from "../components/Modal.js";
+import { Scoreboard } from "../components/Scoreboard.js";
 import { resolveTarget } from "../utils/dom.js";
 
 const GAME_OVER_INACTIVE_GRACE_REFRESHES = 3;
@@ -43,61 +44,6 @@ export class GamePage {
   // STEP 1
   // ========================================
 
-  createScoreEntry({ label, imageSource = "" }) {
-    const entry = document.createElement("span");
-    const separator = document.createElement("span");
-    const value = document.createElement("span");
-
-    entry.classList.add("score-entry");
-    separator.classList.add("score-separator");
-    separator.textContent = ":";
-    value.classList.add("score-value");
-
-    if (imageSource === "") {
-      const textLabel = document.createElement("span");
-
-      textLabel.classList.add("score-label");
-      textLabel.textContent = label;
-      entry.append(textLabel);
-    } else {
-      const image = document.createElement("img");
-
-      image.classList.add("score-piece-image");
-      image.src = imageSource;
-      image.alt = label;
-      entry.append(image);
-    }
-
-    entry.append(separator, value);
-
-    return { entry, value };
-  }
-
-  createScoreDisplay() {
-    const display = document.createElement("div");
-    const playerX = this.createScoreEntry({
-      label: "Player X",
-      imageSource: "./src/assets/images/mushroom.png",
-    });
-    const playerO = this.createScoreEntry({
-      label: "Player O",
-      imageSource: "./src/assets/images/coin.png",
-    });
-    const draws = this.createScoreEntry({ label: "Draws" });
-
-    display.classList.add("score-display");
-    display.append(playerX.entry, playerO.entry, draws.entry);
-
-    return {
-      display,
-      values: {
-        X: playerX.value,
-        O: playerO.value,
-        draws: draws.value,
-      },
-    };
-  }
-
   initializeElements() {
     this.container = document.createElement("div");
     this.gameLayout = document.createElement("div");
@@ -111,12 +57,9 @@ export class GamePage {
       content: this.turnDisplay,
       className: "turn-card",
     });
-    const scoreboard = this.createScoreDisplay();
-
-    this.scoreDisplay = scoreboard.display;
-    this.scoreValues = scoreboard.values;
+    this.scoreboard = new Scoreboard();
     this.scoreCard = new Card({
-      content: this.scoreDisplay,
+      content: this.scoreboard.element,
       className: "score-card",
     });
     this.message = document.createElement("p");
@@ -148,10 +91,7 @@ export class GamePage {
     this.resultContent = document.createElement("div");
     this.resultMessage = document.createElement("p");
     this.resultScoreLabel = document.createElement("p");
-    const resultScoreboard = this.createScoreDisplay();
-
-    this.resultScoreDisplay = resultScoreboard.display;
-    this.resultScoreValues = resultScoreboard.values;
+    this.resultScoreboard = new Scoreboard();
     this.resultWaitingIndicator = document.createElement("div");
     this.resultWaitingSpinner = document.createElement("span");
     this.resultWaitingText = document.createElement("p");
@@ -221,7 +161,7 @@ export class GamePage {
     this.pauseMenuAnchor.classList.add("pause-menu-anchor");
     this.scoreRegion.classList.add("game-score-region");
     this.statusContainer.classList.add("game-status");
-    this.scoreDisplay.setAttribute("aria-live", "polite");
+    this.scoreboard.element.setAttribute("aria-live", "polite");
     this.message.classList.add("message");
     this.boardContainer.classList.add("board-stage");
     this.gameCodeContainer.classList.add(
@@ -239,7 +179,7 @@ export class GamePage {
     this.pauseMenuButton.element.title = "Pause menu";
     this.pauseModal.dialog.classList.add("pause-menu-modal");
     this.resultContent.classList.add("modal-form");
-    this.resultScoreDisplay.classList.add("result-score");
+    this.resultScoreboard.element.classList.add("result-score");
     this.resultScoreLabel.classList.add("result-score-label");
     this.resultScoreLabel.textContent = "Series score";
     this.resultWaitingIndicator.classList.add(
@@ -278,7 +218,7 @@ export class GamePage {
     this.resultContent.append(
       this.resultMessage,
       this.resultScoreLabel,
-      this.resultScoreDisplay,
+      this.resultScoreboard.element,
       this.resultWaitingIndicator,
     );
     this.resultWaitingIndicator.append(
@@ -635,10 +575,8 @@ export class GamePage {
   updateScoreDisplays() {
     const scores = gameState.scores;
 
-    for (const key of ["X", "O", "draws"]) {
-      this.scoreValues[key].textContent = scores[key];
-      this.resultScoreValues[key].textContent = scores[key];
-    }
+    this.scoreboard.update(scores);
+    this.resultScoreboard.update(scores);
   }
 
   // ========================================
