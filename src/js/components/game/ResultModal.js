@@ -16,6 +16,10 @@ const OUTCOME_BANNERS = {
     source: "./src/assets/images/defeat.png",
     alt: "Defeat",
   },
+  spectator: {
+    source: "./src/assets/images/spectator.png",
+    alt: "Game finished",
+  },
 };
 
 export class ResultModal {
@@ -49,7 +53,7 @@ export class ResultModal {
     });
     this.leaveButton = new Button({
       label: "LEAVE",
-      className: "button-utility",
+      className: "button-danger",
       onClick: () => this.onLeave(),
     });
     this.modal = new Modal({

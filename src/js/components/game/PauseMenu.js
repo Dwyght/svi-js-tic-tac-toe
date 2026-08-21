@@ -45,7 +45,7 @@ export class PauseMenu {
     });
     this.leaveButton = new Button({
       label: "LEAVE",
-      className: "button-utility",
+      className: "button-danger",
       onClick: () => this.onLeave(),
     });
   }

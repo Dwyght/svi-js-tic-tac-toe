@@ -89,6 +89,7 @@ export class HomePage {
 
     this.spectateModal = new SpectateModal({
       onSpectateGame: () => this.spectateGame(),
+      onPasteGameCode: () => this.pasteSpectateGameCode(),
     });
 
     this.sushiPickerModal = new SushiPickerModal({
@@ -188,6 +189,22 @@ export class HomePage {
 
       this.joinGameModal.setGameCode(gameCode);
       this.joinGameModal.focusPlayerName();
+    } catch (error) {
+      console.error("Could not read the clipboard.", error);
+      this.setMessage("Could not paste the game code.");
+    }
+  }
+
+  async pasteSpectateGameCode() {
+    try {
+      const gameCode = await readClipboardText();
+
+      if (gameCode === "") {
+        this.setMessage("The clipboard does not contain a game code.");
+        return;
+      }
+
+      this.spectateModal.setGameCode(gameCode);
     } catch (error) {
       console.error("Could not read the clipboard.", error);
       this.setMessage("Could not paste the game code.");

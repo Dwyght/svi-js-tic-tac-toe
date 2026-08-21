@@ -5,11 +5,8 @@ export class Board {
     this.onCellClick = onCellClick;
 
     this.initializeElements();
-
     this.setAttributes();
-
     this.appendElements();
-
     this.bindEvents();
   }
 
@@ -37,7 +34,6 @@ export class Board {
     for (let rowIndex = 0; rowIndex < 3; rowIndex++) {
       for (let columnIndex = 0; columnIndex < 3; columnIndex++) {
         const cell = document.createElement("button");
-
         this.cells.push({
           element: cell,
           x: columnIndex,
@@ -61,7 +57,6 @@ export class Board {
 
   setAttributes() {
     this.container.id = "board";
-
     this.container.classList.add("board");
 
     for (const separator of this.separators) {
@@ -70,19 +65,14 @@ export class Board {
         `board-separator-${separator.orientation}`,
         `board-separator-${separator.position}`,
       );
-
       separator.element.setAttribute("aria-hidden", "true");
     }
 
     for (const cell of this.cells) {
       cell.element.classList.add("cell");
-
       cell.element.type = "button";
-
       cell.element.dataset.x = cell.x;
-
       cell.element.dataset.y = cell.y;
-
       this.clearCell(cell.element, cell.x, cell.y);
     }
   }
@@ -120,11 +110,8 @@ export class Board {
   displayBoard(values) {
     for (let cellIndex = 0; cellIndex < this.cells.length; cellIndex++) {
       const cell = this.cells[cellIndex];
-
       const value = values[cellIndex] || "";
-
       cell.element.dataset.value = value;
-
       cell.element.setAttribute(
         "aria-label",
         this.getCellLabel(value, cell.x, cell.y),
@@ -138,7 +125,6 @@ export class Board {
 
   setPlayerTile(tile) {
     this.container.classList.toggle("player-x", tile === "X");
-
     this.container.classList.toggle("player-o", tile === "O");
   }
 
@@ -160,7 +146,6 @@ export class Board {
 
     for (const cell of this.cells) {
       const value = cell.element.dataset.value;
-
       cell.element.setAttribute(
         "aria-label",
         this.getCellLabel(value, cell.x, cell.y),
@@ -175,7 +160,6 @@ export class Board {
   disableBoard() {
     for (const cell of this.cells) {
       cell.element.disabled = true;
-
       cell.element.classList.add("disabled");
     }
   }
@@ -187,7 +171,6 @@ export class Board {
   enableBoard() {
     for (const cell of this.cells) {
       cell.element.disabled = false;
-
       cell.element.classList.remove("disabled");
     }
   }
@@ -206,7 +189,6 @@ export class Board {
 
   clearCell(element, x, y) {
     element.dataset.value = "";
-
     element.setAttribute("aria-label", this.getCellLabel("", x, y));
   }
 

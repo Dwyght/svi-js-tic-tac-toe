@@ -3,8 +3,9 @@ import { Modal } from "../base/Modal.js";
 import { resolveTarget } from "../../utils/dom.js";
 
 export class SpectateModal {
-  constructor({ onSpectateGame }) {
+  constructor({ onSpectateGame, onPasteGameCode }) {
     this.onSpectateGame = onSpectateGame;
+    this.onPasteGameCode = onPasteGameCode;
 
     this.initializeElements();
     this.setAttributes();
@@ -15,8 +16,14 @@ export class SpectateModal {
   initializeElements() {
     this.form = document.createElement("form");
     this.codeLabel = document.createElement("label");
+    this.codeField = document.createElement("div");
     this.codeInput = document.createElement("input");
     this.message = document.createElement("p");
+    this.pasteButton = new Button({
+      label: "PASTE",
+      className: "button-utility",
+      onClick: () => this.onPasteGameCode(),
+    });
     this.spectateButton = new Button({
       label: "SPECTATE GAME",
       type: "submit",
@@ -34,14 +41,17 @@ export class SpectateModal {
     this.codeLabel.htmlFor = "spectate-game-code";
     this.codeInput.id = "spectate-game-code";
     this.codeInput.type = "text";
-    this.codeInput.placeholder = "Enter game code";
+    this.codeInput.placeholder = "Enter or paste game code";
     this.codeInput.autocomplete = "off";
     this.codeInput.spellcheck = false;
+    this.codeField.classList.add("game-code-field");
     this.message.classList.add("message");
   }
 
   appendElements() {
-    this.form.append(this.codeLabel, this.codeInput, this.message);
+    this.form.append(this.codeLabel, this.codeField, this.message);
+    this.codeField.append(this.codeInput);
+    this.pasteButton.render(this.codeField);
     this.spectateButton.render(this.form);
   }
 
@@ -54,6 +64,10 @@ export class SpectateModal {
 
   getGameCode() {
     return this.codeInput.value.trim();
+  }
+
+  setGameCode(gameCode) {
+    this.codeInput.value = gameCode;
   }
 
   setMessage(message) {

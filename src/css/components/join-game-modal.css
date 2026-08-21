@@ -1,13 +1,13 @@
 /* =========================
-   JOIN GAME MODAL
+   GAME CODE FIELD
 ========================= */
 
-.join-code-field {
+.game-code-field {
   display: flex;
 
   gap: 10px;
 }
 
-.join-code-field input {
+.game-code-field input {
   min-width: 0;
 }

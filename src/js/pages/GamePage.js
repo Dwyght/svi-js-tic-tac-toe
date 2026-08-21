@@ -561,18 +561,10 @@ export class GamePage {
       }
     }
 
-    if (result.status === "draw") {
-      await this.resultModal.setOutcome("draw");
-
-      if (!this.isQuitting && gameState.gameCode !== null) {
-        this.resultModal.open();
-      }
-
-      return;
-    }
-
     if (gameState.isSpectator) {
-      await this.resultModal.setOutcome("victory");
+      await this.resultModal.setOutcome("spectator");
+    } else if (result.status === "draw") {
+      await this.resultModal.setOutcome("draw");
     } else if (result.winner === gameState.myTile) {
       await this.resultModal.setOutcome("victory");
     } else {

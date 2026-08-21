@@ -46,7 +46,7 @@ export class JoinGameModal {
     this.codeInput.placeholder = "Enter or paste game code";
     this.codeInput.autocomplete = "off";
     this.codeInput.spellcheck = false;
-    this.codeField.classList.add("join-code-field");
+    this.codeField.classList.add("game-code-field");
     this.nameLabel.textContent = "Player Name";
     this.nameLabel.htmlFor = "join-player-name";
     this.nameInput.id = "join-player-name";
