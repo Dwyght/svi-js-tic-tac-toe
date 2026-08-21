@@ -43,7 +43,15 @@ export class QuitConfirmModal {
   }
 
   open() {
+    this.setPending(false);
     this.modal.open();
+  }
+
+  setPending(isPending) {
+    this.cancelButton.element.disabled = isPending;
+    this.confirmButton.element.disabled = isPending;
+    this.confirmButton.setLabel(isPending ? "QUITTING..." : "YES, QUIT");
+    this.modal.setDismissEnabled(!isPending);
   }
 
   close() {

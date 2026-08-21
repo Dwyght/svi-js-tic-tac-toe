@@ -1,8 +1,6 @@
 import { ScreenManager } from "./components/ScreenManager.js";
 
-import { Button } from "./components/base/Button.js";
-
-import { Modal } from "./components/base/Modal.js";
+import { ResumeGameModal } from "./components/game/ResumeGameModal.js";
 
 import { HomePage } from "./pages/HomePage.js";
 
@@ -57,6 +55,11 @@ const homePage = new HomePage({
   onGameStarted: handleGameStarted,
 });
 
+const resumeGameModal = new ResumeGameModal({
+  onResume: () => resumeSavedGame(),
+  onQuit: () => gamePage.openQuitModal(),
+});
+
 // ========================================
 // RENDER PAGES
 // ========================================
@@ -64,6 +67,8 @@ const homePage = new HomePage({
 homePage.render(screenManager.getHomeTarget());
 
 gamePage.render(screenManager.getGameTarget());
+
+resumeGameModal.render(document.body);
 
 // ========================================
 // WHEN TWO PLAYERS ARE READY
@@ -79,6 +84,8 @@ async function handleGameStarted() {
 
 function handleReturnHome(message = "") {
   pollingService.stopRefresh();
+
+  resumeGameModal.close();
 
   screenManager.returnToHome();
 
@@ -105,61 +112,29 @@ function isValidPlayerSession(session) {
 }
 
 function showResumePrompt(session) {
-  const resumeContent = document.createElement("div");
-  const resumeMessage = document.createElement("p");
-
-  resumeContent.classList.add("modal-form");
-  resumeMessage.textContent = `Resume your game as ${session.name} (Player ${session.tile})?`;
-
-  const resumeModal = new Modal({
-    title: "Resume Game",
-    content: resumeContent,
-    closable: false,
-  });
-  const resumeButton = new Button({
-    label: "RESUME",
-    className: "button-confirm",
-    onClick: async () => {
-      resumeButton.element.disabled = true;
-      discardButton.element.disabled = true;
-
-      gameState.setSession({
-        gameCode: session.gameCode,
-        myTile: session.tile,
-        myName: session.name,
-        gameStarted: true,
-      });
-
-      resumeModal.close();
-
-      try {
-        await gamePage.startGame();
-        resumeModal.dialog.remove();
-      } catch (error) {
-        console.error("Could not resume game.", error);
-        clearSession();
-        gameState.reset();
-        resumeModal.dialog.remove();
-        handleReturnHome();
-      }
-    },
-  });
-  const discardButton = new Button({
-    label: "DISCARD",
-    className: "button-utility",
-    onClick: () => {
-      clearSession();
-      resumeModal.close();
-      resumeModal.dialog.remove();
-      screenManager.showHomeScreen();
-    },
+  gameState.setSession({
+    gameCode: session.gameCode,
+    myTile: session.tile,
+    myName: session.name,
+    gameStarted: true,
   });
 
-  resumeContent.append(resumeMessage);
-  resumeButton.render(resumeContent);
-  discardButton.render(resumeContent);
-  resumeModal.render(document.body);
-  resumeModal.open();
+  resumeGameModal.setSession(session);
+  resumeGameModal.open();
+}
+
+async function resumeSavedGame() {
+  resumeGameModal.setResumePending(true);
+
+  try {
+    await gamePage.startGame();
+    resumeGameModal.close();
+  } catch (error) {
+    console.error("Could not resume game.", error);
+    clearSession();
+    gameState.reset();
+    handleReturnHome();
+  }
 }
 
 async function startApplication() {

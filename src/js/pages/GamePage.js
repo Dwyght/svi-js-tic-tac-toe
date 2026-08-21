@@ -30,6 +30,7 @@ export class GamePage {
     this.inactiveGameOverRefreshes = 0;
     this.roundScored = false;
     this.isSubmittingMove = false;
+    this.isQuitting = false;
 
     this.initializeElements();
     this.setAttributes();
@@ -163,6 +164,7 @@ export class GamePage {
   // ========================================
 
   async startGame() {
+    this.isQuitting = false;
     gameState.gameOver = false;
     this.inactiveGameOverRefreshes = 0;
     this.roundScored = false;
@@ -198,11 +200,16 @@ export class GamePage {
   // ========================================
 
   async refreshGame() {
-    if (gameState.gameCode === null) {
+    if (gameState.gameCode === null || this.isQuitting) {
       return;
     }
 
-    const started = await checkGameStillActive(gameState.gameCode);
+    const gameCode = gameState.gameCode;
+    const started = await checkGameStillActive(gameCode);
+
+    if (this.isQuitting || gameState.gameCode !== gameCode) {
+      return;
+    }
 
     // Someone reset/removed room
     if (!started) {
@@ -239,7 +246,16 @@ export class GamePage {
   // ========================================
 
   async loadBoard() {
-    const board = await fetchAndParseBoard(gameState.gameCode);
+    if (gameState.gameCode === null || this.isQuitting) {
+      return;
+    }
+
+    const gameCode = gameState.gameCode;
+    const board = await fetchAndParseBoard(gameCode);
+
+    if (this.isQuitting || gameState.gameCode !== gameCode) {
+      return;
+    }
 
     if (board.status === "waiting") {
       this.message.textContent = "";
@@ -333,6 +349,10 @@ export class GamePage {
         y,
       );
 
+      if (this.isQuitting) {
+        return;
+      }
+
       if (result.reason === "waiting") {
         this.message.textContent = "";
         return;
@@ -361,7 +381,10 @@ export class GamePage {
       await this.loadBoard();
     } catch (error) {
       console.error(error);
-      this.message.textContent = "Could not send move.";
+
+      if (!this.isQuitting) {
+        this.message.textContent = "Could not send move.";
+      }
     } finally {
       this.isSubmittingMove = false;
     }
@@ -372,6 +395,10 @@ export class GamePage {
   // ========================================
 
   finishGame(result) {
+    if (this.isQuitting) {
+      return;
+    }
+
     gameState.gameOver = true;
     this.inactiveGameOverRefreshes = 0;
     this.board.disableBoard();
@@ -497,7 +524,12 @@ export class GamePage {
   }
 
   async confirmQuit() {
-    this.quitConfirmModal.close();
+    if (this.isQuitting) {
+      return;
+    }
+
+    this.isQuitting = true;
+    this.quitConfirmModal.setPending(true);
     await this.handleReset();
   }
 
@@ -525,6 +557,7 @@ export class GamePage {
 
   async handleReset() {
     if (gameState.gameCode === null) {
+      this.isQuitting = false;
       return;
     }
 
@@ -539,6 +572,8 @@ export class GamePage {
       this.quitConfirmModal.close();
       this.onReturnHome("Game reset.");
     } catch (error) {
+      this.isQuitting = false;
+      this.quitConfirmModal.setPending(false);
       console.error(error);
       this.message.textContent = "Could not reset game.";
     }

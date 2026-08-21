@@ -62,6 +62,15 @@ export class Modal {
     return this.dialog.open;
   }
 
+  setDismissEnabled(isEnabled) {
+    if (!this.closeButton) {
+      return;
+    }
+
+    this.closable = isEnabled;
+    this.closeButton.element.disabled = !isEnabled;
+  }
+
   render(target) {
     const parent = resolveTarget(target);
 
