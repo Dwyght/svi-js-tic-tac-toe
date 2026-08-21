@@ -444,7 +444,10 @@ export class GamePage {
   }
 
   scoreRound(result) {
-    if (this.roundScored) {
+    if (
+      this.roundScored ||
+      (result.winner !== "X" && result.winner !== "O")
+    ) {
       return;
     }
 
@@ -452,11 +455,7 @@ export class GamePage {
       ...gameState.scores,
     };
 
-    if (result.status === "draw") {
-      scores.draws++;
-    } else if (result.winner === "X" || result.winner === "O") {
-      scores[result.winner]++;
-    }
+    scores[result.winner]++;
 
     gameState.scores = scores;
     saveScore(gameState.gameCode, scores);

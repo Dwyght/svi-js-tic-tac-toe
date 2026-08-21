@@ -14,7 +14,6 @@ function getDefaultScores() {
   return {
     X: 0,
     O: 0,
-    draws: 0,
   };
 }
 
@@ -111,7 +110,6 @@ export function getScores(gameCode) {
     return {
       X: Number.isFinite(scores.X) ? scores.X : 0,
       O: Number.isFinite(scores.O) ? scores.O : 0,
-      draws: Number.isFinite(scores.draws) ? scores.draws : 0,
     };
   } catch {
     return getDefaultScores();

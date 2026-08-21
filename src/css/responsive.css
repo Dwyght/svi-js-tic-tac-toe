@@ -1,14 +1,47 @@
+@media (min-width: 1400px) and (min-height: 800px) {
+  .home-page {
+    --home-banner-width: min(
+      720px,
+      48vw,
+      calc(100dvh - 220px)
+    );
+
+    padding-bottom: clamp(50px, 6dvh, 72px);
+  }
+
+  .home-actions {
+    gap: 18px;
+  }
+
+  .home-action-button {
+    width: min(360px, 100%);
+    min-height: 62px;
+    padding: 16px 32px;
+
+    font-size: 1.1rem;
+  }
+
+  .how-to-play-button {
+    width: 56px;
+    min-width: 56px;
+    height: 56px;
+    min-height: 56px;
+
+    font-size: 1.65rem;
+  }
+}
+
 @media (max-width: 650px) {
+  .bg-video {
+    object-position: 10% center;
+  }
+
   .game-container {
     padding: 15px;
   }
 
   .home-page {
-    padding-bottom: clamp(22px, 4dvh, 36px);
-  }
-
-  .home-banner {
-    aspect-ratio: 1173 / 941;
+    padding-bottom: clamp(76px, 10dvh, 90px);
   }
 
   .home-actions {
@@ -49,6 +82,15 @@
   }
 
   .pause-menu-button {
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    min-height: 42px;
+
+    font-size: 1.25rem;
+  }
+
+  .how-to-play-button {
     width: 42px;
     min-width: 42px;
     height: 42px;
@@ -130,6 +172,12 @@
 
   .waiting-modal .game-code-container {
     margin: 10px 0;
+  }
+}
+
+@media (max-width: 650px) and (max-height: 500px) {
+  .home-page {
+    padding-bottom: 66px;
   }
 }
 

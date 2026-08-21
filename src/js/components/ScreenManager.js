@@ -40,10 +40,6 @@ export class ScreenManager {
       onClick: () => this.copyGameCode(),
     });
 
-    this.waitingPlayer = document.createElement("p");
-
-    this.waitingHint = document.createElement("p");
-
     this.waitingDots = document.createElement("span");
 
     this.waitingDotElements = [];
@@ -76,8 +72,6 @@ export class ScreenManager {
 
     this.gameScreen.classList.add("hidden");
 
-    this.waitingText.textContent = "Share this game code:";
-
     this.waitingContent.classList.add("waiting-modal-content");
 
     this.waitingModal.dialog.classList.add("waiting-modal");
@@ -87,11 +81,6 @@ export class ScreenManager {
     this.waitingGameCode.id = "waiting-game-code";
 
     this.waitingGameCode.classList.add("game-code");
-
-    this.waitingHint.classList.add("hint");
-
-    this.waitingHint.textContent =
-      "Duplicate this tab, choose Join Game, paste the code, and enter the second player's name.";
 
     this.waitingDots.classList.add("waiting-dots");
 
@@ -118,8 +107,6 @@ export class ScreenManager {
     this.waitingContent.append(
       this.waitingText,
       this.gameCodeContainer,
-      this.waitingPlayer,
-      this.waitingHint,
     );
 
     this.gameCodeContainer.append(this.waitingGameCode);
@@ -170,9 +157,10 @@ export class ScreenManager {
 
     this.gameScreen.classList.add("hidden");
 
-    this.waitingGameCode.textContent = gameCode;
+    this.waitingText.textContent =
+      `Hi ${playerName}, share this game code:`;
 
-    this.waitingPlayer.textContent = `${playerName}, you are Player X`;
+    this.waitingGameCode.textContent = gameCode;
 
     this.waitingModal.open();
   }

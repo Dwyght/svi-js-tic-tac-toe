@@ -107,7 +107,6 @@ class GameState {
     this._scores = {
       X: 0,
       O: 0,
-      draws: 0,
     };
   }
 
@@ -126,7 +125,6 @@ class GameState {
     this._scores = {
       X: 0,
       O: 0,
-      draws: 0,
     };
   }
 }

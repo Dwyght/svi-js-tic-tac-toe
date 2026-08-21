@@ -64,12 +64,12 @@ export class HomePage {
     });
 
     this.howToPlayButton = new Button({
-      label: "HOW TO PLAY",
-      className: "home-action-button",
+      label: "?",
+      className: "button-utility",
       onClick: () => this.openHowToPlayModal(),
     });
 
-    this.howToPlayButton.element.classList.add("button-utility");
+    this.howToPlayButton.element.classList.add("how-to-play-button");
 
     this.createGameModal = new CreateGameModal({
       onCreateGame: () => this.createGame(),
@@ -109,6 +109,11 @@ export class HomePage {
     this.bannerImage.src = "./src/assets/images/banner.png";
     this.bannerImage.alt = "Tic Tac Toe";
     this.actions.classList.add("home-actions");
+    this.howToPlayButton.element.setAttribute(
+      "aria-label",
+      "How to play",
+    );
+    this.howToPlayButton.element.title = "How to play";
 
     // NOTICE
     this.noticeContent.classList.add("modal-form");
@@ -125,7 +130,7 @@ export class HomePage {
     this.openCreateButton.render(this.actions);
     this.openJoinButton.render(this.actions);
     this.openSpectateButton.render(this.actions);
-    this.howToPlayButton.render(this.actions);
+    this.howToPlayButton.render(this.container);
 
     this.noticeContent.append(this.noticeMessage);
     this.noticeButton.render(this.noticeContent);

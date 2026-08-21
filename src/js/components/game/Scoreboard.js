@@ -10,21 +10,19 @@ export class Scoreboard {
   initializeElements() {
     this.element = document.createElement("div");
     this.entries = {
-      X: this.createEntryElements("img"),
-      O: this.createEntryElements("img"),
-      draws: this.createEntryElements("span"),
+      X: this.createEntryElements(),
+      O: this.createEntryElements(),
     };
     this.values = {
       X: this.entries.X.value,
       O: this.entries.O.value,
-      draws: this.entries.draws.value,
     };
   }
 
-  createEntryElements(labelElementName) {
+  createEntryElements() {
     return {
       entry: document.createElement("span"),
-      label: document.createElement(labelElementName),
+      label: document.createElement("img"),
       separator: document.createElement("span"),
       value: document.createElement("span"),
     };
@@ -41,27 +39,20 @@ export class Scoreboard {
       label: "Player O",
       imageSource: "./src/assets/images/coin.png",
     });
-    this.setEntryAttributes(this.entries.draws, { label: "Draws" });
   }
 
-  setEntryAttributes(entry, { label, imageSource = "" }) {
+  setEntryAttributes(entry, { label, imageSource }) {
     entry.entry.classList.add("score-entry");
     entry.separator.classList.add("score-separator");
     entry.separator.textContent = ":";
     entry.value.classList.add("score-value");
-
-    if (imageSource === "") {
-      entry.label.classList.add("score-label");
-      entry.label.textContent = label;
-    } else {
-      entry.label.classList.add("score-piece-image");
-      entry.label.src = imageSource;
-      entry.label.alt = label;
-    }
+    entry.label.classList.add("score-piece-image");
+    entry.label.src = imageSource;
+    entry.label.alt = label;
   }
 
   appendElements() {
-    for (const key of ["X", "O", "draws"]) {
+    for (const key of ["X", "O"]) {
       const entry = this.entries[key];
 
       entry.entry.append(entry.label, entry.separator, entry.value);
@@ -69,10 +60,9 @@ export class Scoreboard {
     }
   }
 
-  update({ X, O, draws }) {
+  update({ X, O }) {
     this.values.X.textContent = X;
     this.values.O.textContent = O;
-    this.values.draws.textContent = draws;
   }
 
   render(target) {
