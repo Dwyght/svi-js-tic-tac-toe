@@ -32,10 +32,6 @@
 }
 
 @media (max-width: 650px) {
-  .bg-video {
-    object-position: 10% center;
-  }
-
   .game-container {
     padding: 15px;
   }
