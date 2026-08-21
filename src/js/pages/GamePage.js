@@ -570,7 +570,7 @@ export class GamePage {
       this.resultModal.close();
       this.pauseMenu.close();
       this.quitConfirmModal.close();
-      this.onReturnHome("Game reset.");
+      this.onReturnHome();
     } catch (error) {
       this.isQuitting = false;
       this.quitConfirmModal.setPending(false);
