@@ -74,6 +74,10 @@ export class CreateGameModal {
     this.modal.close();
   }
 
+  isOpen() {
+    return this.modal.isOpen();
+  }
+
   render(target) {
     const parent = resolveTarget(target);
 

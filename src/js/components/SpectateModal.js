@@ -75,6 +75,10 @@ export class SpectateModal {
     this.modal.close();
   }
 
+  isOpen() {
+    return this.modal.isOpen();
+  }
+
   render(target) {
     const parent = resolveTarget(target);
 

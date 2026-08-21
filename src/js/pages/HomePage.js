@@ -1,40 +1,27 @@
 import { Button } from "../components/Button.js";
-
 import { CreateGameModal } from "../components/CreateGameModal.js";
-
 import { HowToPlayModal } from "../components/HowToPlayModal.js";
-
 import { JoinGameModal } from "../components/JoinGameModal.js";
-
 import { Modal } from "../components/Modal.js";
-
 import { SpectateModal } from "../components/SpectateModal.js";
-
 import {
   createGame as createGameService,
   joinGame as joinGameService,
   spectateGame as spectateGameService,
   waitForPlayerO as waitForPlayerOService,
 } from "../services/gameFlowService.js";
-
 import { readClipboardText } from "../utils/clipboard.js";
-
 import { resolveTarget } from "../utils/dom.js";
 
 export class HomePage {
   constructor({ screenManager, pollingService, onGameStarted }) {
     this.screenManager = screenManager;
-
     this.pollingService = pollingService;
-
     this.onGameStarted = onGameStarted;
 
     this.initializeElements();
-
     this.initializeComponents();
-
     this.setAttributes();
-
     this.appendElements();
   }
 
@@ -44,17 +31,12 @@ export class HomePage {
 
   initializeElements() {
     this.container = document.createElement("div");
-
     this.banner = document.createElement("div");
-
     this.bannerImage = document.createElement("img");
-
     this.actions = document.createElement("div");
 
     // NOTICE
-
     this.noticeContent = document.createElement("div");
-
     this.noticeMessage = document.createElement("p");
   }
 
@@ -102,8 +84,6 @@ export class HomePage {
       onSpectateGame: () => this.spectateGame(),
     });
 
-    this.howToPlayModal = new HowToPlayModal();
-
     this.noticeButton = new Button({
       label: "OK",
       className: "button-confirm",
@@ -115,6 +95,8 @@ export class HomePage {
       content: this.noticeContent,
       closable: false,
     });
+
+    this.howToPlayModal = new HowToPlayModal();
   }
 
   // ========================================
@@ -123,17 +105,12 @@ export class HomePage {
 
   setAttributes() {
     this.container.classList.add("home-page");
-
     this.banner.classList.add("home-banner");
-
     this.bannerImage.src = "./src/assets/images/banner.png";
-
     this.bannerImage.alt = "Tic Tac Toe";
-
     this.actions.classList.add("home-actions");
 
     // NOTICE
-
     this.noticeContent.classList.add("modal-form");
   }
 
@@ -143,21 +120,14 @@ export class HomePage {
 
   appendElements() {
     this.banner.append(this.bannerImage);
-
     this.container.append(this.banner);
-
     this.container.append(this.actions);
-
     this.openCreateButton.render(this.actions);
-
     this.openJoinButton.render(this.actions);
-
     this.openSpectateButton.render(this.actions);
-
     this.howToPlayButton.render(this.actions);
 
     this.noticeContent.append(this.noticeMessage);
-
     this.noticeButton.render(this.noticeContent);
   }
 
@@ -183,7 +153,6 @@ export class HomePage {
 
   showNotice(message) {
     this.noticeMessage.textContent = message;
-
     this.noticeModal.open();
   }
 
@@ -196,20 +165,15 @@ export class HomePage {
       const gameCode = await readClipboardText();
 
       if (gameCode === "") {
-        this.joinGameModal.setMessage(
-          "The clipboard does not contain a game code.",
-        );
-
+        this.setMessage("The clipboard does not contain a game code.");
         return;
       }
 
       this.joinGameModal.setGameCode(gameCode);
-
       this.joinGameModal.focusPlayerName();
     } catch (error) {
       console.error("Could not read the clipboard.", error);
-
-      this.joinGameModal.setMessage("Could not paste the game code.");
+      this.setMessage("Could not paste the game code.");
     }
   }
 
@@ -221,23 +185,19 @@ export class HomePage {
     const playerName = this.createGameModal.getPlayerName();
 
     if (playerName === "") {
-      this.createGameModal.setMessage("Please enter your name.");
-
+      this.setMessage("Please enter your name.");
       return;
     }
 
     const result = await createGameService(playerName);
 
     if (!result.ok) {
-      this.createGameModal.setMessage(result.message);
-
+      this.setMessage(result.message);
       return;
     }
 
     this.createGameModal.close();
-
     this.screenManager.showWaitingScreen(result.gameCode, playerName);
-
     this.waitForPlayerO(result.gameCode);
   }
 
@@ -254,7 +214,6 @@ export class HomePage {
       }
 
       this.pollingService.stopRefresh();
-
       this.onGameStarted();
     });
   }
@@ -270,27 +229,23 @@ export class HomePage {
     const playerName = this.joinGameModal.getPlayerName();
 
     if (gameCode === "") {
-      this.joinGameModal.setMessage("Please enter a game code.");
-
+      this.setMessage("Please enter a game code.");
       return;
     }
 
     if (playerName === "") {
-      this.joinGameModal.setMessage("Please enter your name.");
-
+      this.setMessage("Please enter your name.");
       return;
     }
 
     const result = await joinGameService(gameCode, playerName);
 
     if (!result.ok) {
-      this.joinGameModal.setMessage(result.message);
-
+      this.setMessage(result.message);
       return;
     }
 
     this.joinGameModal.close();
-
     this.onGameStarted();
   }
 
@@ -302,22 +257,42 @@ export class HomePage {
     const gameCode = this.spectateModal.getGameCode();
 
     if (gameCode === "") {
-      this.spectateModal.setMessage("Please enter a game code.");
-
+      this.setMessage("Please enter a game code.");
       return;
     }
 
     const result = await spectateGameService(gameCode);
 
     if (!result.ok) {
-      this.spectateModal.setMessage(result.message);
-
+      this.setMessage(result.message);
       return;
     }
 
     this.spectateModal.close();
-
     this.onGameStarted();
+  }
+
+  // ========================================
+  // MESSAGE
+  // ========================================
+
+  setMessage(message) {
+    if (this.createGameModal.isOpen()) {
+      this.createGameModal.setMessage(message);
+      return;
+    }
+
+    if (this.joinGameModal.isOpen()) {
+      this.joinGameModal.setMessage(message);
+      return;
+    }
+
+    if (this.spectateModal.isOpen()) {
+      this.spectateModal.setMessage(message);
+      return;
+    }
+
+    this.showNotice(message);
   }
 
   // ========================================
@@ -326,19 +301,12 @@ export class HomePage {
 
   resetForm() {
     this.createGameModal.reset();
-
     this.joinGameModal.reset();
-
     this.spectateModal.reset();
-
     this.createGameModal.close();
-
     this.joinGameModal.close();
-
     this.spectateModal.close();
-
     this.noticeModal.close();
-
     this.howToPlayModal.close();
   }
 
@@ -351,15 +319,10 @@ export class HomePage {
 
     if (parent) {
       parent.append(this.container);
-
       this.createGameModal.render(document.body);
-
       this.joinGameModal.render(document.body);
-
       this.spectateModal.render(document.body);
-
       this.noticeModal.render(document.body);
-
       this.howToPlayModal.render(document.body);
     } else {
       console.error("HomePage target not found.");
