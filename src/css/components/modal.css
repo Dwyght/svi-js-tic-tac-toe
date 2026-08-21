@@ -313,3 +313,14 @@
 
   letter-spacing: 4px;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-spinner,
+  .waiting-dot {
+    animation: none;
+  }
+
+  .waiting-dot {
+    opacity: 1;
+  }
+}
