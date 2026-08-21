@@ -192,6 +192,10 @@
   cursor: default;
 }
 
+.cell.occupied {
+  cursor: default;
+}
+
 .cell:focus-visible {
   z-index: 1;
 

@@ -98,6 +98,13 @@ export class Board {
   bindEvents() {
     for (const cell of this.cells) {
       cell.element.addEventListener("click", () => {
+        if (
+          cell.element.disabled ||
+          this.isCellOccupied(cell.element)
+        ) {
+          return;
+        }
+
         this.onCellClick(cell.x, cell.y);
       });
     }
@@ -150,6 +157,14 @@ export class Board {
         "aria-label",
         this.getCellLabel(value, cell.x, cell.y),
       );
+
+      const isOccupied = this.isCellOccupied(cell.element);
+      cell.element.classList.toggle("occupied", isOccupied);
+
+      if (isOccupied) {
+        cell.element.disabled = true;
+        cell.element.classList.add("disabled");
+      }
     }
   }
 
@@ -170,8 +185,10 @@ export class Board {
 
   enableBoard() {
     for (const cell of this.cells) {
-      cell.element.disabled = false;
-      cell.element.classList.remove("disabled");
+      const isOccupied = this.isCellOccupied(cell.element);
+
+      cell.element.disabled = isOccupied;
+      cell.element.classList.toggle("disabled", isOccupied);
     }
   }
 
@@ -189,7 +206,12 @@ export class Board {
 
   clearCell(element, x, y) {
     element.dataset.value = "";
+    element.classList.remove("occupied");
     element.setAttribute("aria-label", this.getCellLabel("", x, y));
+  }
+
+  isCellOccupied(element) {
+    return element.dataset.value === "X" || element.dataset.value === "O";
   }
 
   getCellLabel(value, x, y) {
