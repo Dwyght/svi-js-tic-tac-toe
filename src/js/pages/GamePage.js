@@ -13,10 +13,9 @@ import {
   resetGameSession,
 } from "../services/gameFlowService.js";
 import { Board } from "../components/Board.js";
-import { Button } from "../components/Button.js";
 import { Card } from "../components/Card.js";
-import { Modal } from "../components/Modal.js";
 import { PauseMenu } from "../components/PauseMenu.js";
+import { QuitConfirmModal } from "../components/QuitConfirmModal.js";
 import { ResultModal } from "../components/ResultModal.js";
 import { Scoreboard } from "../components/Scoreboard.js";
 import { resolveTarget } from "../utils/dom.js";
@@ -81,22 +80,8 @@ export class GamePage {
     });
 
     // Quit confirmation
-    this.quitContent = document.createElement("div");
-    this.quitMessage = document.createElement("p");
-
-    this.cancelQuitButton = new Button({
-      label: "CANCEL",
-      className: "button-utility",
-      onClick: () => this.quitModal.close(),
-    });
-    this.confirmQuitButton = new Button({
-      label: "YES, QUIT",
-      className: "button-danger",
-      onClick: () => this.confirmQuit(),
-    });
-    this.quitModal = new Modal({
-      title: "Quit Game",
-      content: this.quitContent,
+    this.quitConfirmModal = new QuitConfirmModal({
+      onConfirm: () => this.confirmQuit(),
     });
   }
 
@@ -112,9 +97,6 @@ export class GamePage {
     this.scoreboard.element.setAttribute("aria-live", "polite");
     this.message.classList.add("message");
     this.boardContainer.classList.add("board-stage");
-    this.quitContent.classList.add("modal-form");
-    this.quitMessage.textContent =
-      "Are you sure you want to quit? This will end the game for both players.";
   }
 
   // ========================================
@@ -131,9 +113,6 @@ export class GamePage {
       this.scoreRegion,
     );
     this.container.append(this.gameLayout);
-    this.quitContent.append(this.quitMessage);
-    this.cancelQuitButton.render(this.quitContent);
-    this.confirmQuitButton.render(this.quitContent);
   }
 
   configureViewerControls() {
@@ -144,13 +123,11 @@ export class GamePage {
     });
 
     if (gameState.isSpectator) {
-      this.quitModal.dialog.remove();
+      this.quitConfirmModal.remove();
       return;
     }
 
-    if (!this.quitModal.dialog.isConnected) {
-      this.quitModal.render(document.body);
-    }
+    this.quitConfirmModal.render(document.body);
   }
 
   clearBoardForViewer(isSpectator = gameState.isSpectator) {
@@ -194,7 +171,7 @@ export class GamePage {
     this.pauseMenu.updateGameCode(gameState.gameCode);
     this.resultModal.close();
     this.pauseMenu.close();
-    this.quitModal.close();
+    this.quitConfirmModal.close();
     this.configureViewerControls();
     this.clearBoardForViewer();
     this.board.setPlayerTile(gameState.myTile);
@@ -244,7 +221,7 @@ export class GamePage {
       this.clearBoardForViewer(wasSpectator);
       this.resultModal.close();
       this.pauseMenu.close();
-      this.quitModal.close();
+      this.quitConfirmModal.close();
       this.onReturnHome(
         wasSpectator
           ? "This game has ended."
@@ -516,11 +493,11 @@ export class GamePage {
 
   openQuitModal() {
     this.pauseMenu.close();
-    this.quitModal.open();
+    this.quitConfirmModal.open();
   }
 
   async confirmQuit() {
-    this.quitModal.close();
+    this.quitConfirmModal.close();
     await this.handleReset();
   }
 
@@ -537,7 +514,7 @@ export class GamePage {
     this.clearBoardForViewer(true);
     this.resultModal.close();
     this.pauseMenu.close();
-    this.quitModal.close();
+    this.quitConfirmModal.close();
     gameState.reset();
     this.onReturnHome();
   }
@@ -559,7 +536,7 @@ export class GamePage {
       this.clearBoardForViewer();
       this.resultModal.close();
       this.pauseMenu.close();
-      this.quitModal.close();
+      this.quitConfirmModal.close();
       this.onReturnHome("Game reset.");
     } catch (error) {
       console.error(error);
@@ -578,7 +555,7 @@ export class GamePage {
       parent.append(this.container);
       this.resultModal.render(document.body);
       this.pauseMenu.render(this.container);
-      this.quitModal.render(document.body);
+      this.quitConfirmModal.render(document.body);
     } else {
       console.error("GamePage target not found.");
     }
