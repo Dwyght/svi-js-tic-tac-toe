@@ -1,4 +1,4 @@
-import { resolveTarget } from "../utils/dom.js";
+import { resolveTarget } from "../../utils/dom.js";
 
 export class Board {
   constructor(onCellClick) {

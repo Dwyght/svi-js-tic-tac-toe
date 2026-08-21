@@ -1,9 +1,9 @@
-import { Button } from "../components/Button.js";
-import { CreateGameModal } from "../components/CreateGameModal.js";
-import { HowToPlayModal } from "../components/HowToPlayModal.js";
-import { JoinGameModal } from "../components/JoinGameModal.js";
-import { Modal } from "../components/Modal.js";
-import { SpectateModal } from "../components/SpectateModal.js";
+import { Button } from "../components/base/Button.js";
+import { Modal } from "../components/base/Modal.js";
+import { CreateGameModal } from "../components/game/CreateGameModal.js";
+import { HowToPlayModal } from "../components/game/HowToPlayModal.js";
+import { JoinGameModal } from "../components/game/JoinGameModal.js";
+import { SpectateModal } from "../components/game/SpectateModal.js";
 import {
   createGame as createGameService,
   joinGame as joinGameService,

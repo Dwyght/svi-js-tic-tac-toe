@@ -1,7 +1,7 @@
-import { Button } from "./Button.js";
-import { Modal } from "./Modal.js";
+import { Button } from "../base/Button.js";
+import { Modal } from "../base/Modal.js";
 import { Scoreboard } from "./Scoreboard.js";
-import { resolveTarget } from "../utils/dom.js";
+import { resolveTarget } from "../../utils/dom.js";
 
 export class ResultModal {
   constructor({ onPlayAgain, onQuit, onLeave }) {

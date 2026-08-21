@@ -1,5 +1,5 @@
 import { Button } from "./Button.js";
-import { resolveTarget } from "../utils/dom.js";
+import { resolveTarget } from "../../utils/dom.js";
 
 export class Modal {
   constructor({ title, content, closable = true }) {

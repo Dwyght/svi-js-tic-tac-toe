@@ -1,8 +1,8 @@
 import { resolveTarget } from "../utils/dom.js";
 
-import { Button } from "./Button.js";
+import { Button } from "./base/Button.js";
 
-import { Modal } from "./Modal.js";
+import { Modal } from "./base/Modal.js";
 
 export class ScreenManager {
   constructor() {

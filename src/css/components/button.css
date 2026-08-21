@@ -6,7 +6,7 @@
   min-height: 46px;
   padding: 11px 22px;
 
-  color: #3a2115;
+  color: var(--color-text);
   background: var(--color-surface-muted);
 
   border: 2px solid #5b341e;
@@ -38,7 +38,7 @@
 }
 
 .button:focus-visible {
-  outline: 3px solid #fff9e9;
+  outline: 3px solid var(--color-action-text);
   outline-offset: 3px;
 }
 
@@ -84,7 +84,7 @@
 
 .button-danger {
   color: var(--color-action-text);
-  background: #b85f43;
+  background: var(--color-danger);
   border-color: var(--color-danger-dark);
   box-shadow:
     0 4px 0 var(--color-danger-dark),

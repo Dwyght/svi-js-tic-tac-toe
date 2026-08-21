@@ -1,6 +1,6 @@
-import { Button } from "./Button.js";
-import { Modal } from "./Modal.js";
-import { resolveTarget } from "../utils/dom.js";
+import { Button } from "../base/Button.js";
+import { Modal } from "../base/Modal.js";
+import { resolveTarget } from "../../utils/dom.js";
 
 export class JoinGameModal {
   constructor({ onJoinGame, onPasteGameCode }) {

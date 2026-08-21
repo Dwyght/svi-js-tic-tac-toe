@@ -1,8 +1,8 @@
 import { ScreenManager } from "./components/ScreenManager.js";
 
-import { Button } from "./components/Button.js";
+import { Button } from "./components/base/Button.js";
 
-import { Modal } from "./components/Modal.js";
+import { Modal } from "./components/base/Modal.js";
 
 import { HomePage } from "./pages/HomePage.js";
 

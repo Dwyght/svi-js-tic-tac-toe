@@ -1,4 +1,4 @@
-import { resolveTarget } from "../utils/dom.js";
+import { resolveTarget } from "../../utils/dom.js";
 
 export class Card {
   constructor({ content, className = "" }) {

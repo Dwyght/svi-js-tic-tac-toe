@@ -12,12 +12,12 @@ import {
   restartGameSession,
   resetGameSession,
 } from "../services/gameFlowService.js";
-import { Board } from "../components/Board.js";
-import { Card } from "../components/Card.js";
-import { PauseMenu } from "../components/PauseMenu.js";
-import { QuitConfirmModal } from "../components/QuitConfirmModal.js";
-import { ResultModal } from "../components/ResultModal.js";
-import { Scoreboard } from "../components/Scoreboard.js";
+import { Card } from "../components/base/Card.js";
+import { Board } from "../components/game/Board.js";
+import { PauseMenu } from "../components/game/PauseMenu.js";
+import { QuitConfirmModal } from "../components/game/QuitConfirmModal.js";
+import { ResultModal } from "../components/game/ResultModal.js";
+import { Scoreboard } from "../components/game/Scoreboard.js";
 import { resolveTarget } from "../utils/dom.js";
 
 const GAME_OVER_INACTIVE_GRACE_REFRESHES = 3;

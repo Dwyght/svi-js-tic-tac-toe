@@ -17,5 +17,5 @@ body {
 
   background-color: #fff4df;
 
-  color: #3b2416;
+  color: var(--color-text);
 }
