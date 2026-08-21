@@ -2,6 +2,8 @@ import { resolveTarget } from "../utils/dom.js";
 
 import { Button } from "./base/Button.js";
 
+import { ConveyorBelt } from "./ConveyorBelt.js";
+
 import { Modal } from "./base/Modal.js";
 
 export class ScreenManager {
@@ -55,6 +57,8 @@ export class ScreenManager {
       content: this.waitingContent,
       closable: false,
     });
+
+    this.conveyorBelt = new ConveyorBelt();
   }
 
   // ========================================
@@ -148,6 +152,8 @@ export class ScreenManager {
     this.gameScreen.classList.add("hidden");
 
     this.waitingModal.close();
+
+    this.conveyorBelt.stop();
   }
 
   // ========================================
@@ -165,6 +171,8 @@ export class ScreenManager {
     this.waitingGameCode.textContent = gameCode;
 
     this.waitingModal.open();
+
+    this.conveyorBelt.start();
   }
 
   // ========================================
@@ -177,6 +185,8 @@ export class ScreenManager {
     this.gameScreen.classList.remove("hidden");
 
     this.waitingModal.close();
+
+    this.conveyorBelt.stop();
   }
 
   // ========================================
@@ -210,6 +220,8 @@ export class ScreenManager {
       parent.append(this.container);
 
       this.waitingModal.render(document.body);
+
+      this.conveyorBelt.render(this.waitingModal.dialog);
     } else {
       console.error("ScreenManager target not found.");
     }

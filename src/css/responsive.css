@@ -32,6 +32,10 @@
 }
 
 @media (max-width: 650px) {
+  .conveyor-belt {
+    --conveyor-plate-size: clamp(72px, 22vw, 94px);
+  }
+
   .game-container {
     padding: 15px;
   }
@@ -71,6 +75,10 @@
 }
 
 @media (max-height: 500px) {
+  .conveyor-belt {
+    display: none !important;
+  }
+
   .game-container {
     padding: 10px 15px;
   }

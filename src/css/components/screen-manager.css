@@ -10,6 +10,18 @@
   justify-content: center;
 
   text-align: center;
+
+  border-radius: 19px 19px 0 0;
+}
+
+.waiting-modal {
+  overflow: visible;
+}
+
+.waiting-modal .modal-body {
+  background: var(--color-surface);
+
+  border-radius: 0 0 19px 19px;
 }
 
 .waiting-dots {
