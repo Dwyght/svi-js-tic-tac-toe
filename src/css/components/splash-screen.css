@@ -1,0 +1,156 @@
+/* =========================
+   SPLASH SCREEN
+========================= */
+
+.splash-screen {
+  --splash-title-width: min(78vw, 860px);
+  --splash-title-top: clamp(28px, 6dvh, 72px);
+  --splash-prompt-bottom: clamp(28px, 7dvh, 76px);
+
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+
+  width: 100%;
+  height: 100dvh;
+  min-height: 100%;
+  padding: 0;
+
+  overflow: hidden;
+
+  color: var(--color-action-text);
+  background: #24150e;
+
+  border: 0;
+  border-radius: 0;
+  outline: 0;
+
+  cursor: pointer;
+  isolation: isolate;
+}
+
+.splash-screen[hidden] {
+  display: none;
+}
+
+.splash-screen::after {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+
+  content: "";
+  background: linear-gradient(
+    to bottom,
+    rgb(25 14 8 / 8%) 48%,
+    rgb(25 14 8 / 58%) 100%
+  );
+
+  pointer-events: none;
+}
+
+.splash-screen-art {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+  object-position: center;
+
+  pointer-events: none;
+  user-select: none;
+}
+
+.splash-screen-content {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+
+  padding:
+    var(--splash-title-top)
+    20px
+    max(
+      var(--splash-prompt-bottom),
+      calc(env(safe-area-inset-bottom) + 18px)
+    );
+
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  justify-items: center;
+
+  pointer-events: none;
+}
+
+.splash-screen-title {
+  width: var(--splash-title-width);
+  max-height: 34dvh;
+  height: auto;
+
+  display: block;
+
+  object-fit: contain;
+
+  filter: drop-shadow(0 10px 8px rgb(47 28 16 / 38%));
+
+  user-select: none;
+}
+
+.splash-screen-prompt {
+  grid-row: 3;
+
+  font-size: clamp(1rem, 2.2vw, 1.45rem);
+  font-weight: 700;
+  letter-spacing: clamp(0.08em, 0.6vw, 0.18em);
+  line-height: 1.2;
+  text-align: center;
+  text-shadow:
+    0 2px 0 var(--color-text),
+    0 4px 12px rgb(25 14 8 / 82%);
+
+  animation: splash-prompt-blink 1.6s ease-in-out infinite;
+}
+
+.splash-screen:focus-visible {
+  box-shadow: inset 0 0 0 4px var(--color-accent);
+}
+
+.splash-screen-exiting {
+  cursor: default;
+  pointer-events: none;
+
+  animation: splash-screen-fade-out 600ms ease-in forwards;
+}
+
+@keyframes splash-prompt-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes splash-screen-fade-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash-screen-prompt {
+    animation: none;
+  }
+
+  .splash-screen-exiting {
+    animation-duration: 1ms;
+  }
+}

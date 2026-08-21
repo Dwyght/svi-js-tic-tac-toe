@@ -1,5 +1,7 @@
 import { ScreenManager } from "./components/ScreenManager.js";
 
+import { SplashScreen } from "./components/SplashScreen.js";
+
 import { MODAL_EVENTS } from "./components/base/Modal.js";
 
 import { ResumeGameModal } from "./components/game/ResumeGameModal.js";
@@ -15,6 +17,8 @@ import { checkGameStillActive } from "./services/gameFlowService.js";
 import {
   getSession,
   clearSession,
+  hasSeenSplash,
+  markSplashSeen,
 } from "./services/storageService.js";
 
 import { gameState } from "./state/gameState.js";
@@ -27,6 +31,9 @@ const screenManager = new ScreenManager();
 
 const pollingService = new PollingService();
 
+let splashScreen = null;
+let applicationStartRequested = false;
+
 // ========================================
 // BACKGROUND VIDEO DURING MODALS
 // ========================================
@@ -34,6 +41,20 @@ const pollingService = new PollingService();
 const backgroundVideo = document.querySelector(".bg-video");
 
 let backgroundVideoPausedByModal = false;
+
+function playBackgroundVideo() {
+  if (!backgroundVideo || document.querySelector("dialog[open]")) {
+    return;
+  }
+
+  const playRequest = backgroundVideo.play();
+
+  if (playRequest) {
+    playRequest.catch((error) => {
+      console.error("Could not resume background video.", error);
+    });
+  }
+}
 
 document.addEventListener(MODAL_EVENTS.opened, () => {
   if (!backgroundVideo) {
@@ -55,14 +76,7 @@ document.addEventListener(MODAL_EVENTS.closed, () => {
     }
 
     backgroundVideoPausedByModal = false;
-
-    const playRequest = backgroundVideo.play();
-
-    if (playRequest) {
-      playRequest.catch((error) => {
-        console.error("Could not resume background video.", error);
-      });
-    }
+    playBackgroundVideo();
   });
 });
 
@@ -203,4 +217,41 @@ async function startApplication() {
   }
 }
 
-startApplication();
+async function startApplicationOnce() {
+  if (applicationStartRequested) {
+    return;
+  }
+
+  applicationStartRequested = true;
+  await startApplication();
+}
+
+async function handleSplashStart() {
+  if (splashScreen === null) {
+    return;
+  }
+
+  markSplashSeen();
+  await splashScreen.close();
+  await startApplicationOnce();
+  playBackgroundVideo();
+}
+
+function launchApplication() {
+  if (hasSeenSplash()) {
+    startApplicationOnce();
+    return;
+  }
+
+  if (backgroundVideo) {
+    backgroundVideo.pause();
+  }
+
+  splashScreen = new SplashScreen({
+    onStart: () => handleSplashStart(),
+  });
+  splashScreen.render(document.body);
+  splashScreen.open();
+}
+
+launchApplication();

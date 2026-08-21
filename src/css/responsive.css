@@ -1,4 +1,14 @@
 @media (min-width: 1400px) and (min-height: 800px) {
+  .splash-screen {
+    --splash-title-width: min(48vw, 980px);
+    --splash-title-top: clamp(44px, 7dvh, 86px);
+    --splash-prompt-bottom: clamp(46px, 8dvh, 88px);
+  }
+
+  .splash-screen-prompt {
+    font-size: 1.5rem;
+  }
+
   .home-page {
     --home-banner-width: min(
       720px,
@@ -60,6 +70,20 @@
 }
 
 @media (max-width: 650px) {
+  .splash-screen {
+    --splash-title-width: min(92vw, 580px);
+    --splash-title-top: clamp(20px, 4dvh, 40px);
+    --splash-prompt-bottom: clamp(24px, 6dvh, 52px);
+  }
+
+  .splash-screen-content {
+    padding-inline: 14px;
+  }
+
+  .splash-screen-prompt {
+    font-size: clamp(0.9rem, 4.4vw, 1.1rem);
+  }
+
   .conveyor-belt {
     --conveyor-plate-size: clamp(72px, 22vw, 94px);
   }
@@ -151,6 +175,20 @@
 }
 
 @media (max-height: 500px) {
+  .splash-screen {
+    --splash-title-width: min(54vw, 480px);
+    --splash-title-top: 12px;
+    --splash-prompt-bottom: 12px;
+  }
+
+  .splash-screen-title {
+    max-height: 30dvh;
+  }
+
+  .splash-screen-prompt {
+    font-size: 0.9rem;
+  }
+
   .conveyor-belt {
     display: none !important;
   }

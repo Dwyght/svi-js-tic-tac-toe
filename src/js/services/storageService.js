@@ -12,6 +12,10 @@ function getSessionStorageKey() {
   return "tictactoe-session";
 }
 
+function getSplashSeenStorageKey() {
+  return "tictactoe-splash-seen-v1";
+}
+
 function getDefaultScores() {
   return {
     X: 0,
@@ -241,4 +245,16 @@ export function getSession() {
 
 export function clearSession() {
   sessionStorage.removeItem(getSessionStorageKey());
+}
+
+// ========================================
+// SPLASH SCREEN SESSION
+// ========================================
+
+export function hasSeenSplash() {
+  return sessionStorage.getItem(getSplashSeenStorageKey()) === "true";
+}
+
+export function markSplashSeen() {
+  sessionStorage.setItem(getSplashSeenStorageKey(), "true");
 }
