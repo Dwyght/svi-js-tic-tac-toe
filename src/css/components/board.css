@@ -159,11 +159,11 @@
 }
 
 .cell[data-value="X"] {
-  --piece-image: url("../../assets/images/mushroom.png");
+  --piece-image: var(--sushi-x-image);
 }
 
 .cell[data-value="O"] {
-  --piece-image: url("../../assets/images/coin.png");
+  --piece-image: var(--sushi-o-image);
 }
 
 .cell[data-value="X"]::before,
@@ -172,11 +172,11 @@
 }
 
 .board.player-x .cell[data-value=""]:hover:not(:disabled) {
-  --piece-image: url("../../assets/images/mushroom.png");
+  --piece-image: var(--sushi-x-image);
 }
 
 .board.player-o .cell[data-value=""]:hover:not(:disabled) {
-  --piece-image: url("../../assets/images/coin.png");
+  --piece-image: var(--sushi-o-image);
 }
 
 .board.player-x .cell[data-value=""]:hover:not(:disabled)::before,

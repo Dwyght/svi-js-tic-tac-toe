@@ -1,3 +1,5 @@
+import { DEFAULT_SUSHI } from "../config/constants.js";
+
 function getStorageKey(gameCode) {
   return `tictactoe-${gameCode}`;
 }
@@ -70,6 +72,73 @@ export function getPlayerNames(gameCode) {
       X: "Player X",
       O: "Player O",
     };
+  }
+}
+
+// ========================================
+// SAVE PLAYER SUSHI
+// ========================================
+
+export function savePlayerSushi(gameCode, tile, sushiId) {
+  const storageKey = getStorageKey(gameCode);
+
+  let players = {};
+
+  const saved = localStorage.getItem(storageKey);
+
+  if (saved !== null) {
+    try {
+      players = JSON.parse(saved);
+
+      if (players === null || typeof players !== "object") {
+        players = {};
+      }
+    } catch {
+      players = {};
+    }
+  }
+
+  players[`sushi${tile}`] = sushiId;
+
+  localStorage.setItem(storageKey, JSON.stringify(players));
+}
+
+// ========================================
+// GET PLAYER SUSHI
+// ========================================
+
+export function getPlayerSushi(gameCode, tile) {
+  const defaultSushi = DEFAULT_SUSHI[tile];
+  const storageKey = getStorageKey(gameCode);
+  const saved = localStorage.getItem(storageKey);
+
+  if (saved === null) {
+    return defaultSushi;
+  }
+
+  try {
+    const players = JSON.parse(saved);
+
+    return players?.[`sushi${tile}`] || defaultSushi;
+  } catch {
+    return defaultSushi;
+  }
+}
+
+export function hasPlayerSushi(gameCode, tile) {
+  const storageKey = getStorageKey(gameCode);
+  const saved = localStorage.getItem(storageKey);
+
+  if (saved === null) {
+    return false;
+  }
+
+  try {
+    const players = JSON.parse(saved);
+
+    return typeof players?.[`sushi${tile}`] === "string";
+  } catch {
+    return false;
   }
 }
 

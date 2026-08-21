@@ -41,22 +41,19 @@ export class Scoreboard {
     this.element.classList.add("score-display");
 
     this.setEntryAttributes(this.entries.X, {
-      label: "Player X",
-      imageSource: "./src/assets/images/mushroom.png",
+      label: "Player X sushi",
     });
     this.setEntryAttributes(this.entries.O, {
-      label: "Player O",
-      imageSource: "./src/assets/images/coin.png",
+      label: "Player O sushi",
     });
   }
 
-  setEntryAttributes(entry, { label, imageSource }) {
+  setEntryAttributes(entry, { label }) {
     entry.entry.classList.add("score-entry");
     entry.separator.classList.add("score-separator");
     entry.separator.textContent = ":";
     entry.value.classList.add("score-value");
     entry.label.classList.add("score-piece-image");
-    entry.label.src = imageSource;
     entry.label.alt = label;
     entry.emoteBubble.classList.add("emote-bubble", "hidden");
     entry.emoteBubble.setAttribute("role", "status");
@@ -81,6 +78,13 @@ export class Scoreboard {
   update({ X, O }) {
     this.values.X.textContent = X;
     this.values.O.textContent = O;
+  }
+
+  setSushiImages({ X, O }) {
+    this.entries.X.label.src = X.src;
+    this.entries.X.label.alt = X.alt;
+    this.entries.O.label.src = O.src;
+    this.entries.O.label.alt = O.alt;
   }
 
   showEmoteBubble(tile, emoteId) {

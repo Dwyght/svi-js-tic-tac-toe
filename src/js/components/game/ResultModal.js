@@ -166,6 +166,10 @@ export class ResultModal {
     this.scoreboard.update(scores);
   }
 
+  setSushiImages(sushiImages) {
+    this.scoreboard.setSushiImages(sushiImages);
+  }
+
   open() {
     this.modal.open();
   }

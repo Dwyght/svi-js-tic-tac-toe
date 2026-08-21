@@ -40,6 +40,18 @@ class GameState {
   }
 
   // =========================
+  // MY SUSHI
+  // =========================
+
+  get mySushi() {
+    return this._mySushi;
+  }
+
+  set mySushi(value) {
+    this._mySushi = value;
+  }
+
+  // =========================
   // GAME STARTED
   // =========================
 
@@ -95,12 +107,14 @@ class GameState {
     gameCode,
     myTile,
     myName,
+    mySushi = null,
     gameStarted = false,
     isSpectator = false,
   }) {
     this._gameCode = gameCode;
     this._myTile = myTile;
     this._myName = myName;
+    this._mySushi = mySushi;
     this._gameStarted = gameStarted;
     this._gameOver = false;
     this._isSpectator = isSpectator;
@@ -118,6 +132,7 @@ class GameState {
     this._gameCode = null;
     this._myTile = null;
     this._myName = null;
+    this._mySushi = null;
 
     this._gameStarted = false;
     this._gameOver = false;

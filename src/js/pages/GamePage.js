@@ -1,6 +1,7 @@
 import { gameState } from "../state/gameState.js";
 import {
   getPlayerNames,
+  getPlayerSushi,
   getScores,
   saveScore,
 } from "../services/storageService.js";
@@ -19,11 +20,13 @@ import {
 import { Card } from "../components/base/Card.js";
 import { Board } from "../components/game/Board.js";
 import { EmotePicker } from "../components/game/EmotePicker.js";
+import { LeaveConfirmModal } from "../components/game/LeaveConfirmModal.js";
 import { PauseMenu } from "../components/game/PauseMenu.js";
 import { QuitConfirmModal } from "../components/game/QuitConfirmModal.js";
 import { ResultModal } from "../components/game/ResultModal.js";
 import { Scoreboard } from "../components/game/Scoreboard.js";
 import { resolveTarget } from "../utils/dom.js";
+import { resolveSushi } from "../utils/sushi.js";
 
 const GAME_OVER_INACTIVE_GRACE_REFRESHES = 3;
 
@@ -81,19 +84,24 @@ export class GamePage {
     this.pauseMenu = new PauseMenu({
       onCopyGameCode: (gameCode) => this.copyGameCode(gameCode),
       onOpenQuitModal: () => this.openQuitModal(),
-      onLeave: () => this.handleLeave(),
+      onLeave: () => this.openLeaveModal(),
     });
 
     // Game result
     this.resultModal = new ResultModal({
       onPlayAgain: () => this.handlePlayAgain(),
       onQuit: () => this.openQuitModal(),
-      onLeave: () => this.handleLeave(),
+      onLeave: () => this.openLeaveModal(),
     });
 
     // Quit confirmation
     this.quitConfirmModal = new QuitConfirmModal({
       onConfirm: () => this.confirmQuit(),
+    });
+
+    // Spectator leave confirmation
+    this.leaveConfirmModal = new LeaveConfirmModal({
+      onConfirm: () => this.handleLeave(),
     });
   }
 
@@ -130,6 +138,10 @@ export class GamePage {
   }
 
   configureViewerControls() {
+    this.statusHeader.classList.toggle(
+      "game-status-header-spectator",
+      gameState.isSpectator,
+    );
     this.pauseMenu.configureViewerControls(gameState.isSpectator);
     this.resultModal.configureViewerControls({
       isSpectator: gameState.isSpectator,
@@ -138,9 +150,11 @@ export class GamePage {
 
     if (gameState.isSpectator) {
       this.quitConfirmModal.remove();
+      this.leaveConfirmModal.render(document.body);
       return;
     }
 
+    this.leaveConfirmModal.remove();
     this.quitConfirmModal.render(document.body);
   }
 
@@ -231,6 +245,31 @@ export class GamePage {
     }
   }
 
+  // ========================================
+  // SUSHI DISPLAY
+  // ========================================
+
+  updateSushiDisplays() {
+    const sushiImages = {
+      X: resolveSushi(
+        "X",
+        getPlayerSushi(gameState.gameCode, "X"),
+      ),
+      O: resolveSushi(
+        "O",
+        getPlayerSushi(gameState.gameCode, "O"),
+      ),
+    };
+
+    this.board.setSushiImages(sushiImages);
+    this.scoreboard.setSushiImages(sushiImages);
+    this.resultModal.setSushiImages(sushiImages);
+
+    if (gameState.myTile === "X" || gameState.myTile === "O") {
+      gameState.mySushi = sushiImages[gameState.myTile].id;
+    }
+  }
+
   clearEmotes() {
     this.stopEmoteSubscription();
     this.emotePicker.setEnabled(false);
@@ -256,11 +295,13 @@ export class GamePage {
     this.inactiveGameOverRefreshes = 0;
     this.roundScored = false;
     gameState.scores = getScores(gameState.gameCode);
+    this.updateSushiDisplays();
     this.updateScoreDisplays();
     this.pauseMenu.updateGameCode(gameState.gameCode);
     this.resultModal.close();
     this.pauseMenu.close();
     this.quitConfirmModal.close();
+    this.leaveConfirmModal.close();
     this.configureViewerControls();
     this.clearBoardForViewer();
     this.board.setPlayerTile(gameState.myTile);
@@ -320,8 +361,12 @@ export class GamePage {
       this.resultModal.close();
       this.pauseMenu.close();
       this.quitConfirmModal.close();
+      this.leaveConfirmModal.close();
       if (wasSpectator) {
-        this.onReturnHome("This game has ended.");
+        this.onReturnHome(
+          "A player has left the game.",
+          "Oopsies!",
+        );
       } else {
         this.onReturnHome(
           "The other player has left the game.",
@@ -459,12 +504,12 @@ export class GamePage {
       }
 
       if (result.reason === "not_your_turn") {
-        this.message.textContent = `It is Player ${result.currentTurn}'s turn.`;
+        this.message.textContent = "";
         return;
       }
 
       if (result.reason === "cell_taken") {
-        this.message.textContent = "That square is already taken.";
+        this.message.textContent = "";
 
         if (result.refreshBoard) {
           await this.loadBoard();
@@ -636,6 +681,15 @@ export class GamePage {
   // LEAVE SPECTATOR VIEW
   // ========================================
 
+  openLeaveModal() {
+    if (!gameState.isSpectator) {
+      return;
+    }
+
+    this.pauseMenu.close();
+    this.leaveConfirmModal.open();
+  }
+
   handleLeave() {
     if (!gameState.isSpectator) {
       return;
@@ -647,6 +701,7 @@ export class GamePage {
     this.resultModal.close();
     this.pauseMenu.close();
     this.quitConfirmModal.close();
+    this.leaveConfirmModal.close();
     gameState.reset();
     this.onReturnHome();
   }
@@ -672,6 +727,7 @@ export class GamePage {
       this.resultModal.close();
       this.pauseMenu.close();
       this.quitConfirmModal.close();
+      this.leaveConfirmModal.close();
       this.onReturnHome();
     } catch (error) {
       this.isQuitting = false;
@@ -694,6 +750,7 @@ export class GamePage {
       this.resultModal.render(document.body);
       this.pauseMenu.render(this.container);
       this.quitConfirmModal.render(document.body);
+      this.leaveConfirmModal.render(document.body);
     } else {
       console.error("GamePage target not found.");
     }

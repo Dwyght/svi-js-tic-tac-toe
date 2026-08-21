@@ -18,6 +18,10 @@
   );
 }
 
+.game-status-header-spectator {
+  transform: none;
+}
+
 .game-status-header .turn-card {
   min-width: 0;
   width: 100%;

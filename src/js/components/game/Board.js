@@ -20,6 +20,11 @@ export class Board {
   initializeElements() {
     this.container = document.createElement("div");
 
+    this.sushiLabels = {
+      X: "Player X sushi",
+      O: "Player O sushi",
+    };
+
     this.separators = [
       this.createSeparator("vertical", "first"),
       this.createSeparator("vertical", "second"),
@@ -137,6 +142,32 @@ export class Board {
     this.container.classList.toggle("player-o", tile === "O");
   }
 
+  setSushiImages({ X, O }) {
+    const xImageUrl = new URL(X.src, document.baseURI).href;
+    const oImageUrl = new URL(O.src, document.baseURI).href;
+
+    this.container.style.setProperty(
+      "--sushi-x-image",
+      `url("${xImageUrl}")`,
+    );
+    this.container.style.setProperty(
+      "--sushi-o-image",
+      `url("${oImageUrl}")`,
+    );
+
+    this.sushiLabels.X = X.alt;
+    this.sushiLabels.O = O.alt;
+
+    for (const cell of this.cells) {
+      const value = cell.element.dataset.value;
+
+      cell.element.setAttribute(
+        "aria-label",
+        this.getCellLabel(value, cell.x, cell.y),
+      );
+    }
+  }
+
   // ========================================
   // DISABLE BOARD
   // ========================================
@@ -183,11 +214,11 @@ export class Board {
     const position = `Row ${y + 1}, column ${x + 1}`;
 
     if (value === "X") {
-      return `${position}: Super Mushroom`;
+      return `${position}: ${this.sushiLabels.X}`;
     }
 
     if (value === "O") {
-      return `${position}: Gold Coin`;
+      return `${position}: ${this.sushiLabels.O}`;
     }
 
     return `${position}: Empty`;
