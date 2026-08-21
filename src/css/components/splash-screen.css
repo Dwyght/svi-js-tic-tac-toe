@@ -4,7 +4,6 @@
 
 .splash-screen {
   --splash-title-width: min(78vw, 860px);
-  --splash-title-top: clamp(28px, 6dvh, 72px);
   --splash-prompt-bottom: clamp(28px, 7dvh, 76px);
 
   position: fixed;
@@ -25,7 +24,7 @@
   border-radius: 0;
   outline: 0;
 
-  cursor: pointer;
+  cursor: default;
   isolation: isolate;
 }
 
@@ -70,7 +69,7 @@
   z-index: 2;
 
   padding:
-    var(--splash-title-top)
+    0
     20px
     max(
       var(--splash-prompt-bottom),
@@ -85,6 +84,10 @@
 }
 
 .splash-screen-title {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+
   width: var(--splash-title-width);
   max-height: 34dvh;
   height: auto;
@@ -94,6 +97,8 @@
   object-fit: contain;
 
   filter: drop-shadow(0 10px 8px rgb(47 28 16 / 38%));
+
+  transform: translate(-50%, -50%);
 
   user-select: none;
 }

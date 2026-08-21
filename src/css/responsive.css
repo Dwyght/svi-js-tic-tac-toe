@@ -1,7 +1,6 @@
 @media (min-width: 1400px) and (min-height: 800px) {
   .splash-screen {
     --splash-title-width: min(48vw, 980px);
-    --splash-title-top: clamp(44px, 7dvh, 86px);
     --splash-prompt-bottom: clamp(46px, 8dvh, 88px);
   }
 
@@ -10,13 +9,7 @@
   }
 
   .home-page {
-    --home-banner-width: min(
-      720px,
-      48vw,
-      calc(100dvh - 220px)
-    );
-
-    padding-bottom: clamp(50px, 6dvh, 72px);
+    padding-bottom: clamp(50px, 6svh, 72px);
   }
 
   .home-actions {
@@ -72,7 +65,6 @@
 @media (max-width: 650px) {
   .splash-screen {
     --splash-title-width: min(92vw, 580px);
-    --splash-title-top: clamp(20px, 4dvh, 40px);
     --splash-prompt-bottom: clamp(24px, 6dvh, 52px);
   }
 
@@ -141,7 +133,7 @@
   }
 
   .home-page {
-    padding-bottom: clamp(76px, 10dvh, 90px);
+    padding-bottom: clamp(76px, 10svh, 90px);
   }
 
   .home-actions {
@@ -177,7 +169,6 @@
 @media (max-height: 500px) {
   .splash-screen {
     --splash-title-width: min(54vw, 480px);
-    --splash-title-top: 12px;
     --splash-prompt-bottom: 12px;
   }
 
