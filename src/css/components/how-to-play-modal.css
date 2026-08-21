@@ -1,0 +1,22 @@
+/* =========================
+   HOW TO PLAY MODAL
+========================= */
+
+.how-to-play-content {
+  color: var(--color-text);
+
+  line-height: 1.5;
+}
+
+.how-to-play-content > p {
+  margin-bottom: 14px;
+}
+
+.how-to-play-content ol {
+  margin: 0;
+  padding-left: 24px;
+}
+
+.how-to-play-content li + li {
+  margin-top: 10px;
+}

@@ -4,9 +4,12 @@
 @import "./components/button.css";
 @import "./components/card.css";
 @import "./components/modal.css";
+@import "./components/result-modal.css";
+@import "./components/join-game-modal.css";
+@import "./components/how-to-play-modal.css";
+@import "./components/screen-manager.css";
 @import "./components/board.css";
 @import "./components/message.css";
-@import "./components/screen-manager.css";
 @import "./components/pause-menu.css";
 @import "./pages/home-page.css";
 @import "./pages/game-page.css";

@@ -2,6 +2,94 @@
    SCREEN MANAGER
 ========================= */
 
+/* =========================
+   WAITING MODAL
+========================= */
+
+.waiting-modal .modal-header {
+  justify-content: center;
+
+  text-align: center;
+}
+
+.waiting-dots {
+  min-width: 1.25em;
+
+  display: inline-flex;
+  justify-content: flex-start;
+}
+
+.waiting-dot {
+  opacity: 0.25;
+
+  animation: pulse-waiting-dot 1.2s ease-in-out infinite;
+}
+
+.waiting-dot:nth-child(2) {
+  animation-delay: 150ms;
+}
+
+.waiting-dot:nth-child(3) {
+  animation-delay: 300ms;
+}
+
+@keyframes pulse-waiting-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateY(-0.12em);
+  }
+}
+
+.waiting-modal-content {
+  text-align: center;
+}
+
+.waiting-modal-content > p:last-child {
+  margin-bottom: 0;
+}
+
+.game-code-container {
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  gap: 10px;
+
+  margin: 20px 0;
+}
+
+.game-code {
+  padding: 15px 25px;
+
+  color: var(--color-text);
+  background: var(--color-surface);
+
+  border: 2px solid var(--color-primary);
+  border-radius: 12px;
+
+  font-size: 24px;
+
+  font-weight: bold;
+
+  letter-spacing: 4px;
+}
+
 .hint {
   color: rgb(59 36 22 / 72%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .waiting-dot {
+    animation: none;
+    opacity: 1;
+  }
 }

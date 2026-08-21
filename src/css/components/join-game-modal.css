@@ -1,0 +1,13 @@
+/* =========================
+   JOIN GAME MODAL
+========================= */
+
+.join-code-field {
+  display: flex;
+
+  gap: 10px;
+}
+
+.join-code-field input {
+  min-width: 0;
+}
