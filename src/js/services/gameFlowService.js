@@ -14,6 +14,7 @@ import { generateGameCode } from "../game/gameCode.js";
 import { gameState } from "../state/gameState.js";
 import {
   savePlayerName,
+  savePlayerSushi,
   saveSession,
   clearPlayerNames,
   clearScores,
@@ -40,8 +41,9 @@ function getJoinGameErrorMessage(serverResponse) {
 // CREATE GAME
 // ========================================
 
-export async function createGame(playerName) {
+export async function createGame(playerName, sushiId) {
   const gameCode = generateGameCode();
+  const restoreSushi = savePlayerSushi(gameCode, "X", sushiId);
 
   try {
     const result = await createGameApi(gameCode);
@@ -49,6 +51,8 @@ export async function createGame(playerName) {
 
     // Creator must receive X.
     if (result !== "X") {
+      restoreSushi();
+
       return {
         ok: false,
         message: "Could not create the room. Please try again.",
@@ -59,6 +63,7 @@ export async function createGame(playerName) {
       gameCode: gameCode,
       myTile: "X",
       myName: playerName,
+      mySushi: sushiId,
       gameStarted: false,
     });
     savePlayerName(gameCode, "X", playerName);
@@ -69,6 +74,7 @@ export async function createGame(playerName) {
       gameCode: gameCode,
     };
   } catch (error) {
+    restoreSushi();
     console.error(error);
 
     return {
@@ -104,7 +110,9 @@ export async function waitForPlayerO(gameCode) {
 // JOIN GAME
 // ========================================
 
-export async function joinGame(gameCode, playerName) {
+export async function joinGame(gameCode, playerName, sushiId) {
+  const restoreSushi = savePlayerSushi(gameCode, "O", sushiId);
+
   try {
     const result = await createGameApi(gameCode);
     console.log("Join Game:", result);
@@ -112,6 +120,7 @@ export async function joinGame(gameCode, playerName) {
     // The endpoint also creates rooms.
     // Therefore if joining returns X, the room did not exist.
     if (result === "X") {
+      restoreSushi();
       await resetGame(gameCode);
 
       return {
@@ -121,6 +130,8 @@ export async function joinGame(gameCode, playerName) {
     }
 
     if (result !== "O") {
+      restoreSushi();
+
       return {
         ok: false,
         message: getJoinGameErrorMessage(result),
@@ -131,6 +142,7 @@ export async function joinGame(gameCode, playerName) {
       gameCode: gameCode,
       myTile: "O",
       myName: playerName,
+      mySushi: sushiId,
       gameStarted: true,
     });
     savePlayerName(gameCode, "O", playerName);
@@ -141,6 +153,7 @@ export async function joinGame(gameCode, playerName) {
       gameCode: gameCode,
     };
   } catch (error) {
+    restoreSushi();
     console.error(error);
 
     return {

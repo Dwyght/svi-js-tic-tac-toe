@@ -4,8 +4,8 @@ import { resolveTarget } from "../../utils/dom.js";
 import { getSushiOptions } from "../../utils/sushi.js";
 
 export class SushiPickerModal {
-  constructor({ onConfirm }) {
-    this.onConfirm = onConfirm;
+  constructor() {
+    this.onConfirm = null;
     this.selectedSushiId = null;
     this.optionElements = [];
 
@@ -89,19 +89,28 @@ export class SushiPickerModal {
     }
 
     const selectedSushiId = this.selectedSushiId;
+    const onConfirm = this.onConfirm;
 
+    this.onConfirm = null;
     this.close();
-    this.onConfirm(selectedSushiId);
+
+    if (onConfirm !== null) {
+      onConfirm(selectedSushiId);
+    }
   }
 
-  open(tile) {
+  open(tile, onConfirm) {
     const options = getSushiOptions(tile);
 
-    if (options.length === 0) {
+    if (options.length === 0 || typeof onConfirm !== "function") {
       console.error(`No sushi options found for Player ${tile}.`);
       return;
     }
 
+    this.onConfirm = onConfirm;
+    this.confirmButton.setLabel(
+      tile === "X" ? "CREATE GAME" : "JOIN GAME",
+    );
     this.renderOptions(options);
     this.selectSushi(options[0].id);
     this.modal.open();
@@ -109,6 +118,7 @@ export class SushiPickerModal {
   }
 
   reset() {
+    this.onConfirm = null;
     this.selectedSushiId = null;
     this.optionElements = [];
     this.grid.replaceChildren();

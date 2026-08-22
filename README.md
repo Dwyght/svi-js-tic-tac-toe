@@ -83,7 +83,7 @@ The project uses both storage types intentionally:
 | --- | --- | --- |
 | `sessionStorage` | Active player's room code, tile, and name | Allows a player to resume after a refresh in the same tab session |
 | `sessionStorage` | Splash-screen-seen flag | Prevents the splash from appearing again during that tab session |
-| `localStorage` | Player names and sushi selections | Shared between same-origin tabs |
+| `localStorage` | Player names and confirmed sushi selections | Written before the Create/Join request and shared between same-origin tabs |
 | `localStorage` | X/O series scores | Preserved between rounds for the room code |
 | `localStorage` | Latest emote event | Delivered to other same-origin tabs through the browser `storage` event |
 
@@ -91,7 +91,9 @@ Spectator sessions are intentionally not saved for resume. A browser may also re
 
 Active player ownership is guarded separately with a browser Web Lock keyed by room code and tile. Web Locks are not copied with `sessionStorage`, so a duplicated active-player tab can discard its copied session without affecting the original tab.
 
-Because names, sushi choices, scores, and emotes are stored locally, the complete experience is designed primarily for same-origin tabs in the same browser. The server board can still be fetched elsewhere, but those locally stored details are not synchronized across different browsers or devices.
+The name/code form advances to the sushi picker, where the final Create/Join action confirms the local player's selection. The selection is written to `localStorage` before the server call, so a same-browser opponent's sushi is already available when polling reports that the second player joined. No additional sushi-readiness state or live image patching is required.
+
+Because names, sushi choices, scores, and emotes are stored locally, they are not synchronized across different browsers or devices. In cross-browser games, each player sees their own locally selected sushi and the default sushi for the opponent because the server has no field for carrying that choice. The server-backed board and moves still synchronize normally.
 
 ## Backend API contract
 

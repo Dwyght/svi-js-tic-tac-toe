@@ -27,7 +27,7 @@ export class JoinGameModal {
       onClick: () => this.onPasteGameCode(),
     });
     this.joinButton = new Button({
-      label: "JOIN GAME",
+      label: "CONTINUE",
       type: "submit",
       className: "button-confirm",
     });

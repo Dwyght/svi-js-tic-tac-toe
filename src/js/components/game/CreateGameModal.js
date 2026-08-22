@@ -18,7 +18,7 @@ export class CreateGameModal {
     this.nameInput = document.createElement("input");
     this.message = document.createElement("p");
     this.createButton = new Button({
-      label: "CREATE GAME",
+      label: "CONTINUE",
       type: "submit",
       className: "button-confirm",
     });

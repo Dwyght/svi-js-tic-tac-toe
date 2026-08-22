@@ -11,11 +11,6 @@ import {
   spectateGame as spectateGameService,
   waitForPlayerO as waitForPlayerOService,
 } from "../services/gameFlowService.js";
-import {
-  hasPlayerSushi,
-  savePlayerSushi,
-} from "../services/storageService.js";
-import { gameState } from "../state/gameState.js";
 import { readClipboardText } from "../utils/clipboard.js";
 import { resolveTarget } from "../utils/dom.js";
 
@@ -24,7 +19,6 @@ export class HomePage {
     this.screenManager = screenManager;
     this.pollingService = pollingService;
     this.onGameStarted = onGameStarted;
-    this.pendingSushiSelection = null;
 
     this.initializeElements();
     this.initializeComponents();
@@ -92,9 +86,7 @@ export class HomePage {
       onPasteGameCode: () => this.pasteSpectateGameCode(),
     });
 
-    this.sushiPickerModal = new SushiPickerModal({
-      onConfirm: (sushiId) => this.confirmSushiSelection(sushiId),
-    });
+    this.sushiPickerModal = new SushiPickerModal();
 
     this.noticeButton = new Button({
       label: "OK",
@@ -215,7 +207,7 @@ export class HomePage {
   // CREATE GAME
   // ========================================
 
-  async createGame() {
+  createGame() {
     const playerName = this.createGameModal.getPlayerName();
 
     if (playerName === "") {
@@ -223,44 +215,28 @@ export class HomePage {
       return;
     }
 
-    const result = await createGameService(playerName);
-
-    if (!result.ok) {
-      this.setMessage(result.message);
-      return;
-    }
-
     this.createGameModal.close();
-    this.pendingSushiSelection = {
-      tile: "X",
-      gameCode: result.gameCode,
-      playerName,
-    };
-    this.sushiPickerModal.open("X");
+    this.sushiPickerModal.open(
+      "X",
+      (sushiId) => this.createGameWithSushi(playerName, sushiId),
+    );
   }
 
   // ========================================
-  // CONFIRM SUSHI
+  // CREATE GAME WITH SUSHI
   // ========================================
 
-  confirmSushiSelection(sushiId) {
-    if (this.pendingSushiSelection === null) {
+  async createGameWithSushi(playerName, sushiId) {
+    const result = await createGameService(playerName, sushiId);
+
+    if (!result.ok) {
+      this.createGameModal.open();
+      this.createGameModal.setMessage(result.message);
       return;
     }
 
-    const { tile, gameCode, playerName } = this.pendingSushiSelection;
-
-    savePlayerSushi(gameCode, tile, sushiId);
-    gameState.mySushi = sushiId;
-    this.pendingSushiSelection = null;
-
-    if (tile === "X") {
-      this.screenManager.showWaitingScreen(gameCode, playerName);
-      this.waitForPlayerO(gameCode);
-      return;
-    }
-
-    this.onGameStarted();
+    this.screenManager.showWaitingScreen(result.gameCode, playerName);
+    this.waitForPlayerO(result.gameCode);
   }
 
   // ========================================
@@ -271,7 +247,7 @@ export class HomePage {
     this.pollingService.startRefresh(async () => {
       const result = await waitForPlayerOService(gameCode);
 
-      if (!result.started || !hasPlayerSushi(gameCode, "O")) {
+      if (!result.started) {
         return;
       }
 
@@ -284,7 +260,7 @@ export class HomePage {
   // JOIN GAME
   // ========================================
 
-  async joinGame() {
+  joinGame() {
     const gameCode = this.joinGameModal.getGameCode();
     // .toUpperCase();
 
@@ -300,20 +276,32 @@ export class HomePage {
       return;
     }
 
-    const result = await joinGameService(gameCode, playerName);
+    this.joinGameModal.close();
+    this.sushiPickerModal.open(
+      "O",
+      (sushiId) =>
+        this.joinGameWithSushi(gameCode, playerName, sushiId),
+    );
+  }
+
+  // ========================================
+  // JOIN GAME WITH SUSHI
+  // ========================================
+
+  async joinGameWithSushi(gameCode, playerName, sushiId) {
+    const result = await joinGameService(
+      gameCode,
+      playerName,
+      sushiId,
+    );
 
     if (!result.ok) {
-      this.setMessage(result.message);
+      this.joinGameModal.open();
+      this.joinGameModal.setMessage(result.message);
       return;
     }
 
-    this.joinGameModal.close();
-    this.pendingSushiSelection = {
-      tile: "O",
-      gameCode: result.gameCode,
-      playerName,
-    };
-    this.sushiPickerModal.open("O");
+    this.onGameStarted();
   }
 
   // ========================================
@@ -367,7 +355,6 @@ export class HomePage {
   // ========================================
 
   resetForm() {
-    this.pendingSushiSelection = null;
     this.createGameModal.reset();
     this.joinGameModal.reset();
     this.spectateModal.reset();

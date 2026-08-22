@@ -85,14 +85,13 @@ export function getPlayerNames(gameCode) {
 
 export function savePlayerSushi(gameCode, tile, sushiId) {
   const storageKey = getStorageKey(gameCode);
+  const previousPlayers = localStorage.getItem(storageKey);
 
   let players = {};
 
-  const saved = localStorage.getItem(storageKey);
-
-  if (saved !== null) {
+  if (previousPlayers !== null) {
     try {
-      players = JSON.parse(saved);
+      players = JSON.parse(previousPlayers);
 
       if (players === null || typeof players !== "object") {
         players = {};
@@ -105,6 +104,23 @@ export function savePlayerSushi(gameCode, tile, sushiId) {
   players[`sushi${tile}`] = sushiId;
 
   localStorage.setItem(storageKey, JSON.stringify(players));
+
+  let restored = false;
+
+  return () => {
+    if (restored) {
+      return;
+    }
+
+    restored = true;
+
+    if (previousPlayers === null) {
+      localStorage.removeItem(storageKey);
+      return;
+    }
+
+    localStorage.setItem(storageKey, previousPlayers);
+  };
 }
 
 // ========================================
@@ -126,23 +142,6 @@ export function getPlayerSushi(gameCode, tile) {
     return players?.[`sushi${tile}`] || defaultSushi;
   } catch {
     return defaultSushi;
-  }
-}
-
-export function hasPlayerSushi(gameCode, tile) {
-  const storageKey = getStorageKey(gameCode);
-  const saved = localStorage.getItem(storageKey);
-
-  if (saved === null) {
-    return false;
-  }
-
-  try {
-    const players = JSON.parse(saved);
-
-    return typeof players?.[`sushi${tile}`] === "string";
-  } catch {
-    return false;
   }
 }
 
