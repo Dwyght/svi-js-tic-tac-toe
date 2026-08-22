@@ -11,7 +11,6 @@ import {
   submitMove,
   checkGameStillActive,
   restartGameSession,
-  resetGameSession,
 } from "../services/gameFlowService.js";
 import { Card } from "../components/base/Card.js";
 import { Board } from "../components/game/Board.js";
@@ -24,6 +23,7 @@ import { Scoreboard } from "../components/game/Scoreboard.js";
 import { resolveTarget } from "../utils/dom.js";
 import { resolveSushi } from "../utils/sushi.js";
 import { Emote } from "./Emote.js";
+import { Quit } from "./Quit.js";
 
 const GAME_OVER_INACTIVE_GRACE_REFRESHES = 3;
 
@@ -43,6 +43,7 @@ export class GamePage {
       scoreboard: this.scoreboard,
       isQuitting: () => this.isQuitting,
     });
+    this.quit = new Quit(this);
     this.setAttributes();
     this.appendElements();
 
@@ -85,25 +86,25 @@ export class GamePage {
     // Pause menu
     this.pauseMenu = new PauseMenu({
       onCopyGameCode: (gameCode) => this.copyGameCode(gameCode),
-      onOpenQuitModal: () => this.openQuitModal(),
-      onLeave: () => this.openLeaveModal(),
+      onOpenQuitModal: () => this.quit.openQuitModal(),
+      onLeave: () => this.quit.openLeaveModal(),
     });
 
     // Game result
     this.resultModal = new ResultModal({
       onPlayAgain: () => this.handlePlayAgain(),
-      onQuit: () => this.openQuitModal(),
-      onLeave: () => this.openLeaveModal(),
+      onQuit: () => this.quit.openQuitModal(),
+      onLeave: () => this.quit.openLeaveModal(),
     });
 
     // Quit confirmation
     this.quitConfirmModal = new QuitConfirmModal({
-      onConfirm: () => this.confirmQuit(),
+      onConfirm: () => this.quit.confirmQuit(),
     });
 
     // Spectator leave confirmation
     this.leaveConfirmModal = new LeaveConfirmModal({
-      onConfirm: () => this.handleLeave(),
+      onConfirm: () => this.quit.handleLeave(),
     });
   }
 
@@ -576,87 +577,6 @@ export class GamePage {
     }
 
     this.playBoardEntrance();
-  }
-
-  // ========================================
-  // QUIT CONFIRMATION
-  // ========================================
-
-  openQuitModal() {
-    this.pauseMenu.close();
-    this.quitConfirmModal.open();
-  }
-
-  async confirmQuit() {
-    if (this.isQuitting) {
-      return;
-    }
-
-    this.isQuitting = true;
-    this.emote.updateEmoteAvailability();
-    this.quitConfirmModal.setPending(true);
-    await this.handleReset();
-  }
-
-  // ========================================
-  // LEAVE SPECTATOR VIEW
-  // ========================================
-
-  openLeaveModal() {
-    if (!gameState.isSpectator) {
-      return;
-    }
-
-    this.pauseMenu.close();
-    this.leaveConfirmModal.open();
-  }
-
-  handleLeave() {
-    if (!gameState.isSpectator) {
-      return;
-    }
-
-    this.pollingService.stopRefresh();
-    this.emote.clear();
-    this.clearBoardForViewer(true);
-    this.resultModal.close();
-    this.pauseMenu.close();
-    this.quitConfirmModal.close();
-    this.leaveConfirmModal.close();
-    gameState.reset();
-    this.onReturnHome();
-  }
-
-  // ========================================
-  // RESET
-  // ========================================
-
-  async handleReset() {
-    if (gameState.gameCode === null) {
-      this.emote.clear();
-      this.isQuitting = false;
-      return;
-    }
-
-    const oldGameCode = gameState.gameCode;
-
-    try {
-      await resetGameSession(oldGameCode);
-      this.pollingService.stopRefresh();
-      this.emote.clear();
-      this.clearBoardForViewer();
-      this.resultModal.close();
-      this.pauseMenu.close();
-      this.quitConfirmModal.close();
-      this.leaveConfirmModal.close();
-      this.onReturnHome();
-    } catch (error) {
-      this.isQuitting = false;
-      this.emote.updateEmoteAvailability();
-      this.quitConfirmModal.setPending(false);
-      console.error(error);
-      this.message.textContent = "Could not reset game.";
-    }
   }
 
   // ========================================
