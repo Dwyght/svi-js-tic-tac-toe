@@ -3,17 +3,18 @@
 ========================= */
 
 .home-page {
+  --home-banner-aspect-ratio: 1672 / 941;
   --home-banner-width: min(
-    480px,
-    78vw,
-    max(80px, calc(165svh - 495px))
+    432px,
+    70vw,
+    max(72px, calc(160svh - 480px))
   );
 
   width: min(700px, 100%);
   height: 100%;
 
   margin: 0 auto;
-  padding-bottom: clamp(28px, 5svh, 50px);
+  padding-bottom: clamp(25px, 4.5svh, 45px);
 
   display: flex;
   flex-direction: column;
@@ -21,14 +22,14 @@
 }
 
 .home-banner {
-  --rope-overhang: clamp(10px, 2vw, 18px);
+  --rope-overhang: clamp(9px, 1.8vw, 16px);
 
   position: fixed;
   top: calc(0px - var(--rope-overhang));
   left: 50%;
 
   width: var(--home-banner-width);
-  aspect-ratio: 1.8;
+  aspect-ratio: var(--home-banner-aspect-ratio);
 
   pointer-events: none;
 
@@ -38,16 +39,12 @@
 }
 
 .home-banner img {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-
   width: 100%;
   height: auto;
 
   display: block;
 
-  filter: drop-shadow(0 12px 12px rgb(47 28 16 / 24%));
+  filter: drop-shadow(0 11px 11px rgb(47 28 16 / 24%));
 }
 
 @keyframes lower-home-banner {
@@ -75,24 +72,26 @@
 
   align-items: center;
 
-  gap: 14px;
+  gap: 13px;
 }
 
 .home-action-button {
-  width: min(280px, 100%);
-  min-height: 52px;
+  width: min(252px, 100%);
+  min-height: 47px;
 
-  padding: 13px 26px;
+  padding: 12px 23px;
+
+  font-size: 0.9rem;
 
   box-shadow:
     0 4px 0 var(--color-primary),
-    0 7px 14px var(--color-button-shadow-soft);
+    0 6px 13px var(--color-button-shadow-soft);
 }
 
 .home-action-button:active:not(:disabled) {
   box-shadow:
     0 1px 0 var(--color-primary),
-    0 3px 7px var(--color-button-shadow-soft);
+    0 3px 6px var(--color-button-shadow-soft);
 }
 
 @media (prefers-reduced-motion: reduce) {

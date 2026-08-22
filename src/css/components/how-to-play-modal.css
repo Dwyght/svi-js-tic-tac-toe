@@ -4,19 +4,19 @@
 
 .how-to-play-button {
   position: fixed;
-  right: clamp(15px, 3vw, 30px);
-  bottom: clamp(15px, 3vw, 30px);
+  right: clamp(14px, 2.7vw, 27px);
+  bottom: clamp(14px, 2.7vw, 27px);
   z-index: 2;
 
-  width: 48px;
-  min-width: 48px;
-  height: 48px;
-  min-height: 48px;
+  width: 43px;
+  min-width: 43px;
+  height: 43px;
+  min-height: 43px;
   padding: 0;
 
   border-radius: 50%;
 
-  font-size: 1.45rem;
+  font-size: 1.3rem;
   line-height: 1;
 }
 
