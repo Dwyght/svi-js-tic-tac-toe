@@ -13,10 +13,6 @@ import {
   restartGameSession,
   resetGameSession,
 } from "../services/gameFlowService.js";
-import {
-  saveEmote,
-  subscribeToEmotes,
-} from "../services/emoteService.js";
 import { Card } from "../components/base/Card.js";
 import { Board } from "../components/game/Board.js";
 import { EmotePicker } from "../components/game/EmotePicker.js";
@@ -27,6 +23,7 @@ import { ResultModal } from "../components/game/ResultModal.js";
 import { Scoreboard } from "../components/game/Scoreboard.js";
 import { resolveTarget } from "../utils/dom.js";
 import { resolveSushi } from "../utils/sushi.js";
+import { Emote } from "./Emote.js";
 
 const GAME_OVER_INACTIVE_GRACE_REFRESHES = 3;
 
@@ -39,9 +36,13 @@ export class GamePage {
     this.roundScored = false;
     this.isSubmittingMove = false;
     this.isQuitting = false;
-    this.unsubscribeFromEmotes = null;
 
     this.initializeElements();
+    this.emote = new Emote({
+      emotePicker: this.emotePicker,
+      scoreboard: this.scoreboard,
+      isQuitting: () => this.isQuitting,
+    });
     this.setAttributes();
     this.appendElements();
 
@@ -69,7 +70,8 @@ export class GamePage {
       className: "turn-card",
     });
     this.emotePicker = new EmotePicker({
-      onSelect: (emoteId) => this.handleEmoteSelect(emoteId),
+      onSelect: (emoteId) =>
+        this.emote.handleEmoteSelect(emoteId),
     });
     this.emotePicker.setEnabled(false);
     this.scoreboard = new Scoreboard();
@@ -179,73 +181,6 @@ export class GamePage {
   }
 
   // ========================================
-  // EMOTES
-  // ========================================
-
-  canDisplayEmotes() {
-    return (
-      gameState.gameCode !== null &&
-      gameState.gameStarted &&
-      !gameState.gameOver &&
-      !this.isQuitting
-    );
-  }
-
-  canSendEmotes() {
-    return (
-      this.canDisplayEmotes() &&
-      !gameState.isSpectator &&
-      (gameState.myTile === "X" || gameState.myTile === "O")
-    );
-  }
-
-  updateEmoteAvailability() {
-    this.emotePicker.setEnabled(this.canSendEmotes());
-  }
-
-  handleEmoteSelect(emoteId) {
-    if (!this.canSendEmotes()) {
-      return;
-    }
-
-    saveEmote(gameState.gameCode, gameState.myTile, emoteId);
-  }
-
-  startEmoteSubscription() {
-    this.stopEmoteSubscription();
-
-    if (gameState.gameCode === null || !gameState.gameStarted) {
-      return;
-    }
-
-    const gameCode = gameState.gameCode;
-
-    this.unsubscribeFromEmotes = subscribeToEmotes(
-      gameCode,
-      (emoteEntry) => {
-        if (
-          gameState.gameCode !== gameCode ||
-          !this.canDisplayEmotes()
-        ) {
-          return;
-        }
-
-        this.scoreboard.showEmoteBubble(
-          emoteEntry.tile,
-          emoteEntry.emoteId,
-        );
-      },
-    );
-  }
-
-  stopEmoteSubscription() {
-    if (this.unsubscribeFromEmotes !== null) {
-      this.unsubscribeFromEmotes();
-      this.unsubscribeFromEmotes = null;
-    }
-  }
-
-  // ========================================
   // SUSHI DISPLAY
   // ========================================
 
@@ -270,12 +205,6 @@ export class GamePage {
     }
   }
 
-  clearEmotes() {
-    this.stopEmoteSubscription();
-    this.emotePicker.setEnabled(false);
-    this.scoreboard.clearEmoteBubbles();
-  }
-
   // ========================================
   // COPY GAME CODE
   // ========================================
@@ -289,7 +218,7 @@ export class GamePage {
   // ========================================
 
   async startGame() {
-    this.clearEmotes();
+    this.emote.clear();
     this.isQuitting = false;
     gameState.gameOver = false;
     this.inactiveGameOverRefreshes = 0;
@@ -310,8 +239,8 @@ export class GamePage {
 
     await this.loadBoard();
 
-    this.startEmoteSubscription();
-    this.updateEmoteAvailability();
+    this.emote.startEmoteSubscription();
+    this.emote.updateEmoteAvailability();
 
     this.pollingService.startRefresh(async () => {
       await this.refreshGame();
@@ -355,7 +284,7 @@ export class GamePage {
       const wasSpectator = gameState.isSpectator;
 
       this.pollingService.stopRefresh();
-      this.clearEmotes();
+      this.emote.clear();
       gameState.reset();
       this.clearBoardForViewer(wasSpectator);
       this.resultModal.close();
@@ -540,7 +469,7 @@ export class GamePage {
     }
 
     gameState.gameOver = true;
-    this.updateEmoteAvailability();
+    this.emote.updateEmoteAvailability();
     this.inactiveGameOverRefreshes = 0;
     this.board.disableBoard();
     this.turnDisplay.textContent = "Game Over";
@@ -634,7 +563,7 @@ export class GamePage {
   resumeGame(clearBoard = false) {
     gameState.gameStarted = true;
     gameState.gameOver = false;
-    this.updateEmoteAvailability();
+    this.emote.updateEmoteAvailability();
     this.inactiveGameOverRefreshes = 0;
     this.roundScored = false;
     this.resultModal.close();
@@ -664,7 +593,7 @@ export class GamePage {
     }
 
     this.isQuitting = true;
-    this.updateEmoteAvailability();
+    this.emote.updateEmoteAvailability();
     this.quitConfirmModal.setPending(true);
     await this.handleReset();
   }
@@ -688,7 +617,7 @@ export class GamePage {
     }
 
     this.pollingService.stopRefresh();
-    this.clearEmotes();
+    this.emote.clear();
     this.clearBoardForViewer(true);
     this.resultModal.close();
     this.pauseMenu.close();
@@ -704,7 +633,7 @@ export class GamePage {
 
   async handleReset() {
     if (gameState.gameCode === null) {
-      this.clearEmotes();
+      this.emote.clear();
       this.isQuitting = false;
       return;
     }
@@ -714,7 +643,7 @@ export class GamePage {
     try {
       await resetGameSession(oldGameCode);
       this.pollingService.stopRefresh();
-      this.clearEmotes();
+      this.emote.clear();
       this.clearBoardForViewer();
       this.resultModal.close();
       this.pauseMenu.close();
@@ -723,7 +652,7 @@ export class GamePage {
       this.onReturnHome();
     } catch (error) {
       this.isQuitting = false;
-      this.updateEmoteAvailability();
+      this.emote.updateEmoteAvailability();
       this.quitConfirmModal.setPending(false);
       console.error(error);
       this.message.textContent = "Could not reset game.";
