@@ -101,7 +101,7 @@ const homePage = new HomePage({
 
 const resumeGameModal = new ResumeGameModal({
   onResume: () => resumeSavedGame(),
-  onQuit: () => gamePage.openQuitModal(),
+  onQuit: () => gamePage.quit.openQuitModal(),
 });
 
 // ========================================
