@@ -78,12 +78,17 @@ export class HomePage {
 
     this.joinGameModal = new JoinGameModal({
       onJoinGame: () => this.joinGame(),
-      onPasteGameCode: () => this.pasteGameCode(),
+      onPasteGameCode: () => this.pasteCodeInto((code) => {
+        this.joinGameModal.setGameCode(code);
+        this.joinGameModal.focusPlayerName();
+      }),
     });
 
     this.spectateModal = new SpectateModal({
       onSpectateGame: () => this.spectateGame(),
-      onPasteGameCode: () => this.pasteSpectateGameCode(),
+      onPasteGameCode: () => this.pasteCodeInto((code) => {
+        this.spectateModal.setGameCode(code);
+      }),
     });
 
     this.sushiPickerModal = new SushiPickerModal();
@@ -170,7 +175,7 @@ export class HomePage {
   // PASTE GAME CODE
   // ========================================
 
-  async pasteGameCode() {
+  async pasteCodeInto(applyCode) {
     try {
       const gameCode = await readClipboardText();
 
@@ -179,24 +184,7 @@ export class HomePage {
         return;
       }
 
-      this.joinGameModal.setGameCode(gameCode);
-      this.joinGameModal.focusPlayerName();
-    } catch (error) {
-      console.error("Could not read the clipboard.", error);
-      this.setMessage("Could not paste the game code.");
-    }
-  }
-
-  async pasteSpectateGameCode() {
-    try {
-      const gameCode = await readClipboardText();
-
-      if (gameCode === "") {
-        this.setMessage("The clipboard does not contain a game code.");
-        return;
-      }
-
-      this.spectateModal.setGameCode(gameCode);
+      applyCode(gameCode);
     } catch (error) {
       console.error("Could not read the clipboard.", error);
       this.setMessage("Could not paste the game code.");
