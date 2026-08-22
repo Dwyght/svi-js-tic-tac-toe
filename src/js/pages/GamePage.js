@@ -11,11 +11,10 @@ import {
   checkGameStillActive,
 } from "../services/gameFlowService.js";
 import { Card } from "../components/base/Card.js";
+import { ConfirmModal } from "../components/base/ConfirmModal.js";
 import { Board } from "../components/game/Board.js";
 import { EmotePicker } from "../components/game/EmotePicker.js";
-import { LeaveConfirmModal } from "../components/game/LeaveConfirmModal.js";
 import { PauseMenu } from "../components/game/PauseMenu.js";
-import { QuitConfirmModal } from "../components/game/QuitConfirmModal.js";
 import { ResultModal } from "../components/game/ResultModal.js";
 import { Scoreboard } from "../components/game/Scoreboard.js";
 import { resolveTarget } from "../utils/dom.js";
@@ -97,12 +96,21 @@ export class GamePage {
     });
 
     // Quit confirmation
-    this.quitConfirmModal = new QuitConfirmModal({
+    this.quitConfirmModal = new ConfirmModal({
+      title: "Quit Game",
+      message:
+        "Are you sure you want to quit? This will end the game for both players.",
+      confirmLabel: "YES, QUIT",
+      pendingLabel: "QUITTING...",
       onConfirm: () => this.quit.confirmQuit(),
     });
 
     // Spectator leave confirmation
-    this.leaveConfirmModal = new LeaveConfirmModal({
+    this.leaveConfirmModal = new ConfirmModal({
+      title: "Leave Game",
+      message:
+        "Are you sure you want to stop spectating and return home?",
+      confirmLabel: "YES, LEAVE",
       onConfirm: () => this.quit.handleLeave(),
     });
   }

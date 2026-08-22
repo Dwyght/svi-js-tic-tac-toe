@@ -160,9 +160,9 @@ export class ResultModal {
   }
 
   setPlayAgainPending(isPending) {
-    this.playAgainButton.element.disabled = isPending;
-    this.playAgainButton.setLabel(
-      isPending ? "STARTING NEW MATCH..." : "PLAY AGAIN",
+    this.playAgainButton.setPending(
+      isPending,
+      "STARTING NEW MATCH...",
     );
   }
 

@@ -48,9 +48,8 @@ export class ResumeGameModal {
   }
 
   setResumePending(isPending) {
-    this.resumeButton.element.disabled = isPending;
     this.quitButton.element.disabled = isPending;
-    this.resumeButton.setLabel(isPending ? "RESUMING..." : "RESUME");
+    this.resumeButton.setPending(isPending, "RESUMING...");
   }
 
   open() {

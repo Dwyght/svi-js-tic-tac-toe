@@ -1,9 +1,19 @@
-import { Button } from "../base/Button.js";
-import { Modal } from "../base/Modal.js";
+import { Button } from "./Button.js";
+import { Modal } from "./Modal.js";
 import { resolveTarget } from "../../utils/dom.js";
 
-export class LeaveConfirmModal {
-  constructor({ onConfirm }) {
+export class ConfirmModal {
+  constructor({
+    title,
+    message,
+    confirmLabel,
+    pendingLabel = null,
+    onConfirm,
+  }) {
+    this.title = title;
+    this.messageText = message;
+    this.confirmLabel = confirmLabel;
+    this.pendingLabel = pendingLabel;
     this.onConfirm = onConfirm;
 
     this.initializeElements();
@@ -20,20 +30,19 @@ export class LeaveConfirmModal {
       onClick: () => this.close(),
     });
     this.confirmButton = new Button({
-      label: "YES, LEAVE",
+      label: this.confirmLabel,
       className: "button-danger",
       onClick: () => this.onConfirm(),
     });
     this.modal = new Modal({
-      title: "Leave Game",
+      title: this.title,
       content: this.content,
     });
   }
 
   setAttributes() {
     this.content.classList.add("modal-form");
-    this.message.textContent =
-      "Are you sure you want to stop spectating and return home?";
+    this.message.textContent = this.messageText;
   }
 
   appendElements() {
@@ -43,7 +52,20 @@ export class LeaveConfirmModal {
   }
 
   open() {
+    if (this.pendingLabel !== null) {
+      this.setPending(false);
+    }
+
     this.modal.open();
+  }
+
+  setPending(isPending) {
+    if (this.pendingLabel === null) {
+      return;
+    }
+
+    this.cancelButton.element.disabled = isPending;
+    this.confirmButton.setPending(isPending, this.pendingLabel);
   }
 
   close() {
@@ -62,7 +84,7 @@ export class LeaveConfirmModal {
         this.modal.render(parent);
       }
     } else {
-      console.error("LeaveConfirmModal target not found.");
+      console.error("ConfirmModal target not found.");
     }
   }
 }
