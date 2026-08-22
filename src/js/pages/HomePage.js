@@ -83,17 +83,19 @@ export class HomePage {
 
     this.joinGameModal = new JoinGameModal({
       onJoinGame: () => this.joinGame(),
-      onPasteGameCode: () => this.pasteCodeInto((code) => {
-        this.joinGameModal.setGameCode(code);
-        this.joinGameModal.focusPlayerName();
-      }),
+      onPasteGameCode: () =>
+        this.pasteCodeInto((code) => {
+          this.joinGameModal.setGameCode(code);
+          this.joinGameModal.focusPlayerName();
+        }),
     });
 
     this.spectateModal = new SpectateModal({
       onSpectateGame: () => this.spectateGame(),
-      onPasteGameCode: () => this.pasteCodeInto((code) => {
-        this.spectateModal.setGameCode(code);
-      }),
+      onPasteGameCode: () =>
+        this.pasteCodeInto((code) => {
+          this.spectateModal.setGameCode(code);
+        }),
     });
 
     this.sushiPickerModal = new SushiPickerModal();
@@ -123,10 +125,7 @@ export class HomePage {
     this.bannerImage.src = "./src/assets/images/banner.png";
     this.bannerImage.alt = "Tic Tac Toe";
     this.actions.classList.add("home-actions");
-    this.howToPlayButton.element.setAttribute(
-      "aria-label",
-      "How to play",
-    );
+    this.howToPlayButton.element.setAttribute("aria-label", "How to play");
     this.howToPlayButton.element.title = "How to play";
 
     // NOTICE
@@ -209,9 +208,8 @@ export class HomePage {
     }
 
     this.createGameModal.close();
-    this.sushiPickerModal.open(
-      "X",
-      (sushiId) => this.createGameWithSushi(playerName, sushiId),
+    this.sushiPickerModal.open("X", (sushiId) =>
+      this.createGameWithSushi(playerName, sushiId),
     );
   }
 
@@ -252,10 +250,8 @@ export class HomePage {
     }
 
     this.joinGameModal.close();
-    this.sushiPickerModal.open(
-      "O",
-      (sushiId) =>
-        this.joinGameWithSushi(gameCode, playerName, sushiId),
+    this.sushiPickerModal.open("O", (sushiId) =>
+      this.joinGameWithSushi(gameCode, playerName, sushiId),
     );
   }
 
@@ -264,11 +260,7 @@ export class HomePage {
   // ========================================
 
   async joinGameWithSushi(gameCode, playerName, sushiId) {
-    const result = await joinGameService(
-      gameCode,
-      playerName,
-      sushiId,
-    );
+    const result = await joinGameService(gameCode, playerName, sushiId);
 
     if (!result.ok) {
       this.joinGameModal.open();

@@ -3,14 +3,12 @@ import {
   getPlayerNames,
   getPlayerSushi,
   getScores,
-  saveScore,
 } from "../services/storageService.js";
 import {
   fetchAndParseBoard,
   evaluateBoard,
   submitMove,
   checkGameStillActive,
-  restartGameSession,
 } from "../services/gameFlowService.js";
 import { Card } from "../components/base/Card.js";
 import { Board } from "../components/game/Board.js";
@@ -24,6 +22,7 @@ import { resolveTarget } from "../utils/dom.js";
 import { resolveSushi } from "../utils/sushi.js";
 import { Emote } from "./Emote.js";
 import { Quit } from "./Quit.js";
+import { Result } from "./Result.js";
 
 const GAME_OVER_INACTIVE_GRACE_REFRESHES = 3;
 
@@ -44,6 +43,7 @@ export class GamePage {
       isQuitting: () => this.isQuitting,
     });
     this.quit = new Quit(this);
+    this.result = new Result(this);
     this.setAttributes();
     this.appendElements();
 
@@ -71,8 +71,7 @@ export class GamePage {
       className: "turn-card",
     });
     this.emotePicker = new EmotePicker({
-      onSelect: (emoteId) =>
-        this.emote.handleEmoteSelect(emoteId),
+      onSelect: (emoteId) => this.emote.handleEmoteSelect(emoteId),
     });
     this.emotePicker.setEnabled(false);
     this.scoreboard = new Scoreboard();
@@ -92,7 +91,7 @@ export class GamePage {
 
     // Game result
     this.resultModal = new ResultModal({
-      onPlayAgain: () => this.handlePlayAgain(),
+      onPlayAgain: () => this.result.handlePlayAgain(),
       onQuit: () => this.quit.openQuitModal(),
       onLeave: () => this.quit.openLeaveModal(),
     });
@@ -170,11 +169,7 @@ export class GamePage {
   }
 
   updateBoardInteraction() {
-    if (
-      gameState.isSpectator ||
-      gameState.gameOver ||
-      this.isSubmittingMove
-    ) {
+    if (gameState.isSpectator || gameState.gameOver || this.isSubmittingMove) {
       this.board.disableBoard();
     } else {
       this.board.enableBoard();
@@ -187,14 +182,8 @@ export class GamePage {
 
   updateSushiDisplays() {
     const sushiImages = {
-      X: resolveSushi(
-        "X",
-        getPlayerSushi(gameState.gameCode, "X"),
-      ),
-      O: resolveSushi(
-        "O",
-        getPlayerSushi(gameState.gameCode, "O"),
-      ),
+      X: resolveSushi("X", getPlayerSushi(gameState.gameCode, "X")),
+      O: resolveSushi("O", getPlayerSushi(gameState.gameCode, "O")),
     };
 
     this.board.setSushiImages(sushiImages);
@@ -226,7 +215,7 @@ export class GamePage {
     this.roundScored = false;
     gameState.scores = getScores(gameState.gameCode);
     this.updateSushiDisplays();
-    this.updateScoreDisplays();
+    this.result.updateScoreDisplays();
     this.pauseMenu.updateGameCode(gameState.gameCode);
     this.resultModal.close();
     this.pauseMenu.close();
@@ -293,15 +282,9 @@ export class GamePage {
       this.quitConfirmModal.close();
       this.leaveConfirmModal.close();
       if (wasSpectator) {
-        this.onReturnHome(
-          "A player has left the game.",
-          "Oopsies!",
-        );
+        this.onReturnHome("A player has left the game.", "Oopsies!");
       } else {
-        this.onReturnHome(
-          "The other player has left the game.",
-          "Oopsies!",
-        );
+        this.onReturnHome("The other player has left the game.", "Oopsies!");
       }
 
       return;
@@ -342,14 +325,14 @@ export class GamePage {
 
     if (boardState.status === "finished") {
       if (!gameState.gameOver) {
-        await this.finishGame(boardState.result);
+        await this.result.finishGame(boardState.result);
       }
 
       return;
     }
 
     if (gameState.gameOver) {
-      this.resumeGame();
+      this.result.resumeGame();
     }
 
     this.updateTurn(boardState.turn);
@@ -429,7 +412,7 @@ export class GamePage {
       }
 
       if (result.reason === "game_over") {
-        await this.finishGame(result.result);
+        await this.result.finishGame(result.result);
         return;
       }
 
@@ -458,125 +441,6 @@ export class GamePage {
     } finally {
       this.isSubmittingMove = false;
     }
-  }
-
-  // ========================================
-  // FINISH GAME
-  // ========================================
-
-  async finishGame(result) {
-    if (this.isQuitting) {
-      return;
-    }
-
-    gameState.gameOver = true;
-    this.emote.updateEmoteAvailability();
-    this.inactiveGameOverRefreshes = 0;
-    this.board.disableBoard();
-    this.turnDisplay.textContent = "Game Over";
-
-    this.scoreRound(result);
-    this.updateScoreDisplays();
-
-    if (!gameState.isSpectator) {
-      const canPlayAgain = gameState.myTile === "X";
-
-      if (canPlayAgain) {
-        this.resultModal.showPlayAgainButton();
-      } else {
-        const players = getPlayerNames(gameState.gameCode);
-
-        this.resultModal.setWaitingPlayerName(players.X);
-        this.resultModal.showWaitingIndicator();
-      }
-    }
-
-    if (gameState.isSpectator) {
-      await this.resultModal.setOutcome("spectator");
-    } else if (result.status === "draw") {
-      await this.resultModal.setOutcome("draw");
-    } else if (result.winner === gameState.myTile) {
-      await this.resultModal.setOutcome("victory");
-    } else {
-      await this.resultModal.setOutcome("defeat");
-    }
-
-    if (this.isQuitting || gameState.gameCode === null) {
-      return;
-    }
-
-    this.resultModal.open();
-  }
-
-  scoreRound(result) {
-    if (
-      this.roundScored ||
-      (result.winner !== "X" && result.winner !== "O")
-    ) {
-      return;
-    }
-
-    const scores = {
-      ...gameState.scores,
-    };
-
-    scores[result.winner]++;
-
-    gameState.scores = scores;
-    saveScore(gameState.gameCode, scores);
-    this.roundScored = true;
-  }
-
-  updateScoreDisplays() {
-    const scores = gameState.scores;
-
-    this.scoreboard.update(scores);
-    this.resultModal.updateScore(scores);
-  }
-
-  // ========================================
-  // PLAY AGAIN
-  // ========================================
-
-  async handlePlayAgain() {
-    if (
-      gameState.gameCode === null ||
-      gameState.isSpectator ||
-      gameState.myTile !== "X" ||
-      !gameState.gameOver
-    ) {
-      return;
-    }
-
-    this.resultModal.setPlayAgainPending(true);
-
-    try {
-      await restartGameSession(gameState.gameCode);
-      this.resumeGame(true);
-      await this.loadBoard();
-    } catch (error) {
-      console.error(error);
-      this.resultModal.setMessage("Could not start a new match.");
-      this.resultModal.setPlayAgainPending(false);
-    }
-  }
-
-  resumeGame(clearBoard = false) {
-    gameState.gameStarted = true;
-    gameState.gameOver = false;
-    this.emote.updateEmoteAvailability();
-    this.inactiveGameOverRefreshes = 0;
-    this.roundScored = false;
-    this.resultModal.close();
-    this.resultModal.hideWaitingIndicator();
-
-    if (clearBoard) {
-      this.clearBoardForViewer();
-    } else {
-      this.updateBoardInteraction();
-    }
-
-    this.playBoardEntrance();
   }
 
   // ========================================
