@@ -84,17 +84,17 @@
     padding: 15px;
   }
 
-  .sushi-picker-modal {
+  .game-entry-modal {
     width: min(390px, calc(100vw - 20px));
     max-width: calc(100vw - 20px);
   }
 
-  .sushi-picker-grid {
+  .sushi-selector-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 9px;
   }
 
-  .sushi-picker-option {
+  .sushi-selector-option {
     padding: 6px;
 
     border-radius: 14px;
@@ -188,16 +188,12 @@
     padding: 10px 15px;
   }
 
-  .sushi-picker-content {
-    gap: 9px;
-  }
-
-  .sushi-picker-grid {
+  .sushi-selector-grid {
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 6px;
   }
 
-  .sushi-picker-option {
+  .sushi-selector-option {
     padding: 4px;
 
     border-width: 2px;

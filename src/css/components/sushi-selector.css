@@ -1,25 +1,24 @@
 /* =========================
-   SUSHI PICKER MODAL
+   SUSHI SELECTOR
 ========================= */
 
-.sushi-picker-modal {
+.game-entry-modal {
   width: min(620px, calc(100vw - 30px));
 }
 
-.sushi-picker-content {
-  display: grid;
-  gap: 18px;
+.sushi-selector-label {
+  margin: 0;
 
-  text-align: center;
+  font-weight: 700;
 }
 
-.sushi-picker-grid {
+.sushi-selector-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
 }
 
-.sushi-picker-option {
+.sushi-selector-option {
   aspect-ratio: 1;
   padding: 8px;
 
@@ -40,28 +39,28 @@
     transform 100ms ease;
 }
 
-.sushi-picker-option:hover,
-.sushi-picker-option:focus-visible {
+.sushi-selector-option:hover,
+.sushi-selector-option:focus-visible {
   background: var(--color-highlight);
   border-color: var(--color-primary);
 }
 
-.sushi-picker-option:focus-visible {
+.sushi-selector-option:focus-visible {
   outline: 3px solid var(--color-accent);
   outline-offset: 2px;
 }
 
-.sushi-picker-option:active {
+.sushi-selector-option:active {
   transform: scale(0.96);
 }
 
-.sushi-picker-option-selected {
+.sushi-selector-option-selected {
   background: var(--color-accent);
   border-color: var(--color-primary);
   box-shadow: 0 0 0 4px rgb(112 64 31 / 18%);
 }
 
-.sushi-picker-image {
+.sushi-selector-image {
   width: 100%;
   height: 100%;
 
@@ -73,8 +72,4 @@
 
   pointer-events: none;
   user-select: none;
-}
-
-.sushi-picker-confirm {
-  width: 100%;
 }

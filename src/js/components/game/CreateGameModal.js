@@ -1,6 +1,7 @@
 import { Button } from "../base/Button.js";
 import { Modal } from "../base/Modal.js";
 import { resolveTarget } from "../../utils/dom.js";
+import { SushiSelector } from "./SushiSelector.js";
 
 export class CreateGameModal {
   constructor({ onCreateGame }) {
@@ -16,6 +17,8 @@ export class CreateGameModal {
     this.form = document.createElement("form");
     this.nameLabel = document.createElement("label");
     this.nameInput = document.createElement("input");
+    this.sushiLabel = document.createElement("p");
+    this.sushiSelector = new SushiSelector({ tile: "X" });
     this.message = document.createElement("p");
     this.createButton = new Button({
       label: "CONTINUE",
@@ -36,11 +39,20 @@ export class CreateGameModal {
     this.nameInput.type = "text";
     this.nameInput.placeholder = "Enter your name";
     this.nameInput.autocomplete = "name";
+    this.sushiLabel.textContent = "Choose Sushi";
+    this.sushiLabel.classList.add("sushi-selector-label");
     this.message.classList.add("message");
+    this.modal.dialog.classList.add("game-entry-modal");
   }
 
   appendElements() {
-    this.form.append(this.nameLabel, this.nameInput, this.message);
+    this.form.append(
+      this.nameLabel,
+      this.nameInput,
+      this.sushiLabel,
+      this.sushiSelector.element,
+      this.message,
+    );
     this.createButton.render(this.form);
   }
 
@@ -55,16 +67,30 @@ export class CreateGameModal {
     return this.nameInput.value.trim();
   }
 
+  getSushiId() {
+    return this.sushiSelector.getSelectedSushiId();
+  }
+
   setMessage(message) {
     this.message.textContent = message;
   }
 
+  setPending(isPending) {
+    this.createButton.setPending(isPending, "CREATING...");
+    this.nameInput.disabled = isPending;
+    this.sushiSelector.setEnabled(!isPending);
+    this.modal.setDismissEnabled(!isPending);
+  }
+
   reset() {
+    this.setPending(false);
     this.nameInput.value = "";
+    this.sushiSelector.reset();
     this.setMessage("");
   }
 
   open() {
+    this.setPending(false);
     this.setMessage("");
     this.modal.open();
     this.nameInput.focus();

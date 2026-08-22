@@ -4,7 +4,6 @@ import { CreateGameModal } from "../components/game/CreateGameModal.js";
 import { HowToPlayModal } from "../components/game/HowToPlayModal.js";
 import { JoinGameModal } from "../components/game/JoinGameModal.js";
 import { SpectateModal } from "../components/game/SpectateModal.js";
-import { SushiPickerModal } from "../components/game/SushiPickerModal.js";
 import {
   createGame as createGameService,
   joinGame as joinGameService,
@@ -97,8 +96,6 @@ export class HomePage {
           this.spectateModal.setGameCode(code);
         }),
     });
-
-    this.sushiPickerModal = new SushiPickerModal();
 
     this.noticeButton = new Button({
       label: "OK",
@@ -199,43 +196,41 @@ export class HomePage {
   // CREATE GAME
   // ========================================
 
-  createGame() {
+  async createGame() {
     const playerName = this.createGameModal.getPlayerName();
+    const sushiId = this.createGameModal.getSushiId();
 
     if (playerName === "") {
       this.setMessage("Please enter your name.");
       return;
     }
 
-    this.createGameModal.close();
-    this.sushiPickerModal.open("X", (sushiId) =>
-      this.createGameWithSushi(playerName, sushiId),
-    );
-  }
+    this.createGameModal.setMessage("");
+    this.createGameModal.setPending(true);
 
-  // ========================================
-  // CREATE GAME WITH SUSHI
-  // ========================================
+    try {
+      const result = await createGameService(playerName, sushiId);
 
-  async createGameWithSushi(playerName, sushiId) {
-    const result = await createGameService(playerName, sushiId);
+      if (!result.ok) {
+        this.createGameModal.setMessage(result.message);
+        return;
+      }
 
-    if (!result.ok) {
-      this.createGameModal.open();
-      this.createGameModal.setMessage(result.message);
-      return;
+      this.createGameModal.close();
+      this.waitingRoomFlow.start(result.gameCode, playerName);
+    } finally {
+      this.createGameModal.setPending(false);
     }
-
-    this.waitingRoomFlow.start(result.gameCode, playerName);
   }
 
   // ========================================
   // JOIN GAME
   // ========================================
 
-  joinGame() {
+  async joinGame() {
     const gameCode = this.joinGameModal.getGameCode();
     const playerName = this.joinGameModal.getPlayerName();
+    const sushiId = this.joinGameModal.getSushiId();
 
     if (gameCode === "") {
       this.setMessage("Please enter a game code.");
@@ -247,26 +242,26 @@ export class HomePage {
       return;
     }
 
-    this.joinGameModal.close();
-    this.sushiPickerModal.open("O", (sushiId) =>
-      this.joinGameWithSushi(gameCode, playerName, sushiId),
-    );
-  }
+    this.joinGameModal.setMessage("");
+    this.joinGameModal.setPending(true);
 
-  // ========================================
-  // JOIN GAME WITH SUSHI
-  // ========================================
+    try {
+      const result = await joinGameService(
+        gameCode,
+        playerName,
+        sushiId,
+      );
 
-  async joinGameWithSushi(gameCode, playerName, sushiId) {
-    const result = await joinGameService(gameCode, playerName, sushiId);
+      if (!result.ok) {
+        this.joinGameModal.setMessage(result.message);
+        return;
+      }
 
-    if (!result.ok) {
-      this.joinGameModal.open();
-      this.joinGameModal.setMessage(result.message);
-      return;
+      this.joinGameModal.close();
+      this.onGameStarted();
+    } finally {
+      this.joinGameModal.setPending(false);
     }
-
-    this.onGameStarted();
   }
 
   // ========================================
@@ -323,11 +318,9 @@ export class HomePage {
     this.createGameModal.reset();
     this.joinGameModal.reset();
     this.spectateModal.reset();
-    this.sushiPickerModal.reset();
     this.createGameModal.close();
     this.joinGameModal.close();
     this.spectateModal.close();
-    this.sushiPickerModal.close();
     this.noticeModal.close();
     this.howToPlayModal.close();
   }
@@ -344,7 +337,6 @@ export class HomePage {
       this.createGameModal.render(document.body);
       this.joinGameModal.render(document.body);
       this.spectateModal.render(document.body);
-      this.sushiPickerModal.render(document.body);
       this.noticeModal.render(document.body);
       this.howToPlayModal.render(document.body);
     } else {
