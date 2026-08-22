@@ -235,8 +235,6 @@ export class HomePage {
 
   joinGame() {
     const gameCode = this.joinGameModal.getGameCode();
-    // .toUpperCase();
-
     const playerName = this.joinGameModal.getPlayerName();
 
     if (gameCode === "") {

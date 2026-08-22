@@ -63,7 +63,7 @@ export class SpectateModal {
   }
 
   getGameCode() {
-    return this.codeInput.value.trim();
+    return this.codeInput.value.trim().toUpperCase();
   }
 
   setGameCode(gameCode) {

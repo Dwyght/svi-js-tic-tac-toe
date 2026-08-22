@@ -77,7 +77,7 @@ export class JoinGameModal {
   }
 
   getGameCode() {
-    return this.codeInput.value.trim();
+    return this.codeInput.value.trim().toUpperCase();
   }
 
   getPlayerName() {
