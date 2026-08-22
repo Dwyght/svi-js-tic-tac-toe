@@ -9,8 +9,8 @@ import {
   createGame as createGameService,
   joinGame as joinGameService,
   spectateGame as spectateGameService,
-  waitForPlayerO as waitForPlayerOService,
 } from "../services/gameFlowService.js";
+import { WaitingRoomFlow } from "../services/waitingRoomFlow.js";
 import { readClipboardText } from "../utils/clipboard.js";
 import { resolveTarget } from "../utils/dom.js";
 
@@ -19,6 +19,11 @@ export class HomePage {
     this.screenManager = screenManager;
     this.pollingService = pollingService;
     this.onGameStarted = onGameStarted;
+    this.waitingRoomFlow = new WaitingRoomFlow({
+      pollingService: this.pollingService,
+      screenManager: this.screenManager,
+      onGameStarted: this.onGameStarted,
+    });
 
     this.initializeElements();
     this.initializeComponents();
@@ -223,25 +228,7 @@ export class HomePage {
       return;
     }
 
-    this.screenManager.showWaitingScreen(result.gameCode, playerName);
-    this.waitForPlayerO(result.gameCode);
-  }
-
-  // ========================================
-  // WAIT FOR PLAYER O
-  // ========================================
-
-  waitForPlayerO(gameCode) {
-    this.pollingService.startRefresh(async () => {
-      const result = await waitForPlayerOService(gameCode);
-
-      if (!result.started) {
-        return;
-      }
-
-      this.pollingService.stopRefresh();
-      this.onGameStarted();
-    });
+    this.waitingRoomFlow.start(result.gameCode, playerName);
   }
 
   // ========================================
