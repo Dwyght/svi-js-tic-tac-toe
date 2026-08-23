@@ -4,6 +4,7 @@ import { CreateGameModal } from "../components/game/CreateGameModal.js";
 import { HowToPlayModal } from "../components/game/HowToPlayModal.js";
 import { JoinGameModal } from "../components/game/JoinGameModal.js";
 import { SpectateModal } from "../components/game/SpectateModal.js";
+import { PLAYER_NAME_MAX_LENGTH } from "../config/constants.js";
 import {
   createGame as createGameService,
   joinGame as joinGameService,
@@ -205,6 +206,11 @@ export class HomePage {
       return;
     }
 
+    if (playerName.length > PLAYER_NAME_MAX_LENGTH) {
+      this.setMessage("Player name must be 10 characters or fewer.");
+      return;
+    }
+
     this.createGameModal.setMessage("");
     this.createGameModal.setPending(true);
 
@@ -242,15 +248,16 @@ export class HomePage {
       return;
     }
 
+    if (playerName.length > PLAYER_NAME_MAX_LENGTH) {
+      this.setMessage("Player name must be 10 characters or fewer.");
+      return;
+    }
+
     this.joinGameModal.setMessage("");
     this.joinGameModal.setPending(true);
 
     try {
-      const result = await joinGameService(
-        gameCode,
-        playerName,
-        sushiId,
-      );
+      const result = await joinGameService(gameCode, playerName, sushiId);
 
       if (!result.ok) {
         this.joinGameModal.setMessage(result.message);

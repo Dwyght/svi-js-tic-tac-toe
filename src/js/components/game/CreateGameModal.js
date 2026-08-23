@@ -1,5 +1,6 @@
 import { Button } from "../base/Button.js";
 import { Modal } from "../base/Modal.js";
+import { PLAYER_NAME_MAX_LENGTH } from "../../config/constants.js";
 import { resolveTarget } from "../../utils/dom.js";
 import { SushiSelector } from "./SushiSelector.js";
 
@@ -39,6 +40,7 @@ export class CreateGameModal {
     this.nameInput.type = "text";
     this.nameInput.placeholder = "Enter your name";
     this.nameInput.autocomplete = "name";
+    this.nameInput.maxLength = PLAYER_NAME_MAX_LENGTH;
     this.sushiLabel.textContent = "Choose Sushi";
     this.sushiLabel.classList.add("sushi-selector-label");
     this.message.classList.add("message");

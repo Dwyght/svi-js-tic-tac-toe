@@ -186,9 +186,6 @@ export async function spectateGame(gameCode) {
       isSpectator: true,
     });
 
-    // Spectator resume is intentionally separate from player resume and
-    // will use its own storage handling when it is implemented.
-
     return {
       ok: true,
       gameCode: gameCode,

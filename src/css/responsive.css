@@ -422,3 +422,81 @@
     align-self: center;
   }
 }
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .game-page {
+    --game-board-size: min(
+      360px,
+      calc(100dvh - 20px),
+      calc(100vw - 250px)
+    );
+    --game-status-inline-inset: 0px;
+  }
+
+  .game-layout {
+    padding: 0;
+
+    grid-template-columns:
+      minmax(96px, 1.15fr)
+      minmax(0, var(--game-board-size))
+      minmax(80px, 0.85fr);
+    grid-template-rows: minmax(0, 1fr);
+    column-gap: clamp(8px, 2vw, 18px);
+    row-gap: 0;
+    align-items: center;
+  }
+
+  .game-status {
+    width: 100%;
+
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+  }
+
+  .game-status-header {
+    transform: none;
+  }
+
+  .game-status-header .turn-card {
+    padding: 8px 38px 8px 10px;
+  }
+
+  .game-status-header-spectator .turn-card {
+    padding-inline: 10px;
+  }
+
+  .turn-card h2 {
+    font-size: clamp(0.85rem, 2.5vw, 1.05rem);
+  }
+
+  .game-layout > .board-stage {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+  }
+
+  .game-score-region {
+    width: 100%;
+    max-width: 120px;
+
+    grid-column: 3;
+    grid-row: 1;
+    align-self: center;
+  }
+
+  .game-score-region .score-card {
+    width: 100%;
+    padding: 8px;
+  }
+
+  .game-score-region .score-display {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .emote-picker-panel {
+    right: auto;
+    left: 0;
+  }
+}
