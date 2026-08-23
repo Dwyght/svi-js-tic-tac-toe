@@ -6,9 +6,7 @@ import { BASE_URL } from "../config/constants.js";
 
 async function requestText(endpoint, parameters = {}, options = {}) {
   const query = new URLSearchParams(parameters);
-
   const url = `${BASE_URL}/${endpoint}?${query}`;
-
   const response = await fetch(url, options);
 
   if (!response.ok) {

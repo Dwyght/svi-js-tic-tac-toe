@@ -106,6 +106,9 @@ export class PauseMenu {
   configureViewerControls(isSpectator) {
     this.quitButton.element.remove();
     this.leaveButton.element.remove();
+    this.resumeButton.setLabel(
+      isSpectator ? "RESUME WATCHING" : "RESUME GAME",
+    );
 
     if (isSpectator) {
       this.leaveButton.render(this.content);

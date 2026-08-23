@@ -108,8 +108,7 @@ export class GamePage {
     // Spectator leave confirmation
     this.leaveConfirmModal = new ConfirmModal({
       title: "Leave Game",
-      message:
-        "Are you sure you want to stop spectating and return home?",
+      message: "Are you sure you want to stop spectating and return home?",
       confirmLabel: "YES, LEAVE",
       onConfirm: () => this.quit.handleLeave(),
     });
@@ -351,15 +350,15 @@ export class GamePage {
   // ========================================
 
   updateTurn(turn) {
+    const players = getPlayerNames(gameState.gameCode);
+    const playerName = players[turn];
+
     if (gameState.isSpectator) {
-      this.turnDisplay.textContent = `${turn}'s Turn`;
+      this.turnDisplay.textContent = `${playerName}'s Turn`;
       this.message.textContent = "";
       this.board.disableBoard();
       return;
     }
-
-    const players = getPlayerNames(gameState.gameCode);
-    const playerName = players[turn];
 
     if (turn === gameState.myTile) {
       this.turnDisplay.textContent = "It's your turn.";
