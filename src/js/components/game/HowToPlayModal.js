@@ -21,13 +21,13 @@ export class HowToPlayModal {
   setAttributes() {
     this.content.classList.add("how-to-play-content");
     this.intro.textContent =
-      "Play with a friend and be the first to make a row of three.";
+      "Create, join, or spectate a game using a shared code.";
 
     const steps = [
-      "Choose Create Game, enter your name, and share the game code.",
-      "Your friend chooses Join Game and enters the shared code.",
-      "Player X goes first. Take turns choosing an empty square.",
-      "Make three matching pieces in a row, column, or diagonal to win.",
+      "Create a game: enter your name, choose an X sushi, and share the code.",
+      "Join a game: enter the code and your name, then choose an O sushi.",
+      "X goes first. Take turns placing sushi; make three in a row to score.",
+      "After a round, X can play again. Spectators can watch an active code but cannot move.",
     ];
 
     for (const step of steps) {

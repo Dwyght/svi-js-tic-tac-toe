@@ -16,7 +16,7 @@ The frontend uses native ES modules and does not require a bundler or an npm bui
 - Persistent X/O series scores; drawn rounds do not add a point
 - Player X authority for starting the next round
 - Emotes between same-origin browser tabs that appear on the other player's screen
-- Pause, resume, copy-code, quit, and leave confirmation flows
+- Pause-menu controls for continuing, copying the game code, quitting a player game, or leaving spectator view
 - Resume prompt after refreshing an active player session
 - Duplicate active-player tabs return Home instead of controlling the same player
 - One splash-screen appearance per browser tab session
@@ -55,13 +55,15 @@ There is no `npm install` or build command for this project.
 
 ## Playing locally
 
-1. Select **Create Game**, enter Player X's name, and choose an X sushi.
-2. Copy the generated room code.
-3. Open the same frontend URL in a second same-origin browser tab, select **Join Game**, enter the code and Player O's name, and choose an O sushi.
+1. Select **Create Game**, enter Player X's name, choose an X sushi, and select **Continue**.
+2. Copy the generated room code while waiting for an opponent.
+3. Open the same frontend URL in a second same-origin browser tab, select **Join Game**, enter the code and Player O's name, choose an O sushi, and select **Continue**.
 4. Player X takes the first turn.
 5. After a round, Player X can select **Play Again**. Player O waits for X to start the next round.
 
 Open a fresh second tab when joining as Player O. If an active player tab is duplicated, the duplicate returns Home while the original tab keeps control of that player.
+
+To watch instead of play, select **Spectate Game** and enter the code of an active game. Spectators cannot make moves and can leave without resetting the room.
 
 ## Game rules and session behavior
 
@@ -91,7 +93,7 @@ Spectator sessions are intentionally not saved for resume. A browser may also re
 
 Active player ownership is guarded separately with a browser Web Lock keyed by room code and tile. Web Locks are not copied with `sessionStorage`, so a duplicated active-player tab can discard its copied session without affecting the original tab.
 
-The name/code form advances to the sushi picker, where the final Create/Join action confirms the local player's selection. The selection is written to `localStorage` before the server call, so a same-browser opponent's sushi is already available when polling reports that the second player joined. No additional sushi-readiness state or live image patching is required.
+The Create and Join forms include sushi selection. Selecting **Continue** confirms the local player's name and sushi together. The selection is written to `localStorage` before the server call, so a same-browser opponent's sushi is already available when polling reports that the second player joined. No additional sushi-readiness state or live image patching is required.
 
 Because names, sushi choices, scores, and emotes are stored locally, they are not synchronized across different browsers or devices. In cross-browser games, each player sees their own locally selected sushi and the default sushi for the opponent because the server has no field for carrying that choice. The server-backed board and moves still synchronize normally.
 
