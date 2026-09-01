@@ -2,7 +2,7 @@
    HISTORY PAGE
 ========================= */
 
-.game-history-link {
+.home-history-link {
   position: fixed;
   top: clamp(15px, 3vw, 30px);
   left: clamp(15px, 3vw, 30px);
@@ -23,12 +23,12 @@
   text-decoration: none;
 }
 
-.game-history-link:hover {
+.home-history-link:hover {
   background: #405b73;
   transform: translateY(-1px);
 }
 
-.game-history-link:focus-visible {
+.home-history-link:focus-visible {
   outline: 3px solid var(--color-action-text);
   outline-offset: 3px;
 }
@@ -74,13 +74,6 @@
 .history-header .button {
   min-width: 76px;
   padding-inline: 14px;
-}
-
-.history-player {
-  margin: 18px 0 0;
-
-  text-align: center;
-  font-weight: 700;
 }
 
 .history-message {

@@ -28,7 +28,7 @@ const pollingService = new PollingService();
 
 const historyPage = new HistoryPage({
   screenManager: screenManager,
-  onBack: () => screenManager.showGameScreen(),
+  onBack: () => screenManager.showHomeScreen(),
 });
 
 let splashScreen = null;
@@ -93,7 +93,6 @@ const gamePage = new GamePage({
   screenManager: screenManager,
   pollingService: pollingService,
   onReturnHome: handleReturnHome,
-  onOpenHistory: () => historyPage.open(),
 });
 
 // ========================================
@@ -104,6 +103,7 @@ const homePage = new HomePage({
   screenManager: screenManager,
   pollingService: pollingService,
   onGameStarted: handleGameStarted,
+  onOpenHistory: () => historyPage.open(),
 });
 
 const resumeGameModal = new ResumeGameModal({

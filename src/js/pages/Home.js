@@ -18,10 +18,16 @@ import { readClipboardText } from "../utils/clipboard.js";
 import { resolveTarget } from "../utils/dom.js";
 
 export class HomePage {
-  constructor({ screenManager, pollingService, onGameStarted }) {
+  constructor({
+    screenManager,
+    pollingService,
+    onGameStarted,
+    onOpenHistory,
+  }) {
     this.screenManager = screenManager;
     this.pollingService = pollingService;
     this.onGameStarted = onGameStarted;
+    this.onOpenHistory = onOpenHistory;
     this.waitingRoomFlow = new WaitingRoomFlow({
       pollingService: this.pollingService,
       screenManager: this.screenManager,
@@ -32,6 +38,7 @@ export class HomePage {
     this.initializeComponents();
     this.setAttributes();
     this.appendElements();
+    this.bindEvents();
   }
 
   // ========================================
@@ -43,6 +50,7 @@ export class HomePage {
     this.banner = document.createElement("div");
     this.bannerImage = document.createElement("img");
     this.actions = document.createElement("div");
+    this.historyLink = document.createElement("a");
 
     // NOTICE
     this.noticeContent = document.createElement("div");
@@ -126,6 +134,9 @@ export class HomePage {
     this.bannerImage.src = "./src/assets/images/banner.png";
     this.bannerImage.alt = "Tic Tac Toe";
     this.actions.classList.add("home-actions");
+    this.historyLink.classList.add("home-history-link");
+    this.historyLink.href = "#history";
+    this.historyLink.textContent = "History";
     this.howToPlayButton.element.setAttribute("aria-label", "How to play");
     this.howToPlayButton.element.title = "How to play";
 
@@ -141,6 +152,7 @@ export class HomePage {
     this.banner.append(this.bannerImage);
     this.container.append(this.banner);
     this.container.append(this.actions);
+    this.container.append(this.historyLink);
     this.openCreateButton.render(this.actions);
     this.openJoinButton.render(this.actions);
     this.openSpectateButton.render(this.actions);
@@ -148,6 +160,13 @@ export class HomePage {
 
     this.noticeContent.append(this.noticeMessage);
     this.noticeButton.render(this.noticeContent);
+  }
+
+  bindEvents() {
+    this.historyLink.addEventListener("click", (event) => {
+      event.preventDefault();
+      this.onOpenHistory();
+    });
   }
 
   // ========================================

@@ -49,6 +49,10 @@ export async function saveMove(moveRecord) {
   });
 }
 
+export async function getAllGames() {
+  return requestJson("games");
+}
+
 export async function getPlayerGames(playerId) {
   return requestJson(
     `list-games/${encodeURIComponent(playerId)}`,
