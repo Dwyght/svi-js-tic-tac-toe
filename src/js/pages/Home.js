@@ -4,7 +4,10 @@ import { CreateGameModal } from "../components/game/CreateGameModal.js";
 import { HowToPlayModal } from "../components/game/HowToPlayModal.js";
 import { JoinGameModal } from "../components/game/JoinGameModal.js";
 import { SpectateModal } from "../components/game/SpectateModal.js";
-import { PLAYER_NAME_MAX_LENGTH } from "../config/constants.js";
+import {
+  PLAYER_NAME_MAX_LENGTH,
+  PLAYER_NAME_PATTERN,
+} from "../config/constants.js";
 import {
   createGame as createGameService,
   joinGame as joinGameService,
@@ -211,6 +214,13 @@ export class HomePage {
       return;
     }
 
+    if (!PLAYER_NAME_PATTERN.test(playerName)) {
+      this.setMessage(
+        "Name must be 1–10 letters, numbers, underscores, or hyphens.",
+      );
+      return;
+    }
+
     this.createGameModal.setMessage("");
     this.createGameModal.setPending(true);
 
@@ -250,6 +260,13 @@ export class HomePage {
 
     if (playerName.length > PLAYER_NAME_MAX_LENGTH) {
       this.setMessage("Player name must be 10 characters or fewer.");
+      return;
+    }
+
+    if (!PLAYER_NAME_PATTERN.test(playerName)) {
+      this.setMessage(
+        "Name must be 1–10 letters, numbers, underscores, or hyphens.",
+      );
       return;
     }
 

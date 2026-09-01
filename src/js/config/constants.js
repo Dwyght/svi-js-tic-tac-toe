@@ -4,6 +4,8 @@ export const REFRESH_INTERVAL_MS = 500;
 
 export const PLAYER_NAME_MAX_LENGTH = 10;
 
+export const PLAYER_NAME_PATTERN = /^[A-Za-z0-9_-]{1,10}$/;
+
 export const EMOTES = Object.freeze([
   {
     id: "angry",
