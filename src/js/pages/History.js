@@ -43,10 +43,7 @@ function parseGameId(gameId) {
     separatorIndex <= 0 ||
     separatorIndex === gameId.length - GAME_ID_SEPARATOR.length
   ) {
-    return {
-      gameCode: gameId,
-      gameId,
-    };
+    return { gameCode: gameId, gameId };
   }
 
   return {
@@ -84,9 +81,13 @@ export class HistoryPage {
   constructor({ screenManager, onBack }) {
     this.screenManager = screenManager;
     this.onBack = onBack;
+    this.view = "games";
     this.historyRequestId = 0;
     this.roundsRequestId = 0;
     this.roundMovesCache = new Map();
+    this.selectedGameCode = null;
+    this.loadedRounds = [];
+    this.selectedRoundIndex = -1;
 
     this.initializeElements();
     this.initializeComponents();
@@ -99,10 +100,10 @@ export class HistoryPage {
     this.panel = document.createElement("div");
     this.header = document.createElement("header");
     this.title = document.createElement("h1");
-    this.message = document.createElement("p");
 
     this.gamesSection = document.createElement("section");
     this.gamesTitle = document.createElement("h2");
+    this.gamesMessage = document.createElement("p");
     this.gamesTableWrapper = document.createElement("div");
     this.gamesTable = document.createElement("table");
     this.gamesTableHead = document.createElement("thead");
@@ -116,22 +117,20 @@ export class HistoryPage {
     this.roundsTableHead = document.createElement("thead");
     this.roundsTableBody = document.createElement("tbody");
 
-    this.detailsSection = document.createElement("section");
-    this.detailsTitle = document.createElement("h2");
-    this.detailsMessage = document.createElement("p");
-    this.detailsTableWrapper = document.createElement("div");
-    this.detailsTable = document.createElement("table");
-    this.detailsTableHead = document.createElement("thead");
-    this.detailsTableBody = document.createElement("tbody");
+    this.replaySection = document.createElement("section");
+    this.replayTitle = document.createElement("h2");
   }
 
   initializeComponents() {
     this.backButton = new Button({
-      label: "Back",
+      label: "Home",
       className: "button-utility",
-      onClick: () => this.close(),
+      onClick: () => this.handleBack(),
     });
-    this.replay = new HistoryReplay();
+    this.replay = new HistoryReplay({
+      onPreviousRound: () => this.selectAdjacentRound(-1),
+      onNextRound: () => this.selectAdjacentRound(1),
+    });
   }
 
   setAttributes() {
@@ -139,33 +138,29 @@ export class HistoryPage {
     this.panel.classList.add("history-panel", "card");
     this.header.classList.add("history-header");
     this.title.textContent = "Game History";
-    this.configureMessage(this.message);
 
-    this.configureSection(this.gamesSection, this.gamesTableWrapper);
-    this.gamesTitle.textContent = "Games Played";
-    this.gamesTable.classList.add("history-table", "hidden");
+    this.gamesSection.classList.add("history-view");
+    this.gamesTitle.textContent = "Game Codes";
+    this.configureMessage(this.gamesMessage);
+    this.configureTable(
+      this.gamesTableWrapper,
+      this.gamesTable,
+      this.gamesTableHead,
+      ["Game Code"],
+    );
 
-    this.configureSection(this.roundsSection, this.roundsTableWrapper);
-    this.roundsSection.classList.add("hidden");
+    this.roundsSection.classList.add("history-view", "hidden");
     this.roundsTitle.textContent = "Rounds";
     this.configureMessage(this.roundsMessage);
-    this.roundsTable.classList.add("history-table", "hidden");
-
-    this.configureSection(this.detailsSection, this.detailsTableWrapper);
-    this.detailsSection.classList.add("hidden");
-    this.detailsTitle.textContent = "Round Details";
-    this.configureMessage(this.detailsMessage);
-    this.detailsTable.classList.add(
-      "history-table",
-      "history-moves-table",
-      "hidden",
+    this.configureTable(
+      this.roundsTableWrapper,
+      this.roundsTable,
+      this.roundsTableHead,
+      ["Round"],
     );
 
-    this.gamesTableHead.append(this.createHeaderRow(["Game Code"]));
-    this.roundsTableHead.append(this.createHeaderRow(["Round"]));
-    this.detailsTableHead.append(
-      this.createHeaderRow(["Player", "Symbol", "Location", "Date"]),
-    );
+    this.replaySection.classList.add("history-view", "hidden");
+    this.replayTitle.textContent = "Round Replay";
   }
 
   configureMessage(message) {
@@ -173,9 +168,10 @@ export class HistoryPage {
     message.setAttribute("aria-live", "polite");
   }
 
-  configureSection(section, tableWrapper) {
-    section.classList.add("history-section");
-    tableWrapper.classList.add("history-table-wrapper");
+  configureTable(wrapper, table, tableHead, labels) {
+    wrapper.classList.add("history-table-wrapper", "hidden");
+    table.classList.add("history-table");
+    tableHead.append(this.createHeaderRow(labels));
   }
 
   appendElements() {
@@ -184,7 +180,11 @@ export class HistoryPage {
 
     this.gamesTable.append(this.gamesTableHead, this.gamesTableBody);
     this.gamesTableWrapper.append(this.gamesTable);
-    this.gamesSection.append(this.gamesTitle, this.gamesTableWrapper);
+    this.gamesSection.append(
+      this.gamesTitle,
+      this.gamesMessage,
+      this.gamesTableWrapper,
+    );
 
     this.roundsTable.append(this.roundsTableHead, this.roundsTableBody);
     this.roundsTableWrapper.append(this.roundsTable);
@@ -194,18 +194,14 @@ export class HistoryPage {
       this.roundsTableWrapper,
     );
 
-    this.detailsTable.append(this.detailsTableHead, this.detailsTableBody);
-    this.detailsTableWrapper.append(this.detailsTable);
-    this.detailsSection.append(this.detailsTitle, this.detailsMessage);
-    this.replay.render(this.detailsSection);
-    this.detailsSection.append(this.detailsTableWrapper);
+    this.replaySection.append(this.replayTitle);
+    this.replay.render(this.replaySection);
 
     this.panel.append(
       this.header,
-      this.message,
       this.gamesSection,
       this.roundsSection,
-      this.detailsSection,
+      this.replaySection,
     );
     this.container.append(this.panel);
   }
@@ -240,12 +236,41 @@ export class HistoryPage {
     return row;
   }
 
+  showView(view) {
+    this.view = view;
+    this.gamesSection.classList.toggle("hidden", view !== "games");
+    this.roundsSection.classList.toggle("hidden", view !== "rounds");
+    this.replaySection.classList.toggle("hidden", view !== "replay");
+
+    const backLabels = {
+      games: "Home",
+      rounds: "Back to Game Codes",
+      replay: "Back to Rounds",
+    };
+
+    this.backButton.setLabel(backLabels[view]);
+  }
+
+  handleBack() {
+    if (this.view === "replay") {
+      this.showRounds();
+      return;
+    }
+
+    if (this.view === "rounds") {
+      this.showGameCodes();
+      return;
+    }
+
+    this.close();
+  }
+
   async open() {
     this.reset();
     const requestId = this.historyRequestId;
 
     this.screenManager.showHistoryScreen();
-    this.message.textContent = "Loading history...";
+    this.gamesMessage.textContent = "Loading history...";
 
     try {
       const response = await getAllGames();
@@ -265,7 +290,7 @@ export class HistoryPage {
       }
 
       console.error("Could not load game history.", error);
-      this.message.textContent = this.getHistoryErrorMessage(error);
+      this.gamesMessage.textContent = this.getHistoryErrorMessage(error);
     }
   }
 
@@ -273,8 +298,8 @@ export class HistoryPage {
     this.gamesTableBody.replaceChildren();
 
     if (gameGroups.length === 0) {
-      this.gamesTable.classList.add("hidden");
-      this.message.textContent = "No games found.";
+      this.gamesTableWrapper.classList.add("hidden");
+      this.gamesMessage.textContent = "No games found.";
       return;
     }
 
@@ -288,20 +313,22 @@ export class HistoryPage {
       this.gamesTableBody.append(row);
     }
 
-    this.message.textContent = "";
-    this.gamesTable.classList.remove("hidden");
+    this.gamesMessage.textContent = "";
+    this.gamesTableWrapper.classList.remove("hidden");
   }
 
   async loadRounds(group) {
     const requestId = ++this.roundsRequestId;
 
+    this.selectedGameCode = group.gameCode;
+    this.loadedRounds = [];
+    this.selectedRoundIndex = -1;
     this.replay.reset();
-    this.detailsSection.classList.add("hidden");
-    this.roundsSection.classList.remove("hidden");
     this.roundsTitle.textContent = `Game: ${group.gameCode}`;
     this.roundsMessage.textContent = "Loading rounds...";
     this.roundsTableBody.replaceChildren();
-    this.roundsTable.classList.add("hidden");
+    this.roundsTableWrapper.classList.add("hidden");
+    this.showView("rounds");
 
     try {
       const rounds = await Promise.all(
@@ -313,7 +340,7 @@ export class HistoryPage {
       }
 
       rounds.sort(compareRounds);
-      this.renderRounds(group.gameCode, rounds);
+      this.renderRounds(rounds);
     } catch (error) {
       if (requestId !== this.roundsRequestId) {
         return;
@@ -326,20 +353,19 @@ export class HistoryPage {
 
   async loadRound(gameId) {
     if (!this.roundMovesCache.has(gameId)) {
-      const request = getGame(gameId)
-        .then((response) => {
-          if (!Array.isArray(response?.list)) {
-            throw new Error("Webservice returned invalid game details.");
-          }
+      const request = getGame(gameId).then((response) => {
+        if (!Array.isArray(response?.list)) {
+          throw new Error("Webservice returned invalid game details.");
+        }
 
-          const moves = [...response.list].sort(compareMoveDates);
+        const moves = [...response.list].sort(compareMoveDates);
 
-          return {
-            gameId,
-            firstMoveTime: getFirstMoveTime(moves),
-            moves,
-          };
-        });
+        return {
+          gameId,
+          firstMoveTime: getFirstMoveTime(moves),
+          moves,
+        };
+      });
 
       this.roundMovesCache.set(gameId, request);
     }
@@ -357,60 +383,61 @@ export class HistoryPage {
     }
   }
 
-  renderRounds(gameCode, rounds) {
+  renderRounds(rounds) {
+    this.loadedRounds = rounds;
     this.roundsTableBody.replaceChildren();
 
-    for (const [index, round] of rounds.entries()) {
+    for (const [index] of rounds.entries()) {
       const roundNumber = index + 1;
       const row = this.createSelectionRow(
         `Round ${roundNumber}`,
-        `View Round ${roundNumber} for game ${gameCode}`,
-        () => this.selectRound(gameCode, roundNumber, round.moves),
+        `View Round ${roundNumber} for game ${this.selectedGameCode}`,
+        () => this.selectRound(index),
       );
 
       this.roundsTableBody.append(row);
     }
 
     this.roundsMessage.textContent = "";
-    this.roundsTable.classList.remove("hidden");
+    this.roundsTableWrapper.classList.remove("hidden");
   }
 
-  selectRound(gameCode, roundNumber, moves) {
-    this.detailsSection.classList.remove("hidden");
-    this.detailsTitle.textContent =
-      `Game ${gameCode} - Round ${roundNumber}`;
-    this.renderMoves(moves);
-    this.replay.setMoves(moves);
-  }
+  selectRound(index) {
+    const round = this.loadedRounds[index];
 
-  renderMoves(moves) {
-    this.detailsTableBody.replaceChildren();
-
-    if (moves.length === 0) {
-      this.detailsMessage.textContent = "No moves found.";
-      this.detailsTable.classList.add("hidden");
+    if (!round) {
       return;
     }
 
-    for (const move of moves) {
-      const row = document.createElement("tr");
+    this.selectedRoundIndex = index;
+    this.replayTitle.textContent =
+      `Game ${this.selectedGameCode} - ` +
+      `Round ${index + 1} of ${this.loadedRounds.length}`;
+    this.showView("replay");
+    this.replay.setMoves(round.moves);
+    this.replay.setNavigation({
+      hasPrevious: index > 0,
+      hasNext: index < this.loadedRounds.length - 1,
+    });
+  }
 
-      for (const value of [
-        move.playerid,
-        move.symbol,
-        move.location,
-        move.datesave,
-      ]) {
-        const cell = document.createElement("td");
-        cell.textContent = String(value ?? "");
-        row.append(cell);
-      }
+  selectAdjacentRound(offset) {
+    this.selectRound(this.selectedRoundIndex + offset);
+  }
 
-      this.detailsTableBody.append(row);
-    }
+  showRounds() {
+    this.replay.reset();
+    this.selectedRoundIndex = -1;
+    this.showView("rounds");
+  }
 
-    this.detailsMessage.textContent = "";
-    this.detailsTable.classList.remove("hidden");
+  showGameCodes() {
+    this.roundsRequestId++;
+    this.replay.reset();
+    this.selectedGameCode = null;
+    this.loadedRounds = [];
+    this.selectedRoundIndex = -1;
+    this.showView("games");
   }
 
   getHistoryErrorMessage(error) {
@@ -434,23 +461,22 @@ export class HistoryPage {
     this.historyRequestId++;
     this.roundsRequestId++;
     this.roundMovesCache.clear();
+    this.selectedGameCode = null;
+    this.loadedRounds = [];
+    this.selectedRoundIndex = -1;
     this.replay.reset();
 
-    this.message.textContent = "";
+    this.gamesMessage.textContent = "";
     this.gamesTableBody.replaceChildren();
-    this.gamesTable.classList.add("hidden");
+    this.gamesTableWrapper.classList.add("hidden");
 
-    this.roundsSection.classList.add("hidden");
     this.roundsTitle.textContent = "Rounds";
     this.roundsMessage.textContent = "";
     this.roundsTableBody.replaceChildren();
-    this.roundsTable.classList.add("hidden");
+    this.roundsTableWrapper.classList.add("hidden");
 
-    this.detailsSection.classList.add("hidden");
-    this.detailsTitle.textContent = "Round Details";
-    this.detailsMessage.textContent = "";
-    this.detailsTableBody.replaceChildren();
-    this.detailsTable.classList.add("hidden");
+    this.replayTitle.textContent = "Round Replay";
+    this.showView("games");
   }
 
   render(target) {

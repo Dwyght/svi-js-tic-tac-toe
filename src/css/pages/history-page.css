@@ -52,7 +52,7 @@
 
 .history-header {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 16px;
 }
@@ -66,12 +66,11 @@
 }
 
 .history-header::after {
-  width: 76px;
-
   content: "";
 }
 
 .history-header .button {
+  justify-self: start;
   min-width: 76px;
   padding-inline: 14px;
 }
@@ -82,12 +81,14 @@
   text-align: center;
 }
 
-.history-section {
+.history-view {
   margin-top: 24px;
 }
 
-.history-section h2 {
+.history-view > h2 {
   margin-bottom: 10px;
+
+  text-align: center;
 }
 
 .history-table-wrapper {
@@ -172,18 +173,20 @@
 }
 
 .history-replay-board-stage {
-  --plate-size: min(380px, calc(100vw - 90px));
+  --plate-size: min(540px, calc(100vw - 100px));
 
   margin-block: 8px 16px;
 }
 
 .history-replay-controls {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
+  gap: 12px;
 }
 
-.history-moves-table {
-  min-width: 650px;
+.history-replay-controls .button {
+  min-width: 150px;
 }
 
 @media (max-width: 650px) {
@@ -205,17 +208,20 @@
     font-size: 1.55rem;
   }
 
-  .history-header::after,
   .history-header .button {
-    width: 66px;
-    min-width: 66px;
-  }
+    min-width: 0;
+    max-width: 110px;
+    padding-inline: 10px;
 
-  .history-header .button {
-    padding-inline: 8px;
+    font-size: 0.78rem;
   }
 
   .history-replay-board-stage {
-    --plate-size: min(330px, calc(100vw - 54px));
+    --plate-size: min(390px, calc(100vw - 54px));
+  }
+
+  .history-replay-controls .button {
+    min-width: min(150px, 100%);
+    flex: 1 1 140px;
   }
 }

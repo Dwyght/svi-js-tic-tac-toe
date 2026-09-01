@@ -36,7 +36,12 @@ function normalizeMoves(moves) {
 }
 
 export class HistoryReplay {
-  constructor() {
+  constructor({
+    onPreviousRound = () => {},
+    onNextRound = () => {},
+  } = {}) {
+    this.onPreviousRound = onPreviousRound;
+    this.onNextRound = onNextRound;
     this.moves = [];
     this.cells = Array(9).fill("");
     this.moveIndex = 0;
@@ -66,6 +71,16 @@ export class HistoryReplay {
       className: "button-confirm",
       onClick: () => this.start(),
     });
+    this.previousButton = new Button({
+      label: "Previous Round",
+      className: "button-utility",
+      onClick: () => this.onPreviousRound(),
+    });
+    this.nextButton = new Button({
+      label: "Next Round",
+      className: "button-utility",
+      onClick: () => this.onNextRound(),
+    });
   }
 
   setAttributes() {
@@ -73,6 +88,8 @@ export class HistoryReplay {
     this.title.textContent = "Replay";
     this.status.classList.add("history-replay-status");
     this.status.setAttribute("aria-live", "polite");
+    this.board.container.setAttribute("role", "group");
+    this.board.container.setAttribute("aria-label", "Replay board");
     this.boardStage.classList.add(
       "board-stage",
       "history-replay-board-stage",
@@ -82,7 +99,9 @@ export class HistoryReplay {
 
   appendElements() {
     this.board.render(this.boardStage);
+    this.previousButton.render(this.controls);
     this.replayButton.render(this.controls);
+    this.nextButton.render(this.controls);
     this.container.append(
       this.title,
       this.status,
@@ -98,6 +117,7 @@ export class HistoryReplay {
     });
     this.clearBoard();
     this.replayButton.element.disabled = true;
+    this.setNavigation({ hasPrevious: false, hasNext: false });
   }
 
   setMoves(moves) {
@@ -182,6 +202,11 @@ export class HistoryReplay {
     this.status.textContent = "Replay complete: round is unfinished.";
   }
 
+  setNavigation({ hasPrevious, hasNext }) {
+    this.previousButton.element.disabled = !hasPrevious;
+    this.nextButton.element.disabled = !hasNext;
+  }
+
   clearBoard() {
     this.cells.fill("");
     this.moveIndex = 0;
@@ -202,6 +227,7 @@ export class HistoryReplay {
     this.clearBoard();
     this.status.textContent = "";
     this.replayButton.element.disabled = true;
+    this.setNavigation({ hasPrevious: false, hasNext: false });
     this.container.classList.add("hidden");
   }
 
