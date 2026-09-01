@@ -9,6 +9,7 @@ class GameState {
 
 setSession({
   gameCode,
+  gameId = null,
   playerId = null,
   myTile,
   myName,
@@ -17,6 +18,7 @@ setSession({
   isSpectator = false,
 }) {
   this.gameCode = gameCode;
+  this.gameId = gameId;
   this.playerId = playerId;
   this.myTile = myTile;
   this.myName = myName;
@@ -37,6 +39,7 @@ setSession({
 
   reset() {
     this.gameCode = null;
+    this.gameId = null;
     this.myTile = null;
     this.myName = null;
     this.mySushi = null;

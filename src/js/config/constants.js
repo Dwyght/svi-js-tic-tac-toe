@@ -1,5 +1,8 @@
 export const BASE_URL = "http://localhost:8080/tictactoe/tictactoeserver";
 
+export const WEBSERVICE_BASE_URL =
+  "http://localhost:8080/tictactoe-webservice-1.0/api";
+
 export const REFRESH_INTERVAL_MS = 500;
 
 export const PLAYER_NAME_MAX_LENGTH = 10;

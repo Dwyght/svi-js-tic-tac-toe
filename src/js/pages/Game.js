@@ -9,6 +9,7 @@ import {
   evaluateBoard,
   submitMove,
   checkGameStillActive,
+  syncCurrentRoundGameId,
 } from "../services/gameFlowService.js";
 import { Card } from "../components/base/Card.js";
 import { ConfirmModal } from "../components/base/ConfirmModal.js";
@@ -79,6 +80,7 @@ export class GamePage {
       className: "score-card",
     });
     this.message = document.createElement("p");
+    this.webserviceMessage = document.createElement("p");
     this.boardContainer = document.createElement("div");
 
     // Pause menu
@@ -126,6 +128,8 @@ export class GamePage {
     this.statusHeader.classList.add("game-status-header");
     this.scoreboard.element.setAttribute("aria-live", "polite");
     this.message.classList.add("message");
+    this.webserviceMessage.classList.add("message");
+    this.webserviceMessage.setAttribute("aria-live", "polite");
     this.boardContainer.classList.add("board-stage");
   }
 
@@ -136,7 +140,11 @@ export class GamePage {
   appendElements() {
     this.turnCard.render(this.statusHeader);
     this.emotePicker.render(this.statusHeader);
-    this.statusContainer.append(this.statusHeader, this.message);
+    this.statusContainer.append(
+      this.statusHeader,
+      this.message,
+      this.webserviceMessage,
+    );
     this.scoreCard.render(this.scoreRegion);
     this.gameLayout.append(
       this.statusContainer,
@@ -234,6 +242,8 @@ export class GamePage {
     this.screenManager.showGameScreen();
     this.playBoardEntrance();
 
+    await this.syncRoundGameId();
+
     await this.loadBoard();
 
     this.emote.startEmoteSubscription();
@@ -250,6 +260,40 @@ export class GamePage {
     // Restart the entrance animation for every newly started match.
     void this.boardContainer.offsetWidth;
     this.boardContainer.classList.add("board-stage-enter");
+  }
+
+  async syncRoundGameId() {
+    if (gameState.isSpectator || gameState.gameCode === null) {
+      this.setWebserviceError(null);
+      return true;
+    }
+
+    const gameCode = gameState.gameCode;
+
+    try {
+      await syncCurrentRoundGameId(gameCode);
+
+      if (gameState.gameCode === gameCode) {
+        this.setWebserviceError(null);
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Could not synchronize the round game ID.", error);
+
+      if (gameState.gameCode === gameCode) {
+        gameState.gameId = null;
+        this.setWebserviceError(error);
+      }
+
+      return false;
+    }
+  }
+
+  setWebserviceError(error) {
+    this.webserviceMessage.textContent = error
+      ? "History service is unavailable. Live gameplay will continue."
+      : "";
   }
 
   // ========================================
@@ -339,6 +383,14 @@ export class GamePage {
     }
 
     if (gameState.gameOver) {
+      if (gameState.myTile === "O") {
+        await this.syncRoundGameId();
+
+        if (this.isQuitting || gameState.gameCode !== gameCode) {
+          return;
+        }
+      }
+
       this.result.resumeGame();
     }
 

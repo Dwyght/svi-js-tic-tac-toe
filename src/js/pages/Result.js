@@ -93,7 +93,8 @@ export class Result {
     this.gamePage.resultModal.setPlayAgainPending(true);
 
     try {
-      await restartGameSession(gameState.gameCode);
+      const restartResult = await restartGameSession(gameState.gameCode);
+      this.gamePage.setWebserviceError(restartResult.roundIdError);
       this.resumeGame(true);
       await this.gamePage.loadBoard();
     } catch (error) {

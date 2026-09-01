@@ -6,6 +6,10 @@ import {
   resetGame,
 } from "../api/tictactoeApi.js";
 import {
+  createRoundGameId,
+  getCurrentRoundGameId,
+} from "../api/webserviceApi.js";
+import {
   parseBoard,
   getCurrentTurn,
   checkGameResult,
@@ -61,8 +65,17 @@ export async function createGame(playerName, sushiId) {
       };
     }
 
+    let gameId = null;
+
+    try {
+      gameId = await createRoundGameId(gameCode);
+    } catch (error) {
+      console.error("Could not create the round game ID.", error);
+    }
+
     gameState.setSession({
       gameCode: gameCode,
+      gameId: gameId,
       playerId: playerId,
       myTile: "X",
       myName: playerName,
@@ -142,8 +155,17 @@ export async function joinGame(gameCode, playerName, sushiId) {
       };
     }
 
+    let gameId = null;
+
+    try {
+      gameId = await getCurrentRoundGameId(gameCode);
+    } catch (error) {
+      console.error("Could not load the current round game ID.", error);
+    }
+
     gameState.setSession({
       gameCode: gameCode,
+      gameId: gameId,
       playerId: playerId,
       myTile: "O",
       myName: playerName,
@@ -340,6 +362,20 @@ export async function checkGameStillActive(gameCode) {
 }
 
 // ========================================
+// SYNC CURRENT ROUND ID
+// ========================================
+
+export async function syncCurrentRoundGameId(gameCode) {
+  const gameId = await getCurrentRoundGameId(gameCode);
+
+  if (gameState.gameCode === gameCode) {
+    gameState.gameId = gameId;
+  }
+
+  return gameId;
+}
+
+// ========================================
 // RESTART GAME SESSION
 // ========================================
 
@@ -364,8 +400,22 @@ export async function restartGameSession(gameCode) {
     throw new Error("Could not recreate the Player O slot.");
   }
 
+  let roundIdError = null;
+
+  try {
+    gameState.gameId = await createRoundGameId(gameCode);
+  } catch (error) {
+    gameState.gameId = null;
+    roundIdError = error;
+    console.error("Could not create the next round game ID.", error);
+  }
+
   gameState.gameStarted = true;
   gameState.gameOver = false;
+
+  return {
+    roundIdError: roundIdError,
+  };
 }
 
 // ========================================
