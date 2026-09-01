@@ -290,9 +290,12 @@ export class GamePage {
     }
   }
 
-  setWebserviceError(error) {
+  setWebserviceError(
+    error,
+    message = "History service is unavailable. Live gameplay will continue.",
+  ) {
     this.webserviceMessage.textContent = error
-      ? "History service is unavailable. Live gameplay will continue."
+      ? message
       : "";
   }
 
@@ -491,6 +494,10 @@ export class GamePage {
       }
 
       await this.loadBoard();
+      this.setWebserviceError(
+        result.persistenceError,
+        "Move was accepted, but it could not be saved to history.",
+      );
     } catch (error) {
       console.error(error);
 

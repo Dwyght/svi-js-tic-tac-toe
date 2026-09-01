@@ -10,7 +10,6 @@ class GameState {
 setSession({
   gameCode,
   gameId = null,
-  playerId = null,
   myTile,
   myName,
   mySushi = null,
@@ -19,7 +18,6 @@ setSession({
 }) {
   this.gameCode = gameCode;
   this.gameId = gameId;
-  this.playerId = playerId;
   this.myTile = myTile;
   this.myName = myName;
   this.mySushi = mySushi;

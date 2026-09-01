@@ -8,6 +8,7 @@ import {
 import {
   createRoundGameId,
   getCurrentRoundGameId,
+  saveMove,
 } from "../api/webserviceApi.js";
 import {
   parseBoard,
@@ -17,7 +18,6 @@ import {
 import { generateGameCode } from "../game/gameCode.js";
 import { gameState } from "../state/gameState.js";
 import {
-  getOrCreatePlayerId,
   savePlayerName,
   savePlayerSushi,
   saveSession,
@@ -48,7 +48,6 @@ function getJoinGameErrorMessage(serverResponse) {
 
 export async function createGame(playerName, sushiId) {
   const gameCode = generateGameCode();
-  const playerId = getOrCreatePlayerId();
   const restoreSushi = savePlayerSushi(gameCode, "X", sushiId);
 
   try {
@@ -76,7 +75,6 @@ export async function createGame(playerName, sushiId) {
     gameState.setSession({
       gameCode: gameCode,
       gameId: gameId,
-      playerId: playerId,
       myTile: "X",
       myName: playerName,
       mySushi: sushiId,
@@ -128,7 +126,6 @@ export async function waitForPlayerO(gameCode) {
 
 export async function joinGame(gameCode, playerName, sushiId) {
   const restoreSushi = savePlayerSushi(gameCode, "O", sushiId);
-  const playerId = getOrCreatePlayerId();
 
   try {
     const result = await createGameApi(gameCode);
@@ -166,7 +163,6 @@ export async function joinGame(gameCode, playerName, sushiId) {
     gameState.setSession({
       gameCode: gameCode,
       gameId: gameId,
-      playerId: playerId,
       myTile: "O",
       myName: playerName,
       mySushi: sushiId,
@@ -348,8 +344,26 @@ export async function submitMove(gameCode, tile, x, y) {
     };
   }
 
+  let persistenceError = null;
+
+  if (!gameState.isSpectator) {
+    try {
+      await saveMove({
+        gameid: gameState.gameId,
+        playerid: gameState.myName,
+        symbol: gameState.myTile,
+        location: String(y * 3 + x),
+        datesave: new Date().toISOString(),
+      });
+    } catch (error) {
+      persistenceError = error;
+      console.error("The accepted move could not be saved.", error);
+    }
+  }
+
   return {
     ok: true,
+    persistenceError: persistenceError,
   };
 }
 

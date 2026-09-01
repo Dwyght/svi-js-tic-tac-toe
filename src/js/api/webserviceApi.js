@@ -36,6 +36,26 @@ function readGameId(responseBody) {
   return gameId;
 }
 
+export async function saveMove(moveRecord) {
+  return requestJson("save", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(moveRecord),
+  });
+}
+
+export async function getPlayerGames(playerId) {
+  return requestJson(
+    `list-games/${encodeURIComponent(playerId)}`,
+  );
+}
+
+export async function getGame(gameId) {
+  return requestJson(`game/${encodeURIComponent(gameId)}`);
+}
+
 export async function createRoundGameId(gameCode) {
   const response = await requestJson(
     `session/${encodeURIComponent(gameCode)}/game`,
