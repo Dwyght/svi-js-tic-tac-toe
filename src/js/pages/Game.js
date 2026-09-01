@@ -27,10 +27,16 @@ import { Result } from "./Result.js";
 const GAME_OVER_INACTIVE_GRACE_REFRESHES = 3;
 
 export class GamePage {
-  constructor({ screenManager, pollingService, onReturnHome }) {
+  constructor({
+    screenManager,
+    pollingService,
+    onReturnHome,
+    onOpenHistory,
+  }) {
     this.screenManager = screenManager;
     this.pollingService = pollingService;
     this.onReturnHome = onReturnHome;
+    this.onOpenHistory = onOpenHistory;
     this.inactiveGameOverRefreshes = 0;
     this.roundScored = false;
     this.isSubmittingMove = false;
@@ -46,6 +52,7 @@ export class GamePage {
     this.result = new Result(this);
     this.setAttributes();
     this.appendElements();
+    this.bindEvents();
 
     this.board = new Board((x, y) => {
       this.makeMove(x, y);
@@ -59,6 +66,7 @@ export class GamePage {
 
   initializeElements() {
     this.container = document.createElement("div");
+    this.historyLink = document.createElement("a");
     this.gameLayout = document.createElement("div");
     this.scoreRegion = document.createElement("div");
 
@@ -122,6 +130,9 @@ export class GamePage {
 
   setAttributes() {
     this.container.classList.add("game-page");
+    this.historyLink.classList.add("game-history-link");
+    this.historyLink.href = "#history";
+    this.historyLink.textContent = "History";
     this.gameLayout.classList.add("game-layout");
     this.scoreRegion.classList.add("game-score-region");
     this.statusContainer.classList.add("game-status");
@@ -151,10 +162,21 @@ export class GamePage {
       this.boardContainer,
       this.scoreRegion,
     );
-    this.container.append(this.gameLayout);
+    this.container.append(this.historyLink, this.gameLayout);
+  }
+
+  bindEvents() {
+    this.historyLink.addEventListener("click", (event) => {
+      event.preventDefault();
+
+      if (!gameState.isSpectator) {
+        this.onOpenHistory();
+      }
+    });
   }
 
   configureViewerControls() {
+    this.historyLink.classList.toggle("hidden", gameState.isSpectator);
     this.statusHeader.classList.toggle(
       "game-status-header-spectator",
       gameState.isSpectator,

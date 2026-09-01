@@ -18,9 +18,12 @@ async function requestJson(endpoint, options = {}) {
   }
 
   if (!response.ok) {
-    throw new Error(
+    const error = new Error(
       body?.msg || `Webservice request failed (${response.status}).`,
     );
+
+    error.status = response.status;
+    throw error;
   }
 
   return body;

@@ -4,6 +4,7 @@ import { MODAL_EVENTS } from "./components/base/Modal.js";
 import { ResumeGameModal } from "./components/game/ResumeGameModal.js";
 import { HomePage } from "./pages/Home.js";
 import { GamePage } from "./pages/Game.js";
+import { HistoryPage } from "./pages/History.js";
 import { PollingService } from "./services/pollingService.js";
 import {
   claimPlayerTab,
@@ -24,6 +25,11 @@ import { gameState } from "./state/gameState.js";
 
 const screenManager = new ScreenManager();
 const pollingService = new PollingService();
+
+const historyPage = new HistoryPage({
+  screenManager: screenManager,
+  onBack: () => screenManager.showGameScreen(),
+});
 
 let splashScreen = null;
 let applicationStartRequested = false;
@@ -87,6 +93,7 @@ const gamePage = new GamePage({
   screenManager: screenManager,
   pollingService: pollingService,
   onReturnHome: handleReturnHome,
+  onOpenHistory: () => historyPage.open(),
 });
 
 // ========================================
@@ -110,6 +117,7 @@ const resumeGameModal = new ResumeGameModal({
 
 homePage.render(screenManager.getHomeTarget());
 gamePage.render(screenManager.getGameTarget());
+historyPage.render(screenManager.getHistoryTarget());
 resumeGameModal.render(document.body);
 
 // ========================================

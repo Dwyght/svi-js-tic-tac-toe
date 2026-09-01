@@ -18,6 +18,7 @@ export class ScreenManager {
     this.container = document.createElement("main");
     this.homeScreen = document.createElement("section");
     this.gameScreen = document.createElement("section");
+    this.historyScreen = document.createElement("section");
 
     // Waiting elements
     this.waitingContent = document.createElement("div");
@@ -55,6 +56,8 @@ export class ScreenManager {
     this.homeScreen.classList.add("hidden");
     this.gameScreen.id = "game-screen";
     this.gameScreen.classList.add("hidden");
+    this.historyScreen.id = "history-screen";
+    this.historyScreen.classList.add("hidden");
     this.waitingContent.classList.add("waiting-modal-content");
     this.waitingText.classList.add("waiting-greeting");
     this.waitingModal.dialog.classList.add("waiting-modal");
@@ -75,7 +78,11 @@ export class ScreenManager {
   // ========================================
 
   appendElements() {
-    this.container.append(this.homeScreen, this.gameScreen);
+    this.container.append(
+      this.homeScreen,
+      this.gameScreen,
+      this.historyScreen,
+    );
     this.waitingDots.append(...this.waitingDotElements);
     this.waitingModal.title.append(this.waitingDots);
     this.waitingContent.append(
@@ -113,6 +120,7 @@ export class ScreenManager {
   showHomeScreen() {
     this.homeScreen.classList.remove("hidden");
     this.gameScreen.classList.add("hidden");
+    this.historyScreen.classList.add("hidden");
     this.waitingModal.close();
     this.conveyorBelt.stop();
   }
@@ -124,6 +132,7 @@ export class ScreenManager {
   showWaitingScreen(gameCode, playerName) {
     this.homeScreen.classList.add("hidden");
     this.gameScreen.classList.add("hidden");
+    this.historyScreen.classList.add("hidden");
     this.waitingText.textContent =
       `Hi ${playerName}, share this game code:`;
     this.waitingGameCode.textContent = gameCode;
@@ -138,6 +147,19 @@ export class ScreenManager {
   showGameScreen() {
     this.homeScreen.classList.add("hidden");
     this.gameScreen.classList.remove("hidden");
+    this.historyScreen.classList.add("hidden");
+    this.waitingModal.close();
+    this.conveyorBelt.stop();
+  }
+
+  // ========================================
+  // SHOW HISTORY
+  // ========================================
+
+  showHistoryScreen() {
+    this.homeScreen.classList.add("hidden");
+    this.gameScreen.classList.add("hidden");
+    this.historyScreen.classList.remove("hidden");
     this.waitingModal.close();
     this.conveyorBelt.stop();
   }
@@ -160,6 +182,10 @@ export class ScreenManager {
 
   getGameTarget() {
     return this.gameScreen;
+  }
+
+  getHistoryTarget() {
+    return this.historyScreen;
   }
 
   // ========================================
