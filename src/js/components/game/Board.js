@@ -1,8 +1,9 @@
 import { resolveTarget } from "../../utils/dom.js";
 
 export class Board {
-  constructor(onCellClick) {
+  constructor(onCellClick, { elementId = "board" } = {}) {
     this.onCellClick = onCellClick;
+    this.elementId = elementId;
 
     this.initializeElements();
     this.setAttributes();
@@ -56,7 +57,7 @@ export class Board {
   // ========================================
 
   setAttributes() {
-    this.container.id = "board";
+    this.container.id = this.elementId;
     this.container.classList.add("board");
 
     for (const separator of this.separators) {

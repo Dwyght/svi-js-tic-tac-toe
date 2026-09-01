@@ -148,6 +148,40 @@
   outline-offset: 3px;
 }
 
+.history-replay {
+  margin: 18px 0 24px;
+  padding: clamp(14px, 3vw, 22px);
+
+  background: var(--color-surface-muted);
+
+  border: 2px solid var(--color-primary);
+  border-radius: 14px;
+
+  text-align: center;
+}
+
+.history-replay h3 {
+  margin: 0;
+}
+
+.history-replay-status {
+  min-height: 1.5em;
+  margin: 10px 0;
+
+  font-weight: 700;
+}
+
+.history-replay-board-stage {
+  --plate-size: min(380px, calc(100vw - 90px));
+
+  margin-block: 8px 16px;
+}
+
+.history-replay-controls {
+  display: flex;
+  justify-content: center;
+}
+
 .history-moves-table {
   min-width: 650px;
 }
@@ -179,5 +213,9 @@
 
   .history-header .button {
     padding-inline: 8px;
+  }
+
+  .history-replay-board-stage {
+    --plate-size: min(330px, calc(100vw - 54px));
   }
 }
