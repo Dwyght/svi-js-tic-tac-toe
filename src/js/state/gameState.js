@@ -7,26 +7,29 @@ class GameState {
   // SET SESSION
   // =========================
 
-  setSession({
-    gameCode,
-    myTile,
-    myName,
-    mySushi = null,
-    gameStarted = false,
-    isSpectator = false,
-  }) {
-    this.gameCode = gameCode;
-    this.myTile = myTile;
-    this.myName = myName;
-    this.mySushi = mySushi;
-    this.gameStarted = gameStarted;
-    this.gameOver = false;
-    this.isSpectator = isSpectator;
-    this.scores = {
-      X: 0,
-      O: 0,
-    };
-  }
+setSession({
+  gameCode,
+  playerId = null,
+  myTile,
+  myName,
+  mySushi = null,
+  gameStarted = false,
+  isSpectator = false,
+}) {
+  this.gameCode = gameCode;
+  this.playerId = playerId;
+  this.myTile = myTile;
+  this.myName = myName;
+  this.mySushi = mySushi;
+  this.gameStarted = gameStarted;
+  this.gameOver = false;
+  this.isSpectator = isSpectator;
+
+  this.scores = {
+    X: 0,
+    O: 0,
+  };
+}
 
   // =========================
   // RESET

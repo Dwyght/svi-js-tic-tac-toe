@@ -257,3 +257,27 @@ export function hasSeenSplash() {
 export function markSplashSeen() {
   sessionStorage.setItem(getSplashSeenStorageKey(), "true");
 }
+
+// ========================================
+// PLAYER ID STORAGE
+// ========================================
+
+function getPlayerIdStorageKey() {
+  return "tictactoe-player-id";
+}
+
+export function getOrCreatePlayerId() {
+  const storageKey = getPlayerIdStorageKey();
+
+  let playerId = sessionStorage.getItem(storageKey);
+
+  if (playerId !== null) {
+    return playerId;
+  }
+
+  playerId = crypto.randomUUID();
+
+  sessionStorage.setItem(storageKey, playerId);
+
+  return playerId;
+}

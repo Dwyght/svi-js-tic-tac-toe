@@ -13,6 +13,7 @@ import {
 import { generateGameCode } from "../game/gameCode.js";
 import { gameState } from "../state/gameState.js";
 import {
+  getOrCreatePlayerId,
   savePlayerName,
   savePlayerSushi,
   saveSession,
@@ -43,6 +44,7 @@ function getJoinGameErrorMessage(serverResponse) {
 
 export async function createGame(playerName, sushiId) {
   const gameCode = generateGameCode();
+  const playerId = getOrCreatePlayerId();
   const restoreSushi = savePlayerSushi(gameCode, "X", sushiId);
 
   try {
@@ -61,6 +63,7 @@ export async function createGame(playerName, sushiId) {
 
     gameState.setSession({
       gameCode: gameCode,
+      playerId: playerId,
       myTile: "X",
       myName: playerName,
       mySushi: sushiId,
@@ -112,6 +115,7 @@ export async function waitForPlayerO(gameCode) {
 
 export async function joinGame(gameCode, playerName, sushiId) {
   const restoreSushi = savePlayerSushi(gameCode, "O", sushiId);
+  const playerId = getOrCreatePlayerId();
 
   try {
     const result = await createGameApi(gameCode);
@@ -140,6 +144,7 @@ export async function joinGame(gameCode, playerName, sushiId) {
 
     gameState.setSession({
       gameCode: gameCode,
+      playerId: playerId,
       myTile: "O",
       myName: playerName,
       mySushi: sushiId,
