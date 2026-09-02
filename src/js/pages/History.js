@@ -3,8 +3,6 @@ import { Button } from "../components/base/Button.js";
 import { HistoryReplay } from "../components/history/HistoryReplay.js";
 import { resolveTarget } from "../utils/dom.js";
 
-const GAME_ID_SEPARATOR = "__";
-
 function compareMoveDates(left, right) {
   const leftTime = Date.parse(left.datesave);
   const rightTime = Date.parse(right.datesave);
@@ -36,24 +34,8 @@ function compareRounds(left, right) {
   return left.gameId.localeCompare(right.gameId);
 }
 
-function parseGameId(gameId) {
-  const separatorIndex = gameId.indexOf(GAME_ID_SEPARATOR);
-
-  if (
-    separatorIndex <= 0 ||
-    separatorIndex === gameId.length - GAME_ID_SEPARATOR.length
-  ) {
-    return { gameCode: gameId, gameId };
-  }
-
-  return {
-    gameCode: gameId.slice(0, separatorIndex),
-    gameId,
-  };
-}
-
-function groupGamesByCode(games) {
-  const groups = new Map();
+function createGameGroups(games) {
+  const groups = [];
 
   for (const game of games) {
     const gameId = String(game?.id ?? "").trim();
@@ -62,19 +44,13 @@ function groupGamesByCode(games) {
       throw new Error("Webservice returned an invalid game ID.");
     }
 
-    const round = parseGameId(gameId);
-
-    if (!groups.has(round.gameCode)) {
-      groups.set(round.gameCode, {
-        gameCode: round.gameCode,
-        rounds: [],
-      });
-    }
-
-    groups.get(round.gameCode).rounds.push(round);
+    groups.push({
+      gameId,
+      rounds: [{ gameId }],
+    });
   }
 
-  return [...groups.values()];
+  return groups;
 }
 
 export class HistoryPage {
@@ -85,7 +61,7 @@ export class HistoryPage {
     this.historyRequestId = 0;
     this.roundsRequestId = 0;
     this.roundMovesCache = new Map();
-    this.selectedGameCode = null;
+    this.selectedGameId = null;
     this.loadedRounds = [];
     this.selectedRoundIndex = -1;
 
@@ -140,13 +116,13 @@ export class HistoryPage {
     this.title.textContent = "Game History";
 
     this.gamesSection.classList.add("history-view");
-    this.gamesTitle.textContent = "Game Codes";
+    this.gamesTitle.textContent = "Games";
     this.configureMessage(this.gamesMessage);
     this.configureTable(
       this.gamesTableWrapper,
       this.gamesTable,
       this.gamesTableHead,
-      ["Game Code"],
+      ["Game ID"],
     );
 
     this.roundsSection.classList.add("history-view", "hidden");
@@ -244,7 +220,7 @@ export class HistoryPage {
 
     const backLabels = {
       games: "Home",
-      rounds: "Back to Game Codes",
+      rounds: "Back to Games",
       replay: "Back to Rounds",
     };
 
@@ -258,7 +234,7 @@ export class HistoryPage {
     }
 
     if (this.view === "rounds") {
-      this.showGameCodes();
+      this.showGames();
       return;
     }
 
@@ -283,7 +259,7 @@ export class HistoryPage {
         throw new Error("Webservice returned invalid game history.");
       }
 
-      this.renderGames(groupGamesByCode(response.list));
+      this.renderGames(createGameGroups(response.list));
     } catch (error) {
       if (requestId !== this.historyRequestId) {
         return;
@@ -305,8 +281,8 @@ export class HistoryPage {
 
     for (const group of gameGroups) {
       const row = this.createSelectionRow(
-        group.gameCode,
-        `View rounds for game ${group.gameCode}`,
+        group.gameId,
+        `View game ${group.gameId}`,
         () => this.loadRounds(group),
       );
 
@@ -320,11 +296,11 @@ export class HistoryPage {
   async loadRounds(group) {
     const requestId = ++this.roundsRequestId;
 
-    this.selectedGameCode = group.gameCode;
+    this.selectedGameId = group.gameId;
     this.loadedRounds = [];
     this.selectedRoundIndex = -1;
     this.replay.reset();
-    this.roundsTitle.textContent = `Game: ${group.gameCode}`;
+    this.roundsTitle.textContent = `Game: ${group.gameId}`;
     this.roundsMessage.textContent = "Loading rounds...";
     this.roundsTableBody.replaceChildren();
     this.roundsTableWrapper.classList.add("hidden");
@@ -391,7 +367,7 @@ export class HistoryPage {
       const roundNumber = index + 1;
       const row = this.createSelectionRow(
         `Round ${roundNumber}`,
-        `View Round ${roundNumber} for game ${this.selectedGameCode}`,
+        `View Round ${roundNumber} for game ${this.selectedGameId}`,
         () => this.selectRound(index),
       );
 
@@ -411,7 +387,7 @@ export class HistoryPage {
 
     this.selectedRoundIndex = index;
     this.replayTitle.textContent =
-      `Game ${this.selectedGameCode} - ` +
+      `Game ${this.selectedGameId} - ` +
       `Round ${index + 1} of ${this.loadedRounds.length}`;
     this.showView("replay");
     this.replay.setMoves(round.moves);
@@ -431,10 +407,10 @@ export class HistoryPage {
     this.showView("rounds");
   }
 
-  showGameCodes() {
+  showGames() {
     this.roundsRequestId++;
     this.replay.reset();
-    this.selectedGameCode = null;
+    this.selectedGameId = null;
     this.loadedRounds = [];
     this.selectedRoundIndex = -1;
     this.showView("games");
@@ -461,7 +437,7 @@ export class HistoryPage {
     this.historyRequestId++;
     this.roundsRequestId++;
     this.roundMovesCache.clear();
-    this.selectedGameCode = null;
+    this.selectedGameId = null;
     this.loadedRounds = [];
     this.selectedRoundIndex = -1;
     this.replay.reset();
