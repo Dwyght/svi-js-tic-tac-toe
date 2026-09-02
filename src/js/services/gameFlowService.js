@@ -11,6 +11,8 @@ import {
   getCurrentRoundGameId,
   registerSessionPlayer,
   saveMove,
+  sendSessionEmote,
+  updateSessionScore,
 } from "../api/webserviceApi.js";
 import {
   parseBoard,
@@ -20,11 +22,7 @@ import {
 import { generateGameCode } from "../game/gameCode.js";
 import { gameState } from "../state/gameState.js";
 import {
-  savePlayerName,
-  savePlayerSushi,
   saveSession,
-  clearPlayerNames,
-  clearScores,
   clearSession,
 } from "./storageService.js";
 
@@ -55,7 +53,6 @@ function isSamePlayerName(left, right) {
 
 export async function createGame(playerName, sushiId) {
   const gameCode = generateGameCode();
-  const restoreSushi = savePlayerSushi(gameCode, "X", sushiId);
 
   try {
     const result = await createGameApi(gameCode);
@@ -63,8 +60,6 @@ export async function createGame(playerName, sushiId) {
 
     // Creator must receive X.
     if (result !== "X") {
-      restoreSushi();
-
       return {
         ok: false,
         message: "Could not create the room. Please try again.",
@@ -93,7 +88,6 @@ export async function createGame(playerName, sushiId) {
       mySushi: sushiId,
       gameStarted: false,
     });
-    savePlayerName(gameCode, "X", playerName);
     saveSession(gameCode, "X", playerName);
 
     return {
@@ -101,7 +95,6 @@ export async function createGame(playerName, sushiId) {
       gameCode: gameCode,
     };
   } catch (error) {
-    restoreSushi();
     console.error(error);
 
     return {
@@ -151,8 +144,6 @@ export async function joinGame(gameCode, playerName, sushiId) {
     console.error("Could not check the room player name.", error);
   }
 
-  const restoreSushi = savePlayerSushi(gameCode, "O", sushiId);
-
   try {
     const result = await createGameApi(gameCode);
     console.log("Join Game:", result);
@@ -160,7 +151,6 @@ export async function joinGame(gameCode, playerName, sushiId) {
     // The endpoint also creates rooms.
     // Therefore if joining returns X, the room did not exist.
     if (result === "X") {
-      restoreSushi();
       await resetGame(gameCode);
 
       return {
@@ -170,8 +160,6 @@ export async function joinGame(gameCode, playerName, sushiId) {
     }
 
     if (result !== "O") {
-      restoreSushi();
-
       return {
         ok: false,
         message: getJoinGameErrorMessage(result),
@@ -200,7 +188,6 @@ export async function joinGame(gameCode, playerName, sushiId) {
       mySushi: sushiId,
       gameStarted: true,
     });
-    savePlayerName(gameCode, "O", playerName);
     saveSession(gameCode, "O", playerName);
 
     return {
@@ -208,7 +195,6 @@ export async function joinGame(gameCode, playerName, sushiId) {
       gameCode: gameCode,
     };
   } catch (error) {
-    restoreSushi();
     console.error(error);
 
     if (error?.status === 409) {
@@ -429,6 +415,63 @@ export async function syncCurrentRoundGameId(gameCode) {
 }
 
 // ========================================
+// SYNC RUNTIME SESSION
+// ========================================
+
+function getPlayerName(playerId, tile) {
+  return typeof playerId === "string" && playerId.trim() !== ""
+    ? playerId
+    : `Player ${tile}`;
+}
+
+function getScore(score) {
+  return Number.isInteger(score) && score >= 0 ? score : 0;
+}
+
+export async function syncRuntimeSession(gameCode) {
+  const session = await getGameSession(gameCode);
+
+  if (gameState.gameCode === gameCode) {
+    gameState.playerNames = {
+      X: getPlayerName(session.xplayerid, "X"),
+      O: getPlayerName(session.oplayerid, "O"),
+    };
+    gameState.sushiIds = {
+      X: session.xsushiid || null,
+      O: session.osushiid || null,
+    };
+    gameState.scores = {
+      X: getScore(session.xscore),
+      O: getScore(session.oscore),
+    };
+  }
+
+  return session;
+}
+
+// ========================================
+// UPDATE RUNTIME SCORE
+// ========================================
+
+export async function updateRuntimeScore(gameCode, scores) {
+  return updateSessionScore(gameCode, {
+    xscore: scores.X,
+    oscore: scores.O,
+  });
+}
+
+// ========================================
+// SEND RUNTIME EMOTE
+// ========================================
+
+export async function sendRuntimeEmote(gameCode, tile, emoteId) {
+  return sendSessionEmote(gameCode, {
+    symbol: tile,
+    emoteid: emoteId,
+  });
+}
+
+// ========================================
 // RESTART GAME SESSION
 // ========================================
 
@@ -440,7 +483,7 @@ export async function restartGameSession(gameCode) {
   await resetGame(gameCode);
 
   // Recreate both server-side player slots under the same game code.
-  // The clients keep their existing names and X/O assignments locally.
+  // The runtime session keeps player details and scores across rounds.
   const playerX = await createGameApi(gameCode);
 
   if (playerX !== "X") {
@@ -477,8 +520,6 @@ export async function restartGameSession(gameCode) {
 
 export async function resetGameSession(gameCode) {
   await resetGame(gameCode);
-  clearPlayerNames(gameCode);
-  clearScores(gameCode);
   clearSession();
   gameState.reset();
 }

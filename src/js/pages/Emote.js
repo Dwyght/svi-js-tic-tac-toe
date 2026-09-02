@@ -1,15 +1,16 @@
 import { gameState } from "../state/gameState.js";
-import {
-  saveEmote,
-  subscribeToEmotes,
-} from "../services/emoteService.js";
+import { sendRuntimeEmote } from "../services/gameFlowService.js";
 
 export class Emote {
-  constructor({ emotePicker, scoreboard, isQuitting }) {
+  constructor({ emotePicker, scoreboard, isQuitting, onError }) {
     this.emotePicker = emotePicker;
     this.scoreboard = scoreboard;
     this.isQuitting = isQuitting;
-    this.unsubscribeFromEmotes = null;
+    this.onError = onError;
+    this.lastEventIds = {
+      X: 0,
+      O: 0,
+    };
   }
 
   canDisplayEmotes() {
@@ -33,51 +34,65 @@ export class Emote {
     this.emotePicker.setEnabled(this.canSendEmotes());
   }
 
-  handleEmoteSelect(emoteId) {
+  async handleEmoteSelect(emoteId) {
     if (!this.canSendEmotes()) {
       return;
     }
 
-    saveEmote(gameState.gameCode, gameState.myTile, emoteId);
+    try {
+      await sendRuntimeEmote(
+        gameState.gameCode,
+        gameState.myTile,
+        emoteId,
+      );
+    } catch (error) {
+      console.error("Could not send emote.", error);
+      this.onError?.(error);
+    }
   }
 
-  startEmoteSubscription() {
-    this.stopEmoteSubscription();
+  startEmoteSynchronization(session) {
+    this.lastEventIds = {
+      X: this.getEventId(session?.xemoteeventid),
+      O: this.getEventId(session?.oemoteeventid),
+    };
+  }
 
-    if (gameState.gameCode === null || !gameState.gameStarted) {
-      return;
-    }
-
-    const gameCode = gameState.gameCode;
-
-    this.unsubscribeFromEmotes = subscribeToEmotes(
-      gameCode,
-      (emoteEntry) => {
-        if (
-          gameState.gameCode !== gameCode ||
-          !this.canDisplayEmotes()
-        ) {
-          return;
-        }
-
-        this.scoreboard.showEmoteBubble(
-          emoteEntry.tile,
-          emoteEntry.emoteId,
-        );
-      },
+  syncEmotes(session) {
+    this.syncEmote(
+      "X",
+      session?.xemoteid,
+      this.getEventId(session?.xemoteeventid),
+    );
+    this.syncEmote(
+      "O",
+      session?.oemoteid,
+      this.getEventId(session?.oemoteeventid),
     );
   }
 
-  stopEmoteSubscription() {
-    if (this.unsubscribeFromEmotes !== null) {
-      this.unsubscribeFromEmotes();
-      this.unsubscribeFromEmotes = null;
+  syncEmote(tile, emoteId, eventId) {
+    if (eventId <= this.lastEventIds[tile]) {
+      return;
+    }
+
+    this.lastEventIds[tile] = eventId;
+
+    if (typeof emoteId === "string" && this.canDisplayEmotes()) {
+      this.scoreboard.showEmoteBubble(tile, emoteId);
     }
   }
 
+  getEventId(eventId) {
+    return Number.isInteger(eventId) && eventId >= 0 ? eventId : 0;
+  }
+
   clear() {
-    this.stopEmoteSubscription();
     this.emotePicker.setEnabled(false);
     this.scoreboard.clearEmoteBubbles();
+    this.lastEventIds = {
+      X: 0,
+      O: 0,
+    };
   }
 }

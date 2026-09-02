@@ -1,8 +1,7 @@
-import { restartGameSession } from "../services/gameFlowService.js";
 import {
-  getPlayerNames,
-  saveScore,
-} from "../services/storageService.js";
+  restartGameSession,
+  updateRuntimeScore,
+} from "../services/gameFlowService.js";
 import { gameState } from "../state/gameState.js";
 
 export class Result {
@@ -30,9 +29,9 @@ export class Result {
       if (canPlayAgain) {
         this.gamePage.resultModal.showPlayAgainButton();
       } else {
-        const players = getPlayerNames(gameState.gameCode);
-
-        this.gamePage.resultModal.setWaitingPlayerName(players.X);
+        this.gamePage.resultModal.setWaitingPlayerName(
+          gameState.playerNames.X,
+        );
         this.gamePage.resultModal.showWaitingIndicator();
       }
     }
@@ -57,6 +56,7 @@ export class Result {
   scoreRound(result) {
     if (
       this.gamePage.roundScored ||
+      gameState.myTile !== "X" ||
       (result.winner !== "X" && result.winner !== "O")
     ) {
       return;
@@ -69,8 +69,17 @@ export class Result {
     scores[result.winner]++;
 
     gameState.scores = scores;
-    saveScore(gameState.gameCode, scores);
     this.gamePage.roundScored = true;
+
+    // Player X is the single score writer, so the completed round is not
+    // counted twice when both browsers reach the result at different times.
+    void updateRuntimeScore(gameState.gameCode, scores).catch((error) => {
+      console.error("Could not synchronize the score.", error);
+      this.gamePage.setWebserviceError(
+        error,
+        "Score could not be synchronized. Live gameplay will continue.",
+      );
+    });
   }
 
   updateScoreDisplays() {

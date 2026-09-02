@@ -1,15 +1,11 @@
 import { gameState } from "../state/gameState.js";
 import {
-  getPlayerNames,
-  getPlayerSushi,
-  getScores,
-} from "../services/storageService.js";
-import {
   fetchAndParseBoard,
   evaluateBoard,
   submitMove,
   checkGameStillActive,
   syncCurrentRoundGameId,
+  syncRuntimeSession as syncRuntimeSessionState,
 } from "../services/gameFlowService.js";
 import { Card } from "../components/base/Card.js";
 import { ConfirmModal } from "../components/base/ConfirmModal.js";
@@ -41,6 +37,10 @@ export class GamePage {
       emotePicker: this.emotePicker,
       scoreboard: this.scoreboard,
       isQuitting: () => this.isQuitting,
+      onError: (error) => this.setWebserviceError(
+        error,
+        "Emote could not be sent. Please try again.",
+      ),
     });
     this.quit = new Quit(this);
     this.result = new Result(this);
@@ -197,8 +197,8 @@ export class GamePage {
 
   updateSushiDisplays() {
     const sushiImages = {
-      X: resolveSushi("X", getPlayerSushi(gameState.gameCode, "X")),
-      O: resolveSushi("O", getPlayerSushi(gameState.gameCode, "O")),
+      X: resolveSushi("X", gameState.sushiIds.X),
+      O: resolveSushi("O", gameState.sushiIds.O),
     };
 
     this.board.setSushiImages(sushiImages);
@@ -228,7 +228,6 @@ export class GamePage {
     gameState.gameOver = false;
     this.inactiveGameOverRefreshes = 0;
     this.roundScored = false;
-    gameState.scores = getScores(gameState.gameCode);
     this.updateSushiDisplays();
     this.result.updateScoreDisplays();
     this.pauseMenu.updateGameCode(gameState.gameCode);
@@ -242,11 +241,11 @@ export class GamePage {
     this.screenManager.showGameScreen();
     this.playBoardEntrance();
 
+    await this.syncRuntimeSession(true);
     await this.syncRoundGameId();
 
     await this.loadBoard();
 
-    this.emote.startEmoteSubscription();
     this.emote.updateEmoteAvailability();
 
     this.pollingService.startRefresh(async () => {
@@ -299,6 +298,45 @@ export class GamePage {
       : "";
   }
 
+  async syncRuntimeSession(initializeEmotes = false) {
+    if (gameState.gameCode === null) {
+      return false;
+    }
+
+    const gameCode = gameState.gameCode;
+
+    try {
+      const session = await syncRuntimeSessionState(gameCode);
+
+      if (this.isQuitting || gameState.gameCode !== gameCode) {
+        return false;
+      }
+
+      this.updateSushiDisplays();
+      this.result.updateScoreDisplays();
+
+      if (initializeEmotes) {
+        this.emote.startEmoteSynchronization(session);
+      } else {
+        this.emote.syncEmotes(session);
+      }
+
+      this.setWebserviceError(null);
+      return true;
+    } catch (error) {
+      console.error("Could not synchronize the runtime session.", error);
+
+      if (gameState.gameCode === gameCode) {
+        this.setWebserviceError(
+          error,
+          "Player details, scores, and emotes are temporarily unavailable.",
+        );
+      }
+
+      return false;
+    }
+  }
+
   // ========================================
   // REFRESH
   // ========================================
@@ -345,6 +383,12 @@ export class GamePage {
     }
 
     this.inactiveGameOverRefreshes = 0;
+    await this.syncRuntimeSession();
+
+    if (this.isQuitting || gameState.gameCode !== gameCode) {
+      return;
+    }
+
     await this.loadBoard();
   }
 
@@ -405,8 +449,7 @@ export class GamePage {
   // ========================================
 
   updateTurn(turn) {
-    const players = getPlayerNames(gameState.gameCode);
-    const playerName = players[turn];
+    const playerName = gameState.playerNames[turn];
 
     if (gameState.isSpectator) {
       this.turnDisplay.textContent = `${playerName}'s Turn`;

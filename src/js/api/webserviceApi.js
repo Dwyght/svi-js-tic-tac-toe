@@ -87,6 +87,26 @@ export async function registerSessionPlayer(gameCode, player) {
   });
 }
 
+export async function updateSessionScore(gameCode, scores) {
+  return requestJson(`session/${encodeURIComponent(gameCode)}/score`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(scores),
+  });
+}
+
+export async function sendSessionEmote(gameCode, emote) {
+  return requestJson(`session/${encodeURIComponent(gameCode)}/emote`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(emote),
+  });
+}
+
 export async function createRoundGameId(gameCode) {
   const response = await requestJson(
     `session/${encodeURIComponent(gameCode)}/game`,
