@@ -65,7 +65,7 @@
 }
 
 .history-navigation {
-  margin-bottom: 20px;
+  margin-top: 20px;
 }
 
 .history-navigation .button {
@@ -77,6 +77,10 @@
   margin: 14px 0;
 
   text-align: center;
+}
+
+.history-message:empty {
+  display: none;
 }
 
 .history-view {
@@ -125,9 +129,14 @@
   border-bottom: 0;
 }
 
+.history-table td {
+  padding: 0;
+}
+
 .history-game-select {
   width: 100%;
-  padding: 2px 0;
+  min-height: 48px;
+  padding: 12px 14px;
 
   color: var(--color-primary);
   background: transparent;
@@ -139,15 +148,55 @@
   font-weight: 700;
   text-decoration: none;
   overflow-wrap: anywhere;
+
+  transition:
+    color 140ms ease,
+    background-color 140ms ease;
 }
 
 .history-game-select:hover {
   color: var(--color-danger-dark);
+  background: var(--color-accent);
+}
+
+.history-game-select:active {
+  background: #e3c99c;
 }
 
 .history-game-select:focus-visible {
   outline: 3px solid var(--color-accent);
-  outline-offset: 3px;
+  outline-offset: -4px;
+}
+
+.history-room-select {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+}
+
+.history-room-count {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.history-round-select {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.history-round-number {
+  grid-column: 1;
+
+  white-space: nowrap;
+}
+
+.history-round-matchup {
+  grid-column: 2;
+
+  text-align: center;
 }
 
 .history-replay {
@@ -160,10 +209,6 @@
   border-radius: 14px;
 
   text-align: center;
-}
-
-.history-replay h3 {
-  margin: 0;
 }
 
 .history-replay-status {
@@ -190,6 +235,10 @@
   min-width: 150px;
 }
 
+.history-replay-controls .button:disabled {
+  cursor: default;
+}
+
 @media (max-width: 650px) {
   .history-modal .modal-header {
     padding: 16px 14px 13px 18px;
@@ -206,7 +255,7 @@
   }
 
   .history-table th,
-  .history-table td {
+  .history-game-select {
     padding: 11px 10px;
   }
 

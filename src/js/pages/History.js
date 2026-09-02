@@ -152,8 +152,6 @@ export class HistoryPage {
   }
 
   appendElements() {
-    this.backButton.render(this.navigation);
-
     this.gamesTable.append(this.gamesTableHead, this.gamesTableBody);
     this.gamesTableWrapper.append(this.gamesTable);
     this.gamesSection.append(
@@ -171,12 +169,13 @@ export class HistoryPage {
 
     this.replaySection.append(this.replayTitle);
     this.replay.render(this.replaySection);
+    this.backButton.render(this.navigation);
 
     this.container.append(
-      this.navigation,
       this.gamesSection,
       this.roundsSection,
       this.replaySection,
+      this.navigation,
     );
 
     this.modal.dialog.addEventListener(MODAL_EVENTS.closed, () => {
@@ -197,19 +196,56 @@ export class HistoryPage {
     return row;
   }
 
-  createSelectionRow(label, ariaLabel, onSelect) {
+  createSelectionRow(ariaLabel, onSelect, className) {
     const row = document.createElement("tr");
     const cell = document.createElement("td");
     const selectButton = document.createElement("button");
 
     selectButton.type = "button";
-    selectButton.classList.add("history-game-select");
-    selectButton.textContent = label;
+    selectButton.classList.add("history-game-select", className);
     selectButton.setAttribute("aria-label", ariaLabel);
     selectButton.addEventListener("click", onSelect);
 
     cell.append(selectButton);
     row.append(cell);
+
+    return { row, selectButton };
+  }
+
+  createRoomSelectionRow(roomId, roundCount) {
+    const roundLabel = roundCount === 1 ? "round" : "rounds";
+    const { row, selectButton } = this.createSelectionRow(
+      `View ${roundCount} ${roundLabel} for room ${roomId}`,
+      () => this.loadRounds(roomId),
+      "history-room-select",
+    );
+    const code = document.createElement("span");
+    const count = document.createElement("span");
+
+    code.classList.add("history-room-code");
+    code.textContent = roomId;
+    count.classList.add("history-room-count");
+    count.textContent = `${roundCount} ${roundLabel}`;
+    selectButton.append(code, count);
+
+    return row;
+  }
+
+  createRoundSelectionRow(round, roundNumber) {
+    const { row, selectButton } = this.createSelectionRow(
+      `Replay round ${roundNumber} for room ${this.selectedRoomId}`,
+      () => this.selectRound(roundNumber - 1),
+      "history-round-select",
+    );
+    const number = document.createElement("span");
+    const matchup = document.createElement("span");
+
+    number.classList.add("history-round-number");
+    number.textContent = `Round ${roundNumber}`;
+    matchup.classList.add("history-round-matchup");
+    matchup.textContent =
+      `${round.players.X}(X) VS ${round.players.O}(O)`;
+    selectButton.append(number, matchup);
 
     return row;
   }
@@ -293,12 +329,7 @@ export class HistoryPage {
 
     for (const { roomId, gameIds } of roomSummaries) {
       const roundCount = gameIds.length;
-      const roundLabel = roundCount === 1 ? "round" : "rounds";
-      const row = this.createSelectionRow(
-        `${roomId} - ${roundCount} ${roundLabel}`,
-        `View ${roundCount} ${roundLabel} for room ${roomId}`,
-        () => this.loadRounds(roomId),
-      );
+      const row = this.createRoomSelectionRow(roomId, roundCount);
 
       this.gamesTableBody.append(row);
     }
@@ -413,13 +444,7 @@ export class HistoryPage {
     for (const [index] of rounds.entries()) {
       const roundNumber = index + 1;
       const round = rounds[index];
-      const row = this.createSelectionRow(
-        `Round ${roundNumber} - ` +
-          `${round.players.X}(Sushi X) VS ` +
-          `${round.players.O}(Sushi O)`,
-        `Replay round ${roundNumber} for room ${this.selectedRoomId}`,
-        () => this.selectRound(index),
-      );
+      const row = this.createRoundSelectionRow(round, roundNumber);
 
       this.roundsTableBody.append(row);
     }
@@ -436,9 +461,7 @@ export class HistoryPage {
     }
 
     this.selectedRoundIndex = index;
-    this.replayTitle.textContent =
-      `Room ${this.selectedRoomId} - ` +
-      `Round ${index + 1} of ${this.loadedRounds.length}`;
+    this.replayTitle.textContent = `Replay of Round ${index + 1}`;
     this.showView("replay");
     this.replay.setMoves(round.moves);
     this.replay.setNavigation({

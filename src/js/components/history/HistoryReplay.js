@@ -56,7 +56,6 @@ export class HistoryReplay {
 
   initializeElements() {
     this.container = document.createElement("div");
-    this.title = document.createElement("h3");
     this.status = document.createElement("p");
     this.boardStage = document.createElement("div");
     this.controls = document.createElement("div");
@@ -85,7 +84,6 @@ export class HistoryReplay {
 
   setAttributes() {
     this.container.classList.add("history-replay", "hidden");
-    this.title.textContent = "Replay";
     this.status.classList.add("history-replay-status");
     this.status.setAttribute("aria-live", "polite");
     this.board.container.setAttribute("role", "group");
@@ -103,7 +101,6 @@ export class HistoryReplay {
     this.replayButton.render(this.controls);
     this.nextButton.render(this.controls);
     this.container.append(
-      this.title,
       this.status,
       this.boardStage,
       this.controls,
@@ -174,9 +171,7 @@ export class HistoryReplay {
     this.moveIndex++;
     this.board.displayBoard(this.cells);
     this.board.disableBoard();
-    this.status.textContent =
-      `Move ${this.moveIndex} of ${this.moves.length}: ` +
-      `${move.playerId} placed ${move.symbol}.`;
+    this.status.textContent = `${move.playerId} placed ${move.symbol}.`;
 
     if (this.moveIndex < this.moves.length) {
       this.scheduleNextMove();
