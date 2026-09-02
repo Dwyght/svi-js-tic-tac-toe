@@ -1,17 +1,25 @@
 import { getGame, getRoomGames, getRooms } from "../api/webserviceApi.js";
 import { Button } from "../components/base/Button.js";
+import { MODAL_EVENTS, Modal } from "../components/base/Modal.js";
 import { HistoryReplay } from "../components/history/HistoryReplay.js";
-import { resolveTarget } from "../utils/dom.js";
 
-function compareMoveDates(left, right) {
-  const leftTime = Date.parse(left.datesave);
-  const rightTime = Date.parse(right.datesave);
+function compareDates(left, right) {
+  const leftTime = Date.parse(left);
+  const rightTime = Date.parse(right);
 
   if (Number.isFinite(leftTime) && Number.isFinite(rightTime)) {
     return leftTime - rightTime;
   }
 
-  return String(left.datesave).localeCompare(String(right.datesave));
+  return String(left).localeCompare(String(right));
+}
+
+function compareMoveDates(left, right) {
+  return compareDates(left.datesave, right.datesave);
+}
+
+function compareRoundDates(left, right) {
+  return compareDates(left.startedAt, right.startedAt);
 }
 
 function getIds(records) {
@@ -30,13 +38,30 @@ function getIds(records) {
   return ids;
 }
 
+function getRoundPlayers(moves) {
+  const players = {
+    X: "Player X",
+    O: "Player O",
+  };
+
+  for (const move of moves) {
+    const symbol = move?.symbol;
+    const playerId = String(move?.playerid ?? "").trim();
+
+    if ((symbol === "X" || symbol === "O") && playerId !== "") {
+      players[symbol] = playerId;
+    }
+  }
+
+  return players;
+}
+
 export class HistoryPage {
-  constructor({ screenManager, onBack }) {
-    this.screenManager = screenManager;
-    this.onBack = onBack;
+  constructor() {
     this.view = "rooms";
     this.historyRequestId = 0;
     this.roundsRequestId = 0;
+    this.roomGameIdsCache = new Map();
     this.roundMovesCache = new Map();
     this.selectedRoomId = null;
     this.loadedRounds = [];
@@ -50,12 +75,9 @@ export class HistoryPage {
 
   initializeElements() {
     this.container = document.createElement("div");
-    this.panel = document.createElement("div");
-    this.header = document.createElement("header");
-    this.title = document.createElement("h1");
+    this.navigation = document.createElement("div");
 
     this.gamesSection = document.createElement("section");
-    this.gamesTitle = document.createElement("h2");
     this.gamesMessage = document.createElement("p");
     this.gamesTableWrapper = document.createElement("div");
     this.gamesTable = document.createElement("table");
@@ -76,7 +98,7 @@ export class HistoryPage {
 
   initializeComponents() {
     this.backButton = new Button({
-      label: "Home",
+      label: "Back to Rooms",
       className: "button-utility",
       onClick: () => this.handleBack(),
     });
@@ -84,22 +106,24 @@ export class HistoryPage {
       onPreviousRound: () => this.selectAdjacentRound(-1),
       onNextRound: () => this.selectAdjacentRound(1),
     });
+    this.modal = new Modal({
+      title: "Game History",
+      content: this.container,
+    });
   }
 
   setAttributes() {
-    this.container.classList.add("history-page");
-    this.panel.classList.add("history-panel", "card");
-    this.header.classList.add("history-header");
-    this.title.textContent = "Game History";
+    this.container.classList.add("history-content");
+    this.navigation.classList.add("history-navigation", "hidden");
+    this.modal.dialog.classList.add("history-modal");
 
     this.gamesSection.classList.add("history-view");
-    this.gamesTitle.textContent = "Room Codes";
     this.configureMessage(this.gamesMessage);
     this.configureTable(
       this.gamesTableWrapper,
       this.gamesTable,
       this.gamesTableHead,
-      ["Room Code"],
+      ["Room Codes"],
     );
 
     this.roundsSection.classList.add("history-view", "hidden");
@@ -109,7 +133,7 @@ export class HistoryPage {
       this.roundsTableWrapper,
       this.roundsTable,
       this.roundsTableHead,
-      ["Game ID"],
+      ["Rounds"],
     );
 
     this.replaySection.classList.add("history-view", "hidden");
@@ -128,13 +152,11 @@ export class HistoryPage {
   }
 
   appendElements() {
-    this.backButton.render(this.header);
-    this.header.append(this.title);
+    this.backButton.render(this.navigation);
 
     this.gamesTable.append(this.gamesTableHead, this.gamesTableBody);
     this.gamesTableWrapper.append(this.gamesTable);
     this.gamesSection.append(
-      this.gamesTitle,
       this.gamesMessage,
       this.gamesTableWrapper,
     );
@@ -150,13 +172,16 @@ export class HistoryPage {
     this.replaySection.append(this.replayTitle);
     this.replay.render(this.replaySection);
 
-    this.panel.append(
-      this.header,
+    this.container.append(
+      this.navigation,
       this.gamesSection,
       this.roundsSection,
       this.replaySection,
     );
-    this.container.append(this.panel);
+
+    this.modal.dialog.addEventListener(MODAL_EVENTS.closed, () => {
+      this.reset();
+    });
   }
 
   createHeaderRow(labels) {
@@ -194,14 +219,16 @@ export class HistoryPage {
     this.gamesSection.classList.toggle("hidden", view !== "rooms");
     this.roundsSection.classList.toggle("hidden", view !== "rounds");
     this.replaySection.classList.toggle("hidden", view !== "replay");
+    this.navigation.classList.toggle("hidden", view === "rooms");
 
     const backLabels = {
-      rooms: "Home",
       rounds: "Back to Rooms",
       replay: "Back to Rounds",
     };
 
-    this.backButton.setLabel(backLabels[view]);
+    if (backLabels[view]) {
+      this.backButton.setLabel(backLabels[view]);
+    }
   }
 
   handleBack() {
@@ -212,17 +239,14 @@ export class HistoryPage {
 
     if (this.view === "rounds") {
       this.showRooms();
-      return;
     }
-
-    this.close();
   }
 
   async open() {
     this.reset();
     const requestId = this.historyRequestId;
 
-    this.screenManager.showHistoryScreen();
+    this.modal.open();
     this.gamesMessage.textContent = "Loading rooms...";
 
     try {
@@ -236,7 +260,18 @@ export class HistoryPage {
         throw new Error("Webservice returned invalid room history.");
       }
 
-      this.renderRooms(getIds(response.list));
+      const roomSummaries = await Promise.all(
+        getIds(response.list).map(async (roomId) => ({
+          roomId,
+          gameIds: await this.loadRoomGameIds(roomId),
+        })),
+      );
+
+      if (requestId !== this.historyRequestId) {
+        return;
+      }
+
+      this.renderRooms(roomSummaries);
     } catch (error) {
       if (requestId !== this.historyRequestId) {
         return;
@@ -247,19 +282,21 @@ export class HistoryPage {
     }
   }
 
-  renderRooms(roomIds) {
+  renderRooms(roomSummaries) {
     this.gamesTableBody.replaceChildren();
 
-    if (roomIds.length === 0) {
+    if (roomSummaries.length === 0) {
       this.gamesTableWrapper.classList.add("hidden");
       this.gamesMessage.textContent = "No rooms found.";
       return;
     }
 
-    for (const roomId of roomIds) {
+    for (const { roomId, gameIds } of roomSummaries) {
+      const roundCount = gameIds.length;
+      const roundLabel = roundCount === 1 ? "round" : "rounds";
       const row = this.createSelectionRow(
-        roomId,
-        `View games for room ${roomId}`,
+        `${roomId} - ${roundCount} ${roundLabel}`,
+        `View ${roundCount} ${roundLabel} for room ${roomId}`,
         () => this.loadRounds(roomId),
       );
 
@@ -270,6 +307,32 @@ export class HistoryPage {
     this.gamesTableWrapper.classList.remove("hidden");
   }
 
+  async loadRoomGameIds(roomId) {
+    if (!this.roomGameIdsCache.has(roomId)) {
+      const request = getRoomGames(roomId).then((response) => {
+        if (!Array.isArray(response?.list)) {
+          throw new Error("Webservice returned invalid room games.");
+        }
+
+        return getIds(response.list);
+      });
+
+      this.roomGameIdsCache.set(roomId, request);
+    }
+
+    const request = this.roomGameIdsCache.get(roomId);
+
+    try {
+      return await request;
+    } catch (error) {
+      if (this.roomGameIdsCache.get(roomId) === request) {
+        this.roomGameIdsCache.delete(roomId);
+      }
+
+      throw error;
+    }
+  }
+
   async loadRounds(roomId) {
     const requestId = ++this.roundsRequestId;
 
@@ -277,28 +340,24 @@ export class HistoryPage {
     this.loadedRounds = [];
     this.selectedRoundIndex = -1;
     this.replay.reset();
-    this.roundsTitle.textContent = `Room: ${roomId}`;
-    this.roundsMessage.textContent = "Loading games...";
+    this.roundsTitle.textContent = `Rounds for room code ${roomId}`;
+    this.roundsMessage.textContent = "Loading rounds...";
     this.roundsTableBody.replaceChildren();
     this.roundsTableWrapper.classList.add("hidden");
     this.showView("rounds");
 
     try {
-      const response = await getRoomGames(roomId);
-
-      if (!Array.isArray(response?.list)) {
-        throw new Error("Webservice returned invalid room games.");
-      }
-
       const rounds = await Promise.all(
-        getIds(response.list).map((gameId) => this.loadRound(gameId)),
+        (await this.loadRoomGameIds(roomId)).map((gameId) =>
+          this.loadRound(gameId),
+        ),
       );
 
       if (requestId !== this.roundsRequestId) {
         return;
       }
 
-      this.renderRounds(rounds);
+      this.renderRounds(rounds.sort(compareRoundDates));
     } catch (error) {
       if (requestId !== this.roundsRequestId) {
         return;
@@ -319,8 +378,9 @@ export class HistoryPage {
         const moves = [...response.list].sort(compareMoveDates);
 
         return {
-          gameId,
           moves,
+          startedAt: moves[0]?.datesave ?? "",
+          players: getRoundPlayers(moves),
         };
       });
 
@@ -344,12 +404,20 @@ export class HistoryPage {
     this.loadedRounds = rounds;
     this.roundsTableBody.replaceChildren();
 
+    if (rounds.length === 0) {
+      this.roundsTableWrapper.classList.add("hidden");
+      this.roundsMessage.textContent = "No rounds found.";
+      return;
+    }
+
     for (const [index] of rounds.entries()) {
       const roundNumber = index + 1;
       const round = rounds[index];
       const row = this.createSelectionRow(
-        `Game ${roundNumber}: ${round.gameId}`,
-        `View game ${round.gameId} in room ${this.selectedRoomId}`,
+        `Round ${roundNumber} - ` +
+          `${round.players.X}(Sushi X) VS ` +
+          `${round.players.O}(Sushi O)`,
+        `Replay round ${roundNumber} for room ${this.selectedRoomId}`,
         () => this.selectRound(index),
       );
 
@@ -370,7 +438,7 @@ export class HistoryPage {
     this.selectedRoundIndex = index;
     this.replayTitle.textContent =
       `Room ${this.selectedRoomId} - ` +
-      `Game ${index + 1} of ${this.loadedRounds.length}`;
+      `Round ${index + 1} of ${this.loadedRounds.length}`;
     this.showView("replay");
     this.replay.setMoves(round.moves);
     this.replay.setNavigation({
@@ -407,17 +475,17 @@ export class HistoryPage {
   getRoundsErrorMessage(error) {
     return error?.status === 402
       ? "Record not found"
-      : "Could not load game rounds.";
+      : "Could not load rounds.";
   }
 
   close() {
-    this.reset();
-    this.onBack();
+    this.modal.close();
   }
 
   reset() {
     this.historyRequestId++;
     this.roundsRequestId++;
+    this.roomGameIdsCache.clear();
     this.roundMovesCache.clear();
     this.selectedRoomId = null;
     this.loadedRounds = [];
@@ -428,22 +496,16 @@ export class HistoryPage {
     this.gamesTableBody.replaceChildren();
     this.gamesTableWrapper.classList.add("hidden");
 
-    this.roundsTitle.textContent = "Games";
+    this.roundsTitle.textContent = "Rounds";
     this.roundsMessage.textContent = "";
     this.roundsTableBody.replaceChildren();
     this.roundsTableWrapper.classList.add("hidden");
 
-    this.replayTitle.textContent = "Game Replay";
+    this.replayTitle.textContent = "Round Replay";
     this.showView("rooms");
   }
 
   render(target) {
-    const parent = resolveTarget(target);
-
-    if (parent) {
-      parent.append(this.container);
-    } else {
-      console.error("HistoryPage target not found.");
-    }
+    this.modal.render(target);
   }
 }

@@ -26,10 +26,7 @@ import { gameState } from "./state/gameState.js";
 const screenManager = new ScreenManager();
 const pollingService = new PollingService();
 
-const historyPage = new HistoryPage({
-  screenManager: screenManager,
-  onBack: () => screenManager.showHomeScreen(),
-});
+const historyPage = new HistoryPage();
 
 let splashScreen = null;
 let applicationStartRequested = false;
@@ -117,7 +114,7 @@ const resumeGameModal = new ResumeGameModal({
 
 homePage.render(screenManager.getHomeTarget());
 gamePage.render(screenManager.getGameTarget());
-historyPage.render(screenManager.getHistoryTarget());
+historyPage.render(document.body);
 resumeGameModal.render(document.body);
 
 // ========================================

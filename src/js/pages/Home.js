@@ -38,7 +38,6 @@ export class HomePage {
     this.initializeComponents();
     this.setAttributes();
     this.appendElements();
-    this.bindEvents();
   }
 
   // ========================================
@@ -50,7 +49,6 @@ export class HomePage {
     this.banner = document.createElement("div");
     this.bannerImage = document.createElement("img");
     this.actions = document.createElement("div");
-    this.historyLink = document.createElement("a");
 
     // NOTICE
     this.noticeContent = document.createElement("div");
@@ -79,6 +77,14 @@ export class HomePage {
       className: "home-action-button",
       onClick: () => this.openSpectateModal(),
     });
+
+    this.openHistoryButton = new Button({
+      label: "HISTORY",
+      className: "home-action-button",
+      onClick: () => this.onOpenHistory(),
+    });
+
+    this.openHistoryButton.element.classList.add("home-history-button");
 
     this.howToPlayButton = new Button({
       label: "?",
@@ -134,9 +140,6 @@ export class HomePage {
     this.bannerImage.src = "./src/assets/images/banner.png";
     this.bannerImage.alt = "Tic Tac Toe";
     this.actions.classList.add("home-actions");
-    this.historyLink.classList.add("home-history-link");
-    this.historyLink.href = "#history";
-    this.historyLink.textContent = "History";
     this.howToPlayButton.element.setAttribute("aria-label", "How to play");
     this.howToPlayButton.element.title = "How to play";
 
@@ -152,21 +155,14 @@ export class HomePage {
     this.banner.append(this.bannerImage);
     this.container.append(this.banner);
     this.container.append(this.actions);
-    this.container.append(this.historyLink);
     this.openCreateButton.render(this.actions);
     this.openJoinButton.render(this.actions);
     this.openSpectateButton.render(this.actions);
+    this.openHistoryButton.render(this.actions);
     this.howToPlayButton.render(this.container);
 
     this.noticeContent.append(this.noticeMessage);
     this.noticeButton.render(this.noticeContent);
-  }
-
-  bindEvents() {
-    this.historyLink.addEventListener("click", (event) => {
-      event.preventDefault();
-      this.onOpenHistory();
-    });
   }
 
   // ========================================
