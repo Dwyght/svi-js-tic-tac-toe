@@ -431,9 +431,15 @@ export class GamePage {
 
     if (gameState.gameOver) {
       if (gameState.myTile === "O") {
-        await this.syncRoundGameId();
+        const previousGameId = gameState.gameId;
+        const synchronized = await this.syncRoundGameId();
 
-        if (this.isQuitting || gameState.gameCode !== gameCode) {
+        if (
+          !synchronized ||
+          gameState.gameId === previousGameId ||
+          this.isQuitting ||
+          gameState.gameCode !== gameCode
+        ) {
           return;
         }
       }
