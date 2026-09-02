@@ -1,4 +1,4 @@
-import { getAllGames, getGame } from "../api/webserviceApi.js";
+import { getGame, getRoomGames, getRooms } from "../api/webserviceApi.js";
 import { Button } from "../components/base/Button.js";
 import { HistoryReplay } from "../components/history/HistoryReplay.js";
 import { resolveTarget } from "../utils/dom.js";
@@ -14,54 +14,31 @@ function compareMoveDates(left, right) {
   return String(left.datesave).localeCompare(String(right.datesave));
 }
 
-function getFirstMoveTime(moves) {
-  for (const move of moves) {
-    const time = Date.parse(move.datesave);
+function getIds(records) {
+  const ids = [];
 
-    if (Number.isFinite(time)) {
-      return time;
-    }
-  }
+  for (const record of records) {
+    const id = String(record?.id ?? "").trim();
 
-  return Number.POSITIVE_INFINITY;
-}
-
-function compareRounds(left, right) {
-  if (left.firstMoveTime !== right.firstMoveTime) {
-    return left.firstMoveTime < right.firstMoveTime ? -1 : 1;
-  }
-
-  return left.gameId.localeCompare(right.gameId);
-}
-
-function createGameGroups(games) {
-  const groups = [];
-
-  for (const game of games) {
-    const gameId = String(game?.id ?? "").trim();
-
-    if (gameId === "") {
-      throw new Error("Webservice returned an invalid game ID.");
+    if (id === "") {
+      throw new Error("Webservice returned an invalid ID.");
     }
 
-    groups.push({
-      gameId,
-      rounds: [{ gameId }],
-    });
+    ids.push(id);
   }
 
-  return groups;
+  return ids;
 }
 
 export class HistoryPage {
   constructor({ screenManager, onBack }) {
     this.screenManager = screenManager;
     this.onBack = onBack;
-    this.view = "games";
+    this.view = "rooms";
     this.historyRequestId = 0;
     this.roundsRequestId = 0;
     this.roundMovesCache = new Map();
-    this.selectedGameId = null;
+    this.selectedRoomId = null;
     this.loadedRounds = [];
     this.selectedRoundIndex = -1;
 
@@ -116,13 +93,13 @@ export class HistoryPage {
     this.title.textContent = "Game History";
 
     this.gamesSection.classList.add("history-view");
-    this.gamesTitle.textContent = "Games";
+    this.gamesTitle.textContent = "Room Codes";
     this.configureMessage(this.gamesMessage);
     this.configureTable(
       this.gamesTableWrapper,
       this.gamesTable,
       this.gamesTableHead,
-      ["Game ID"],
+      ["Room Code"],
     );
 
     this.roundsSection.classList.add("history-view", "hidden");
@@ -132,7 +109,7 @@ export class HistoryPage {
       this.roundsTableWrapper,
       this.roundsTable,
       this.roundsTableHead,
-      ["Round"],
+      ["Game ID"],
     );
 
     this.replaySection.classList.add("history-view", "hidden");
@@ -214,13 +191,13 @@ export class HistoryPage {
 
   showView(view) {
     this.view = view;
-    this.gamesSection.classList.toggle("hidden", view !== "games");
+    this.gamesSection.classList.toggle("hidden", view !== "rooms");
     this.roundsSection.classList.toggle("hidden", view !== "rounds");
     this.replaySection.classList.toggle("hidden", view !== "replay");
 
     const backLabels = {
-      games: "Home",
-      rounds: "Back to Games",
+      rooms: "Home",
+      rounds: "Back to Rooms",
       replay: "Back to Rounds",
     };
 
@@ -234,7 +211,7 @@ export class HistoryPage {
     }
 
     if (this.view === "rounds") {
-      this.showGames();
+      this.showRooms();
       return;
     }
 
@@ -246,44 +223,44 @@ export class HistoryPage {
     const requestId = this.historyRequestId;
 
     this.screenManager.showHistoryScreen();
-    this.gamesMessage.textContent = "Loading history...";
+    this.gamesMessage.textContent = "Loading rooms...";
 
     try {
-      const response = await getAllGames();
+      const response = await getRooms();
 
       if (requestId !== this.historyRequestId) {
         return;
       }
 
       if (!Array.isArray(response?.list)) {
-        throw new Error("Webservice returned invalid game history.");
+        throw new Error("Webservice returned invalid room history.");
       }
 
-      this.renderGames(createGameGroups(response.list));
+      this.renderRooms(getIds(response.list));
     } catch (error) {
       if (requestId !== this.historyRequestId) {
         return;
       }
 
-      console.error("Could not load game history.", error);
-      this.gamesMessage.textContent = this.getHistoryErrorMessage(error);
+      console.error("Could not load room history.", error);
+      this.gamesMessage.textContent = this.getRoomsErrorMessage(error);
     }
   }
 
-  renderGames(gameGroups) {
+  renderRooms(roomIds) {
     this.gamesTableBody.replaceChildren();
 
-    if (gameGroups.length === 0) {
+    if (roomIds.length === 0) {
       this.gamesTableWrapper.classList.add("hidden");
-      this.gamesMessage.textContent = "No games found.";
+      this.gamesMessage.textContent = "No rooms found.";
       return;
     }
 
-    for (const group of gameGroups) {
+    for (const roomId of roomIds) {
       const row = this.createSelectionRow(
-        group.gameId,
-        `View game ${group.gameId}`,
-        () => this.loadRounds(group),
+        roomId,
+        `View games for room ${roomId}`,
+        () => this.loadRounds(roomId),
       );
 
       this.gamesTableBody.append(row);
@@ -293,29 +270,34 @@ export class HistoryPage {
     this.gamesTableWrapper.classList.remove("hidden");
   }
 
-  async loadRounds(group) {
+  async loadRounds(roomId) {
     const requestId = ++this.roundsRequestId;
 
-    this.selectedGameId = group.gameId;
+    this.selectedRoomId = roomId;
     this.loadedRounds = [];
     this.selectedRoundIndex = -1;
     this.replay.reset();
-    this.roundsTitle.textContent = `Game: ${group.gameId}`;
-    this.roundsMessage.textContent = "Loading rounds...";
+    this.roundsTitle.textContent = `Room: ${roomId}`;
+    this.roundsMessage.textContent = "Loading games...";
     this.roundsTableBody.replaceChildren();
     this.roundsTableWrapper.classList.add("hidden");
     this.showView("rounds");
 
     try {
+      const response = await getRoomGames(roomId);
+
+      if (!Array.isArray(response?.list)) {
+        throw new Error("Webservice returned invalid room games.");
+      }
+
       const rounds = await Promise.all(
-        group.rounds.map((round) => this.loadRound(round.gameId)),
+        getIds(response.list).map((gameId) => this.loadRound(gameId)),
       );
 
       if (requestId !== this.roundsRequestId) {
         return;
       }
 
-      rounds.sort(compareRounds);
       this.renderRounds(rounds);
     } catch (error) {
       if (requestId !== this.roundsRequestId) {
@@ -338,7 +320,6 @@ export class HistoryPage {
 
         return {
           gameId,
-          firstMoveTime: getFirstMoveTime(moves),
           moves,
         };
       });
@@ -365,9 +346,10 @@ export class HistoryPage {
 
     for (const [index] of rounds.entries()) {
       const roundNumber = index + 1;
+      const round = rounds[index];
       const row = this.createSelectionRow(
-        `Round ${roundNumber}`,
-        `View Round ${roundNumber} for game ${this.selectedGameId}`,
+        `Game ${roundNumber}: ${round.gameId}`,
+        `View game ${round.gameId} in room ${this.selectedRoomId}`,
         () => this.selectRound(index),
       );
 
@@ -387,8 +369,8 @@ export class HistoryPage {
 
     this.selectedRoundIndex = index;
     this.replayTitle.textContent =
-      `Game ${this.selectedGameId} - ` +
-      `Round ${index + 1} of ${this.loadedRounds.length}`;
+      `Room ${this.selectedRoomId} - ` +
+      `Game ${index + 1} of ${this.loadedRounds.length}`;
     this.showView("replay");
     this.replay.setMoves(round.moves);
     this.replay.setNavigation({
@@ -407,19 +389,19 @@ export class HistoryPage {
     this.showView("rounds");
   }
 
-  showGames() {
+  showRooms() {
     this.roundsRequestId++;
     this.replay.reset();
-    this.selectedGameId = null;
+    this.selectedRoomId = null;
     this.loadedRounds = [];
     this.selectedRoundIndex = -1;
-    this.showView("games");
+    this.showView("rooms");
   }
 
-  getHistoryErrorMessage(error) {
+  getRoomsErrorMessage(error) {
     return error?.status === 402
       ? "Record not found"
-      : "Could not load game history.";
+      : "Could not load rooms.";
   }
 
   getRoundsErrorMessage(error) {
@@ -437,7 +419,7 @@ export class HistoryPage {
     this.historyRequestId++;
     this.roundsRequestId++;
     this.roundMovesCache.clear();
-    this.selectedGameId = null;
+    this.selectedRoomId = null;
     this.loadedRounds = [];
     this.selectedRoundIndex = -1;
     this.replay.reset();
@@ -446,13 +428,13 @@ export class HistoryPage {
     this.gamesTableBody.replaceChildren();
     this.gamesTableWrapper.classList.add("hidden");
 
-    this.roundsTitle.textContent = "Rounds";
+    this.roundsTitle.textContent = "Games";
     this.roundsMessage.textContent = "";
     this.roundsTableBody.replaceChildren();
     this.roundsTableWrapper.classList.add("hidden");
 
-    this.replayTitle.textContent = "Round Replay";
-    this.showView("games");
+    this.replayTitle.textContent = "Game Replay";
+    this.showView("rooms");
   }
 
   render(target) {

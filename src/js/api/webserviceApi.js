@@ -53,6 +53,10 @@ export async function getAllGames() {
   return requestJson("games");
 }
 
+export async function getRooms() {
+  return requestJson("rooms");
+}
+
 export async function getPlayerGames(playerId) {
   return requestJson(
     `list-games/${encodeURIComponent(playerId)}`,
@@ -61,6 +65,12 @@ export async function getPlayerGames(playerId) {
 
 export async function getGame(gameId) {
   return requestJson(`game/${encodeURIComponent(gameId)}`);
+}
+
+export async function getRoomGames(roomId) {
+  return requestJson(
+    `room/${encodeURIComponent(roomId)}/games`,
+  );
 }
 
 export async function createRoundGameId(gameCode) {
