@@ -7,7 +7,9 @@ import {
 } from "../api/tictactoeApi.js";
 import {
   createRoundGameId,
+  getGameSession,
   getCurrentRoundGameId,
+  registerSessionPlayer,
   saveMove,
 } from "../api/webserviceApi.js";
 import {
@@ -38,6 +40,11 @@ function getJoinGameErrorMessage(serverResponse) {
   );
 }
 
+function isSamePlayerName(left, right) {
+  return typeof right === "string"
+    && left.toLowerCase() === right.toLowerCase();
+}
+
 // ========================================
 // HOME FLOW
 // ========================================
@@ -63,6 +70,12 @@ export async function createGame(playerName, sushiId) {
         message: "Could not create the room. Please try again.",
       };
     }
+
+    await registerSessionPlayer(gameCode, {
+      playerid: playerName,
+      symbol: "X",
+      sushiid: sushiId,
+    });
 
     let gameId = null;
 
@@ -125,6 +138,19 @@ export async function waitForPlayerO(gameCode) {
 // ========================================
 
 export async function joinGame(gameCode, playerName, sushiId) {
+  try {
+    const session = await getGameSession(gameCode);
+
+    if (isSamePlayerName(playerName, session?.xplayerid)) {
+      return {
+        ok: false,
+        message: "That name is already being used in this room.",
+      };
+    }
+  } catch (error) {
+    console.error("Could not check the room player name.", error);
+  }
+
   const restoreSushi = savePlayerSushi(gameCode, "O", sushiId);
 
   try {
@@ -152,6 +178,12 @@ export async function joinGame(gameCode, playerName, sushiId) {
       };
     }
 
+    await registerSessionPlayer(gameCode, {
+      playerid: playerName,
+      symbol: "O",
+      sushiid: sushiId,
+    });
+
     let gameId = null;
 
     try {
@@ -178,6 +210,13 @@ export async function joinGame(gameCode, playerName, sushiId) {
   } catch (error) {
     restoreSushi();
     console.error(error);
+
+    if (error?.status === 409) {
+      return {
+        ok: false,
+        message: "That name is already being used in this room.",
+      };
+    }
 
     return {
       ok: false,

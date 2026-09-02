@@ -73,6 +73,20 @@ export async function getRoomGames(roomId) {
   );
 }
 
+export async function getGameSession(gameCode) {
+  return requestJson(`session/${encodeURIComponent(gameCode)}`);
+}
+
+export async function registerSessionPlayer(gameCode, player) {
+  return requestJson(`session/${encodeURIComponent(gameCode)}/player`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(player),
+  });
+}
+
 export async function createRoundGameId(gameCode) {
   const response = await requestJson(
     `session/${encodeURIComponent(gameCode)}/game`,
