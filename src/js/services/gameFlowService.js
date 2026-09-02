@@ -374,6 +374,7 @@ export async function submitMove(gameCode, tile, x, y) {
   if (!gameState.isSpectator) {
     try {
       await saveMove({
+        roomid: gameCode,
         gameid: gameState.gameId,
         playerid: gameState.myName,
         symbol: gameState.myTile,
