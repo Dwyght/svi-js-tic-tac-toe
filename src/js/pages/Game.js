@@ -465,7 +465,7 @@ export class GamePage {
     }
 
     if (turn === gameState.myTile) {
-      this.turnDisplay.textContent = "It's your turn.";
+      this.turnDisplay.textContent = `It's your turn, ${playerName}.`;
 
       if (this.isSubmittingMove) {
         this.board.disableBoard();
