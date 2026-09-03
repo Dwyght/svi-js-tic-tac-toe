@@ -40,7 +40,7 @@ function readGameId(responseBody) {
 }
 
 export async function saveMove(moveRecord) {
-  return requestJson("save", {
+  return requestJson("game/save", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -50,7 +50,7 @@ export async function saveMove(moveRecord) {
 }
 
 export async function getAllGames() {
-  return requestJson("games");
+  return requestJson("game");
 }
 
 export async function getRooms() {
@@ -59,7 +59,7 @@ export async function getRooms() {
 
 export async function getPlayerGames(playerId) {
   return requestJson(
-    `list-games/${encodeURIComponent(playerId)}`,
+    `player/${encodeURIComponent(playerId)}/games`,
   );
 }
 
