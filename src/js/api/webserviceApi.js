@@ -1,5 +1,9 @@
 import { WEBSERVICE_BASE_URL } from "../config/constants.js";
 
+// ========================================
+// GENERIC JSON REQUEST
+// ========================================
+
 async function requestJson(endpoint, options = {}) {
   const response = await fetch(`${WEBSERVICE_BASE_URL}/${endpoint}`, {
     ...options,
@@ -29,6 +33,10 @@ async function requestJson(endpoint, options = {}) {
   return body;
 }
 
+// ========================================
+// READ GAME ID
+// ========================================
+
 function readGameId(responseBody) {
   const gameId = responseBody?.gameid;
 
@@ -38,6 +46,10 @@ function readGameId(responseBody) {
 
   return gameId;
 }
+
+// ========================================
+// SAVE MOVE
+// ========================================
 
 export async function saveMove(moveRecord) {
   return requestJson("game/save", {
@@ -49,13 +61,25 @@ export async function saveMove(moveRecord) {
   });
 }
 
+// ========================================
+// GET ALL GAMES
+// ========================================
+
 export async function getAllGames() {
   return requestJson("game");
 }
 
+// ========================================
+// GET ROOMS
+// ========================================
+
 export async function getRooms() {
   return requestJson("rooms");
 }
+
+// ========================================
+// GET PLAYER GAMES
+// ========================================
 
 export async function getPlayerGames(playerId) {
   return requestJson(
@@ -63,9 +87,17 @@ export async function getPlayerGames(playerId) {
   );
 }
 
+// ========================================
+// GET GAME
+// ========================================
+
 export async function getGame(gameId) {
   return requestJson(`game/${encodeURIComponent(gameId)}`);
 }
+
+// ========================================
+// GET ROOM GAMES
+// ========================================
 
 export async function getRoomGames(roomId) {
   return requestJson(
@@ -73,9 +105,17 @@ export async function getRoomGames(roomId) {
   );
 }
 
+// ========================================
+// GET GAME SESSION
+// ========================================
+
 export async function getGameSession(gameCode) {
   return requestJson(`session/${encodeURIComponent(gameCode)}`);
 }
+
+// ========================================
+// REGISTER SESSION PLAYER
+// ========================================
 
 export async function registerSessionPlayer(gameCode, player) {
   return requestJson(`session/${encodeURIComponent(gameCode)}/player`, {
@@ -87,6 +127,10 @@ export async function registerSessionPlayer(gameCode, player) {
   });
 }
 
+// ========================================
+// UPDATE SESSION SCORE
+// ========================================
+
 export async function updateSessionScore(gameCode, scores) {
   return requestJson(`session/${encodeURIComponent(gameCode)}/score`, {
     method: "POST",
@@ -96,6 +140,10 @@ export async function updateSessionScore(gameCode, scores) {
     body: JSON.stringify(scores),
   });
 }
+
+// ========================================
+// SEND SESSION EMOTE
+// ========================================
 
 export async function sendSessionEmote(gameCode, emote) {
   return requestJson(`session/${encodeURIComponent(gameCode)}/emote`, {
@@ -107,6 +155,10 @@ export async function sendSessionEmote(gameCode, emote) {
   });
 }
 
+// ========================================
+// CREATE ROUND GAME ID
+// ========================================
+
 export async function createRoundGameId(gameCode) {
   const response = await requestJson(
     `session/${encodeURIComponent(gameCode)}/game`,
@@ -115,6 +167,10 @@ export async function createRoundGameId(gameCode) {
 
   return readGameId(response);
 }
+
+// ========================================
+// GET CURRENT ROUND GAME ID
+// ========================================
 
 export async function getCurrentRoundGameId(gameCode) {
   const response = await requestJson(
