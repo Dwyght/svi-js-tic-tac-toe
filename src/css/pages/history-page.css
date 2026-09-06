@@ -3,23 +3,23 @@
 ========================= */
 
 .home-history-button {
-  color: var(--color-action-text);
-  background: #d28b3f;
-  border-color: #78451e;
+  color: var(--color-highlight);
+  background: #31465b;
+  border-color: var(--color-utility-dark);
   box-shadow:
-    0 4px 0 #78451e,
-    0 6px 13px var(--color-button-shadow-soft);
+    0 4px 0 var(--color-utility-dark),
+    0 6px 13px var(--color-utility-shadow-soft);
 }
 
 .home-history-button:hover:not(:disabled) {
-  background: #e09c4f;
+  background: #405b73;
 }
 
 .home-history-button:active:not(:disabled) {
-  background: #b97031;
+  background: #253746;
   box-shadow:
-    0 1px 0 #78451e,
-    0 3px 6px var(--color-button-shadow-soft);
+    0 1px 0 var(--color-utility-dark),
+    0 3px 6px var(--color-utility-shadow-soft);
 }
 
 .history-modal {
