@@ -388,7 +388,7 @@ export class HistoryPage {
         return;
       }
 
-      this.renderRounds(rounds.sort(compareRoundDates));
+      this.renderRounds(rounds.sort((a, b) => compareRoundDates(b, a)));
     } catch (error) {
       if (requestId !== this.roundsRequestId) {
         return;
