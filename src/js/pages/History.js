@@ -3,6 +3,10 @@ import { Button } from "../components/base/Button.js";
 import { MODAL_EVENTS, Modal } from "../components/base/Modal.js";
 import { HistoryReplay } from "../components/history/HistoryReplay.js";
 
+// ========================================
+// DATE COMPARISON
+// ========================================
+
 function compareDates(left, right) {
   const leftTime = Date.parse(left);
   const rightTime = Date.parse(right);
@@ -21,6 +25,10 @@ function compareMoveDates(left, right) {
 function compareRoundDates(left, right) {
   return compareDates(left.startedAt, right.startedAt);
 }
+
+// ========================================
+// RESPONSE HELPERS
+// ========================================
 
 function getIds(records) {
   const ids = [];
@@ -73,6 +81,10 @@ export class HistoryPage {
     this.appendElements();
   }
 
+  // ========================================
+  // STEP 1
+  // ========================================
+
   initializeElements() {
     this.container = document.createElement("div");
     this.navigation = document.createElement("div");
@@ -96,6 +108,10 @@ export class HistoryPage {
     this.replayTitle = document.createElement("h2");
   }
 
+  // ========================================
+  // COMPONENTS
+  // ========================================
+
   initializeComponents() {
     this.backButton = new Button({
       label: "Back to Rooms",
@@ -111,6 +127,10 @@ export class HistoryPage {
       content: this.container,
     });
   }
+
+  // ========================================
+  // STEP 2
+  // ========================================
 
   setAttributes() {
     this.container.classList.add("history-content");
@@ -140,6 +160,10 @@ export class HistoryPage {
     this.replayTitle.textContent = "Round Replay";
   }
 
+  // ========================================
+  // CONFIGURATION HELPERS
+  // ========================================
+
   configureMessage(message) {
     message.classList.add("message", "history-message");
     message.setAttribute("aria-live", "polite");
@@ -150,6 +174,10 @@ export class HistoryPage {
     table.classList.add("history-table");
     tableHead.append(this.createHeaderRow(labels));
   }
+
+  // ========================================
+  // STEP 3
+  // ========================================
 
   appendElements() {
     this.gamesTable.append(this.gamesTableHead, this.gamesTableBody);
@@ -182,6 +210,10 @@ export class HistoryPage {
       this.reset();
     });
   }
+
+  // ========================================
+  // TABLE ROWS
+  // ========================================
 
   createHeaderRow(labels) {
     const row = document.createElement("tr");
@@ -250,6 +282,10 @@ export class HistoryPage {
     return row;
   }
 
+  // ========================================
+  // VIEW NAVIGATION
+  // ========================================
+
   showView(view) {
     this.view = view;
     this.gamesSection.classList.toggle("hidden", view !== "rooms");
@@ -277,6 +313,10 @@ export class HistoryPage {
       this.showRooms();
     }
   }
+
+  // ========================================
+  // ROOM HISTORY
+  // ========================================
 
   async open() {
     this.reset();
@@ -363,6 +403,10 @@ export class HistoryPage {
       throw error;
     }
   }
+
+  // ========================================
+  // ROUND HISTORY
+  // ========================================
 
   async loadRounds(roomId) {
     const requestId = ++this.roundsRequestId;
@@ -453,6 +497,10 @@ export class HistoryPage {
     this.roundsTableWrapper.classList.remove("hidden");
   }
 
+  // ========================================
+  // ROUND REPLAY
+  // ========================================
+
   selectRound(index) {
     const round = this.loadedRounds[index];
 
@@ -489,6 +537,10 @@ export class HistoryPage {
     this.showView("rooms");
   }
 
+  // ========================================
+  // ERROR MESSAGES
+  // ========================================
+
   getRoomsErrorMessage(error) {
     return error?.status === 402
       ? "Record not found"
@@ -500,6 +552,10 @@ export class HistoryPage {
       ? "Record not found"
       : "Could not load rounds.";
   }
+
+  // ========================================
+  // MODAL LIFECYCLE
+  // ========================================
 
   close() {
     this.modal.close();
