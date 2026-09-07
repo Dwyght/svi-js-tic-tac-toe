@@ -29,6 +29,7 @@ Both URLs are configured in [`src/js/config/constants.js`](src/js/config/constan
 - Let Player X start the next round
 - Exchange emotes through the webservice session
 - Browse rooms, rounds, and recorded moves on the History screen
+- Browse player names and replay the games recorded for each player
 - Resume a player session after refreshing the same browser tab
 - Prevent duplicate tabs from controlling the same player slot
 - Support responsive layouts and reduced-motion preferences
@@ -136,6 +137,7 @@ All calls use `WEBSERVICE_BASE_URL` and exchange JSON.
 | `saveMove` | POST | `/game/save` |
 | `getAllGames` | GET | `/game` |
 | `getRooms` | GET | `/rooms` |
+| `getPlayers` | GET | `/player` |
 | `getPlayerGames` | GET | `/player/{playerId}/games` |
 | `getGame` | GET | `/game/{gameId}` |
 | `getRoomGames` | GET | `/room/{roomId}/games` |

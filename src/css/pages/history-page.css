@@ -93,6 +93,19 @@
   text-align: center;
 }
 
+.history-type-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.history-type-button {
+  width: 100%;
+  min-height: 92px;
+
+  font-size: 1.08rem;
+}
+
 .history-table-wrapper {
   max-width: 100%;
 
@@ -168,16 +181,23 @@
   outline-offset: -4px;
 }
 
-.history-room-select {
+.history-room-select,
+.history-player-select {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 18px;
 }
 
-.history-room-count {
+.history-room-count,
+.history-player-action {
   text-align: right;
   white-space: nowrap;
+}
+
+.history-player-action {
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .history-round-select {
@@ -252,6 +272,14 @@
     min-width: 0;
 
     font-size: 0.82rem;
+  }
+
+  .history-type-options {
+    grid-template-columns: 1fr;
+  }
+
+  .history-type-button {
+    min-height: 68px;
   }
 
   .history-table th,

@@ -78,6 +78,14 @@ export async function getRooms() {
 }
 
 // ========================================
+// GET PLAYERS
+// ========================================
+
+export async function getPlayers() {
+  return requestJson("player");
+}
+
+// ========================================
 // GET PLAYER GAMES
 // ========================================
 
