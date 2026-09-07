@@ -332,7 +332,7 @@ export class HistoryPage {
     const action = document.createElement("span");
 
     name.classList.add("history-player-name");
-    name.textContent = playerId;
+    name.textContent = playerId.toUpperCase();
     action.classList.add("history-player-action");
     action.textContent = "View games";
     selectButton.append(name, action);
